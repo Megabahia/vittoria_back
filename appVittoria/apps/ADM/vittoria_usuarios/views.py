@@ -59,7 +59,7 @@ def usuario_list(request):
                 if request.data['idRol']!=0:
                     filters['idRol'] = int(request.data['idRol'])
             if 'estado' in request.data:
-                if request.data['idRol']=='':
+                if request.data['estado']!='':
                     filters['estado'] = str(request.data['estado'])
             #toma de datos
             usuario= Usuarios.objects.filter(**filters)
@@ -67,7 +67,6 @@ def usuario_list(request):
             new_serializer_data={'cont': usuario.count(),
             'info':serializer.data}
             #envio de datos
-            createLog(logModel,new_serializer_data, logTransaccion)
             return Response(new_serializer_data,status=status.HTTP_200_OK)
         #envio de errores
         createLog(logModel,serializer.errors, logExcepcion)
@@ -100,7 +99,7 @@ def usuario_listExport(request):
                 if request.data['idRol']!=0:
                     filters['idRol'] = int(request.data['idRol'])
             if 'estado' in request.data:
-                if request.data['idRol']=='':
+                if request.data['estado']!='':
                     filters['estado'] = str(request.data['estado'])
                 
             #toma de datos
@@ -120,7 +119,7 @@ def usuario_listExport(request):
 def usuario_findOne(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'listOne/'+str(pk),
+        'endPoint': logApi+'listOne/',
         'modulo':logModulo,
         'tipo' : logExcepcion,
         'accion' : 'LEER',
@@ -155,7 +154,7 @@ def usuario_findOne(request, pk):
 def usuario_update(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'update/'+str(pk),
+        'endPoint': logApi+'update/',
         'modulo':logModulo,
         'tipo' : logExcepcion,
         'accion' : 'ESCRIBIR',
@@ -194,10 +193,10 @@ def usuario_update(request, pk):
 def usuario_delete(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'update/'+str(pk),
+        'endPoint': logApi+'delete/',
         'modulo':logModulo,
         'tipo' : logExcepcion,
-        'accion' : 'ESCRIBIR',
+        'accion' : 'BORRAR',
         'fechaInicio' : str(timezone_now),
         'dataEnviada' : '{}',
         'fechaFin': str(timezone_now),
@@ -239,32 +238,32 @@ def usuario_create(request):
     'dataRecibida' : '{}'
     }
 
-    # try:
-    if request.method == 'POST':
-        request.data['created_at'] = str(timezone_now)
-        if 'updated_at' in request.data:
-            request.data.pop('updated_at')
-        logModel['dataEnviada'] = str(request.data)
-        #AGREGA CONTRASEÑA
-        request.data['password']=get_random_string(length=32)
-        serializer = UsuarioCrearSerializer(data=request.data)
-        data = {}
-        if serializer.is_valid():
-            account = serializer.save()
-            data['response'] = 'Usuario creado correctamente'
-            data['email'] = account.email
-            data['username'] = account.username
-            token = Token.objects.get(user=account).key
-            data['token'] = token
-            createLog(logModel,data,logTransaccion)
-            data['tokenEmail']=str(resetPasswordNewUser(data['email'])) 
-        else:
-            data = serializer.errors
-            createLog(logModel,data,logExcepcion)
-        return Response(data)           
-    # except Exception as e: 
-    #     err={"error":'Un error ha ocurrido: {}'.format(e)}  
-    #     createLog(logModel,err,logExcepcion)
-    #     return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+    try:
+        if request.method == 'POST':
+            request.data['created_at'] = str(timezone_now)
+            if 'updated_at' in request.data:
+                request.data.pop('updated_at')
+            logModel['dataEnviada'] = str(request.data)
+            #AGREGA CONTRASEÑA
+            request.data['password']=get_random_string(length=32)
+            serializer = UsuarioCrearSerializer(data=request.data)
+            data = {}
+            if serializer.is_valid():
+                account = serializer.save()
+                data['response'] = 'Usuario creado correctamente'
+                data['email'] = account.email
+                data['username'] = account.username
+                token = Token.objects.get(user=account).key
+                data['token'] = token
+                createLog(logModel,data,logTransaccion)
+                data['tokenEmail']=str(resetPasswordNewUser(data['email'])) 
+            else:
+                data = serializer.errors
+                createLog(logModel,data,logExcepcion)
+            return Response(data)           
+    except Exception as e: 
+        err={"error":'Un error ha ocurrido: {}'.format(e)}  
+        createLog(logModel,err,logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
 
