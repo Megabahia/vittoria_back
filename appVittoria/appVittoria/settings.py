@@ -15,7 +15,7 @@ import pymysql
 import os
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
-from apps.config import config
+from apps.config import config,routersDB
 pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -111,9 +111,19 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': 3307
+    },
+    'vittoria_mdm_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'vittoria_mdm',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': 3307
     }
 }
 
+#AGREGO LAS RUTAS DE LAS DIFERENTES BASES DE DATOS
+# DATABASE_ROUTERS = ['routersDB.MDMRouter',]
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

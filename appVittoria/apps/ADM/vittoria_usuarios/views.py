@@ -62,7 +62,7 @@ def usuario_list(request):
                 if request.data['estado']!='':
                     filters['estado'] = str(request.data['estado'])
             #toma de datos
-            usuario= Usuarios.objects.filter(**filters)
+            usuario= Usuarios.objects.filter(**filters).order_by('-created_at')
             serializer = UsuarioRolSerializer(usuario[offset:limit],many=True)
             new_serializer_data={'cont': usuario.count(),
             'info':serializer.data}
@@ -103,12 +103,10 @@ def usuario_listExport(request):
                     filters['estado'] = str(request.data['estado'])
                 
             #toma de datos
-            usuario= Usuarios.objects.filter(**filters)
+            usuario= Usuarios.objects.filter(**filters).order_by('-created_at')
             serializer = UsuarioRolSerializer(usuario,many=True)
             new_serializer_data={'cont': usuario.count(),
             'info':serializer.data}
-            #envio de datos
-            createLog(logModel,new_serializer_data, logTransaccion)
             return Response(new_serializer_data,status=status.HTTP_200_OK)
     except Exception as e: 
         err={"error":'Un error ha ocurrido: {}'.format(e)}  

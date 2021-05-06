@@ -44,12 +44,11 @@ def rol_list(request):
             offset = page_size* page
             limit = offset + page_size
             #Serializar los datos
-            rol = Roles.objects.filter(state=1)
+            rol = Roles.objects.filter(state=1).order_by('-created_at')
             serializer = RolSerializer(rol[offset:limit], many=True)
             new_serializer_data={'cont': rol.count(),
             'info':serializer.data}
             #envio de datos
-            createLog(logModel,new_serializer_data,logTransaccion)
             return Response(new_serializer_data,status=status.HTTP_200_OK)
     except Exception as e: 
         err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -62,7 +61,7 @@ def rol_listExport(request):
     try:
         if request.method == 'POST':
             #Serializar los datos
-            rol = Roles.objects.filter(state=1)
+            rol = Roles.objects.filter(state=1).order_by('-created_at')
             serializer = RolSerializer(rol, many=True)
             new_serializer_data={'cont': rol.count(),
             'info':serializer.data}

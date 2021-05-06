@@ -12,7 +12,9 @@ from apps.ADM.vittoria_autenticacion.auth import token_expire_handler,expires_in
 from django.utils import timezone
 #logs
 from apps.ADM.vittoria_logs.methods import createLog,datosAuth,datosTipoLog
-
+#permisos
+from apps.ADM.vittoria_roles.models import Roles
+from apps.ADM.vittoria_acciones.models import Acciones, AccionesPermitidas, AccionesPorRol
 #declaracion variables log
 datosAux=datosAuth()
 datosTipoLogAux=datosTipoLog()
@@ -51,15 +53,24 @@ class login(ObtainAuthToken):
                     token= Token.objects.create(user=user)
                     #ELIMINAR USUARIOS EXPIRADOS
                     deleteExpiredTokens()
-                    #data respuesta
+                    #inner join para sacar los permisos urls
+                    acciones=AccionesPermitidas.objects.extra(tables=['vittoria_acciones_acciones','vittoria_acciones_accionesporrol'], 
+                    where=['vittoria_acciones_acciones.id=vittoria_acciones_accionespermitidas.idAccion_id',
+                            'vittoria_acciones_acciones.state=1',
+                            'vittoria_acciones_accionesporrol.idAccion_id=vittoria_acciones_acciones.id',
+                            'vittoria_acciones_accionesporrol.idRol_id='+str(user.idRol.id)
+                    ],
+                    select={'url': 'vittoria_acciones_accionespermitidas.url'})
                     data={
-                            'token': token.key,
-                            'id': user.pk,
-                            'full_name': user.nombres+" "+user.apellidos,
-                            'email': user.email,
-                            'tokenExpiracion': expires_in(token)
-                                    
+                        'token': token.key,
+                        'id': user.pk,
+                        'full_name': user.nombres+" "+user.apellidos,
+                        'email': user.email,
+                        'tokenExpiracion': expires_in(token),
+                        'permisos':[]
                     }
+                    for accion in acciones:
+                        data['permisos'].append({'url':str(accion)})
                     createLog(logModel,data,logTransaccion)
                     return Response(data,status=status.HTTP_200_OK)        
                 else:

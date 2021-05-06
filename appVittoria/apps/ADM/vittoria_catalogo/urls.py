@@ -11,9 +11,9 @@ app_name = 'catalogo'
 
 urlpatterns = [
 	#catalogo
-	path('list', catalogo_list, name="catalogo_list"),
-	path('create', catalogo_create, name="catalogo_create"),
-	path('findOne/<int:pk>', catalogo_findOne, name="catalogo_findOne"), 
+	path('list/', catalogo_list, name="catalogo_list"),
+	path('create/', catalogo_create, name="catalogo_create"),
+	path('listOne/<int:pk>', catalogo_findOne, name="catalogo_findOne"), 
 	path('update/<int:pk>', catalogo_update, name="catalogo_update"), 
 	path('delete/<int:pk>', catalogo_delete, name="catalogo_delete"), 
 	#ESTADO

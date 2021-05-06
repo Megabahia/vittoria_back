@@ -22,7 +22,7 @@ class AccionesPermitidas(models.Model):
     state = models.SmallIntegerField(default=1)
 
     def __str__(self):
-        return '{}'.format(self.nombre)
+        return '{}'.format(self.url)
 
 class AccionesPorRol(models.Model):
     idAccion= models.ForeignKey(Acciones, null=False, on_delete=models.CASCADE)  # Relacion Con Acciones
