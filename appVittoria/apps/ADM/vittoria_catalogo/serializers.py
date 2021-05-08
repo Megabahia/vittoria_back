@@ -14,6 +14,13 @@ class CatalogoHijoSerializer(serializers.ModelSerializer):
         model = Catalogo
        	fields = ['id','nombre','idTipo','descripcion']
 
+class CatalogoListaSerializer(serializers.ModelSerializer):
+    tipo = serializers.CharField(source='idPadre.tipo', read_only=True)
+    class Meta:
+        model = Catalogo
+       	fields = ['id','nombre','tipo','descripcion']
+
+
 class CatalogoFiltroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Catalogo

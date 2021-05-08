@@ -1,5 +1,5 @@
 from apps.ADM.vittoria_catalogo.models import Catalogo
-from apps.ADM.vittoria_catalogo.serializers import CatalogoSerializer,CatalogoHijoSerializer,CatalogoFiltroSerializer,CatalogoTipoSerializer
+from apps.ADM.vittoria_catalogo.serializers import CatalogoSerializer,CatalogoHijoSerializer,CatalogoListaSerializer,CatalogoFiltroSerializer,CatalogoTipoSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -50,7 +50,7 @@ def catalogo_list(request):
           
             #Serializar los datos
             query = Catalogo.objects.filter(**filters).order_by('-created_at')
-            serializer = CatalogoHijoSerializer(query[offset:limit], many=True)
+            serializer = CatalogoListaSerializer(query[offset:limit], many=True)
             new_serializer_data={'cont': query.count(),
             'info':serializer.data}
             #envio de datos
