@@ -29,6 +29,6 @@ class AccionesPorRol(models.Model):
     idRol= models.ForeignKey(Roles, null=False, on_delete=models.CASCADE)  # Relacion Con Rol
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
-    state = models.SmallIntegerField(default=1)
+    state = models.SmallIntegerField(default=0)
 
 

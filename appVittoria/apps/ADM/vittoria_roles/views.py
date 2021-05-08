@@ -109,24 +109,15 @@ def rol_create(request):
             #Valido que existan las acciones
             if 'acciones' in request.data:
                 accionesCrear=request.data['acciones']
-                try:
-                    #recorro las acciones
-                    for dictAcciones in accionesCrear:
-                        idAccionPadre=int(dictAcciones['idAccionPadre'])
-                        nombreHijo=str(dictAcciones['nombre'])
-                        #busco la accion a traves del id Padre y el nombre para asignar a accionesporRol
-                        accion=Acciones.objects.filter(idAccionPadre=idAccionPadre,nombre=nombreHijo,state=1).only('id').first()
-                        #Guardo la accion del rol
-                        accionPorRol=AccionesPorRol.objects.create(idAccion_id=int(accion.id),idRol_id=rolId,created_at=nowDate)
-                        #asigno los ids de accionpara enviar como resultado
-                        dictAcciones['idAccionHijo']=accion.id
-                        dictAcciones['idAccionPorRol']=accionPorRol.id
-
-                except Exception as e: 
-                    err={"error":"El rol ha sido creado pero no se tiene los datos de las acciones: {}".format(e),"rol":serializer.data}  
-                    createLog(logModel,err,logExcepcion)
-                    return Response(err, status=status.HTTP_400_BAD_REQUEST)  
-                #retorno el rol creado con sus acciones
+                #recorro los padres(modulos)
+                #recorro el json de acciones, busco el id de la accion del modulo, Leer, Escribir,etc, por último lo almaceno con los datos 
+                for keyPadre, valuePadre in accionesCrear.items():
+                    nombrePadre=str(keyPadre) 
+                    for keyHijo, valueHijo in valuePadre.items():
+                        nombreHijo,estado=str(keyHijo),int(valueHijo)
+                        accion=Acciones.objects.filter(idAccionPadre__nombre=nombrePadre,nombre=nombreHijo).only('id').first()
+                        #creo la accion
+                        AccionesPorRol.objects.create(idAccion_id=int(accion.id),idRol_id=rolId,state=estado,created_at=nowDate)
                 dataExitosa={"mensaje":"rol y acciones creadas exitosamente","rol":serializer.data,"acciones":accionesCrear}
                 createLog(logModel,dataExitosa,logTransaccion)
                 return Response(dataExitosa, status=status.HTTP_201_CREATED)
@@ -138,6 +129,8 @@ def rol_create(request):
         err={"error":'Un error ha ocurrido: {}'.format(e)}  
         createLog(logModel,err,logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+
       
 
 
@@ -179,26 +172,19 @@ def rol_update(request):
             else:
                 createLog(logModel,serializer.errors,logExcepcion)
                 return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            
+            #Valido que existan las acciones
             if 'acciones' in request.data:
                 accionesUpdate=request.data['acciones']
-                try:
-                    #borro las acciones actuales
-                    AccionesPorRol.objects.filter(idRol_id=rolId).delete()
-                    #recorro las acciones para guardarlas
-                    for dictAcciones in accionesUpdate:
-                        idAccionPadre=int(dictAcciones['idAccionPadre'])
-                        nombreHijo=str(dictAcciones['nombre'])
-                        #busco la accion a traves del id Padre y el nombre para asignar a accionesporRol
-                        accion=Acciones.objects.filter(idAccionPadre=idAccionPadre,nombre=nombreHijo,state=1).only('id').first()
-                        #Guardo la accion del rol
-                        accionPorRol=AccionesPorRol.objects.create(idAccion_id=int(accion.id),idRol_id=rolId,created_at=nowDate)
-                        #asigno los ids de accionpara enviar como resultado
-                        dictAcciones['idAccionHijo']=accion.id
-                        dictAcciones['idAccionPorRol']=accionPorRol.id
-                except Exception as e: 
-                    err={"error":"El rol ha sido actualizado pero no se tiene los datos de las acciones: {}".format(e),"rol":serializer.data} 
-                    createLog(logModel,err,logExcepcion) 
-                    return Response(err, status=status.HTTP_400_BAD_REQUEST)  
+                #recorro los padres(modulos)
+                #recorro el json de acciones, busco el id de la accion del modulo, Leer, Escribir,etc, por último actualizo los datos
+                for keyPadre, valuePadre in accionesUpdate.items():
+                    nombrePadre=str(keyPadre) 
+                    for keyHijo, valueHijo in valuePadre.items():
+                        nombreHijo,estado=str(keyHijo),int(valueHijo)
+                        accion=Acciones.objects.filter(idAccionPadre__nombre=nombrePadre,nombre=nombreHijo).only('id').first()
+                        #creo la accion
+                        AccionesPorRol.objects.filter(idAccion_id=int(accion.id),idRol_id=rolId).update(state=estado,updated_at=nowDate)
                 #retorno el rol creado con sus acciones
                 dataExitosa={"mensaje":"rol y acciones actualizadas exitosamente","rol":serializer.data,"acciones":accionesUpdate}
                 createLog(logModel,dataExitosa,logTransaccion) 
@@ -228,7 +214,7 @@ def rol_findOne(request, pk):
     }
     try:
         rolId=0
-        accionesList=[]
+        accionesList={}
         if request.method == 'GET':
             logModel['dataEnviada'] = str(request.data)
             #Verifico si existe el rol
@@ -239,14 +225,18 @@ def rol_findOne(request, pk):
                 createLog(logModel,err,logExcepcion) 
                 return Response(err,status=status.HTTP_404_NOT_FOUND)
             #tomo los datos del rol
-            serializer = RolSerializer(rol)
+            serializer = RolFiltroSerializer(rol)
             rolId=int(serializer.data['id'])
-            #busco la accion a traves del id Padre y el nombre para asignar a accionesporRol
-            for accion in AccionesPorRol.objects.filter(idRol_id=rolId):
-                accionesList.append({"idAccionPadre":accion.idAccion.idAccionPadre.id,
-                "nombre":accion.idAccion.nombre})
+            #recorro los padres(modulos)
+            for accionPadre in Acciones.objects.filter(idAccionPadre__isnull=True):
+                accionesCrud={} #guardo las acciones leer,escribir,editar,borrar
+                #recorro las acciones de cada padre y las almaceno 
+                for accionHijo in AccionesPorRol.objects.filter(idRol_id=rolId, idAccion__idAccionPadre__nombre=str(accionPadre.nombre)):
+                    accionesCrud[str(accionHijo.idAccion.nombre)]=str(accionHijo.state)
+                #asigno el crud a la lista
+                accionesList[str(accionPadre.nombre)]=accionesCrud
+            #envio la data
             dataExitosa={"rol":serializer.data,"acciones":accionesList}
-            createLog(logModel,dataExitosa,logTransaccion) 
             return Response(dataExitosa, status=status.HTTP_201_CREATED)
     except Exception as e: 
         err={"error":'Un error ha ocurrido: {}'.format(e)}  

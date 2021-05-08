@@ -49,7 +49,7 @@ def catalogo_list(request):
                     filters['idPadre__id'] = int(request.data['idTipo'])
           
             #Serializar los datos
-            query = Catalogo.objects.filter(**filters).order_by('-created_at')
+            query = Catalogo.objects.filter(**filters).exclude(tipo='Log').order_by('-created_at')
             serializer = CatalogoListaSerializer(query[offset:limit], many=True)
             new_serializer_data={'cont': query.count(),
             'info':serializer.data}
