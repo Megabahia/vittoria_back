@@ -23,7 +23,7 @@ urlpatterns = [
     path('adm/usuarios/', include(('apps.ADM.vittoria_usuarios.urls', 'usuarios'), namespace='usuarios')),
     path('adm/auth/', include(('apps.ADM.vittoria_autenticacion.urls', 'autenticacion'), namespace='autenticacion')),
     path('adm/acciones/', include(('apps.ADM.vittoria_acciones.urls', 'acciones'), namespace='acciones')),
-    path('adm/catalogo/', include(('apps.ADM.vittoria_catalogo.urls', 'catalogo'), namespace='catalogo')),
+    path('adm/param/', include(('apps.ADM.vittoria_catalogo.urls', 'catalogo'), namespace='catalogo')),
     url(r'^adm/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     # path('auth/password_reset/', include(('django_rest_passwordreset.urls', 'password_reset'), namespace='password_reset')),
 ]

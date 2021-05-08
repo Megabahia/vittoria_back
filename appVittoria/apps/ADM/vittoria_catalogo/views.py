@@ -1,5 +1,5 @@
 from apps.ADM.vittoria_catalogo.models import Catalogo
-from apps.ADM.vittoria_catalogo.serializers import CatalogoSerializer,CatalogoTipoSerializer
+from apps.ADM.vittoria_catalogo.serializers import CatalogoSerializer,CatalogoHijoSerializer,CatalogoFiltroSerializer,CatalogoTipoSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -44,13 +44,13 @@ def catalogo_list(request):
             if 'nombre' in request.data:
                 if request.data['nombre']!='':
                     filters['nombre__startswith'] = str(request.data['nombre'])
-            if 'tipo' in request.data:
-                if request.data['tipo']!='':
-                    filters['tipo'] = str(request.data['tipo'])
+            if 'idTipo' in request.data:
+                if request.data['idTipo']!=0:
+                    filters['idPadre__id'] = int(request.data['idTipo'])
           
             #Serializar los datos
             query = Catalogo.objects.filter(**filters).order_by('-created_at')
-            serializer = CatalogoSerializer(query[offset:limit], many=True)
+            serializer = CatalogoHijoSerializer(query[offset:limit], many=True)
             new_serializer_data={'cont': query.count(),
             'info':serializer.data}
             #envio de datos
@@ -61,6 +61,7 @@ def catalogo_list(request):
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 #CREAR
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -82,7 +83,9 @@ def catalogo_create(request):
             request.data['created_at'] = str(timezone_now)
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
-            serializer = CatalogoSerializer(data=request.data)
+            #asigno el idTipo al idPadre
+            request.data['idPadre']=request.data.pop('idTipo')
+            serializer = CatalogoSerializer(data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -105,7 +108,7 @@ def catalogo_findOne(request, pk):
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'GET':
-            serializer = CatalogoSerializer(catalogo)
+            serializer = CatalogoHijoSerializer(catalogo)
             return Response(serializer.data)
     except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -143,6 +146,9 @@ def catalogo_update(request, pk):
             request.data['updated_at'] = str(timezone_now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
+            #asigno el idTipo al idPadre
+            if 'idTipo' in request.data:
+                request.data['idPadre']=request.data.pop('idTipo')
             serializer = CatalogoSerializer(catalogo, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
@@ -198,8 +204,8 @@ def estado_list(request):
 
     if request.method == 'GET':
         try:
-            catalogo= Catalogo.objects.filter(state=1,tipo="ESTADO")
-            serializer = CatalogoTipoSerializer(catalogo, many=True)
+            catalogo= Catalogo.objects.filter(state=1,idPadre__tipo="ESTADO",idPadre__state=1)
+            serializer = CatalogoFiltroSerializer(catalogo, many=True)
             return Response(serializer.data)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -214,7 +220,21 @@ def pais_list(request):
 
     if request.method == 'GET':
         try:
-            catalogo= Catalogo.objects.filter(state=1,tipo="PAIS")
+            catalogo= Catalogo.objects.filter(state=1,idPadre__tipo="PAIS",idPadre__state=1)
+            serializer = CatalogoFiltroSerializer(catalogo, many=True)
+            return Response(serializer.data)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET TIPO DE PARAMETRIZACIONES/CATÁLOGO
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def tipo_list(request):
+
+    if request.method == 'GET':
+        try:
+            catalogo= Catalogo.objects.filter(state=1,idPadre__isnull=True).exclude(tipo='Log')
             serializer = CatalogoTipoSerializer(catalogo, many=True)
             return Response(serializer.data)
         except Exception as e: 

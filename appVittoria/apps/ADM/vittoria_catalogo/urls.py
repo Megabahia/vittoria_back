@@ -1,7 +1,7 @@
 from django.urls import path,include
 from apps.ADM.vittoria_catalogo.views import(
 	catalogo_list,catalogo_create,catalogo_findOne,catalogo_update,catalogo_delete,
-	estado_list, pais_list,
+	estado_list, pais_list,tipo_list
 
 )
 
@@ -17,7 +17,9 @@ urlpatterns = [
 	path('update/<int:pk>', catalogo_update, name="catalogo_update"), 
 	path('delete/<int:pk>', catalogo_delete, name="catalogo_delete"), 
 	#ESTADO
-	path('listEstado/', estado_list, name="estado_list"), 
+	path('list/estado/', estado_list, name="estado_list"), 
 	#PAIS
-	path('listPais/', pais_list, name="pais_list"), 
+	path('list/pais/', pais_list, name="pais_list"), 
+	#TIPO PARAMETRIZACION/CATALOGO
+	path('list/tipo/', tipo_list, name="pais_list"), 
 ]
