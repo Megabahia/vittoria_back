@@ -136,7 +136,7 @@ def rol_create(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def rol_update(request):
+def rol_update(request,pk):
     nowDate = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'update/',
@@ -154,14 +154,13 @@ def rol_update(request):
             logModel['dataEnviada'] = str(request.data)
             #asigno los datos del rol
             rolUpdate=request.data['rol']
-            #tomo el id del rol y busco el rol
-            rolId=rolUpdate.pop('id')
             try:
-                rol = Roles.objects.get(pk=rolId, state=1)
+                rol = Roles.objects.get(pk=pk, state=1)
             except Roles.DoesNotExist:
                 err={"err":"El rol no existe"}
                 createLog(logModel,err,logExcepcion)
                 return Response(err,status=status.HTTP_404_NOT_FOUND)
+            rolId=int(rol.id)
             #agrego la fecha actualizar
             rolUpdate['updated_at'] = str(nowDate)
             if 'created_at' in request.data:
