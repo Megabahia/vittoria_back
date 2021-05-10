@@ -6,7 +6,7 @@ from apps.ADM.vittoria_roles.models import Roles
 
 # Create your models here.
 class Usuarios(AbstractBaseUser):
-    username = models.CharField(max_length=150)
+    username = models.CharField(max_length=150,unique=True)
     nombres = models.CharField(max_length=150)
     apellidos = models.CharField(max_length=250)
     email = models.CharField(max_length=250,unique=True)
