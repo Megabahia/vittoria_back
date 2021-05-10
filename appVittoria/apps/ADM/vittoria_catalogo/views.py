@@ -40,7 +40,7 @@ def catalogo_list(request):
             offset = page_size* page
             limit = offset + page_size
             #Filtros
-            filters={"state":"1"}
+            filters={"state":"1","idPadre__isnull":False}
             if 'nombre' in request.data:
                 if request.data['nombre']!='':
                     filters['nombre__startswith'] = str(request.data['nombre'])
