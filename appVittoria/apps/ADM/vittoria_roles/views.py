@@ -2,7 +2,7 @@
 from apps.ADM.vittoria_roles.models import Roles
 from apps.ADM.vittoria_acciones.models import Acciones, AccionesPermitidas, AccionesPorRol
 from apps.ADM.vittoria_acciones.serializers import AccionesSerializer,AccionesPadreSerializer, AccionesPermitidasSerializer, AccionesPorRolSerializer
-from apps.ADM.vittoria_roles.serializers import RolSerializer,RolFiltroSerializer
+from apps.ADM.vittoria_roles.serializers import RolSerializer,RolCreateSerializer,RolFiltroSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -98,7 +98,7 @@ def rol_create(request):
             if 'updated_at' in request.data:
                 rolCrear.pop('updated_at')
             #Guardo los roles
-            serializer = RolSerializer(data=rolCrear,partial=True)
+            serializer = RolCreateSerializer(data=rolCrear,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 #Asigno id del rol creado para usarlo en las acciones

@@ -6,6 +6,11 @@ class RolSerializer(serializers.ModelSerializer):
         model = Roles
         fields = '__all__'
 
+class RolCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Roles
+        fields = ['id','nombre','created_at']
+
 class RolFiltroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Roles
