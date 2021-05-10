@@ -231,7 +231,7 @@ def rol_findOne(request, pk):
                 accionesCrud={} #guardo las acciones leer,escribir,editar,borrar
                 #recorro las acciones de cada padre y las almaceno 
                 for accionHijo in AccionesPorRol.objects.filter(idRol_id=rolId, idAccion__idAccionPadre__nombre=str(accionPadre.nombre)).order_by('id'):
-                    accionesCrud[str(accionHijo.idAccion.nombre)]=str(accionHijo.state)
+                    accionesCrud[str(accionHijo.idAccion.nombre)]=int(accionHijo.state)
                 #asigno el crud a la lista
                 accionesList[str(accionPadre.nombre)]=accionesCrud
             #envio la data
