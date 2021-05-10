@@ -98,7 +98,7 @@ def rol_create(request):
             if 'updated_at' in request.data:
                 rolCrear.pop('updated_at')
             #Guardo los roles
-            serializer = RolSerializer(data=rolCrear)
+            serializer = RolSerializer(data=rolCrear,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 #Asigno id del rol creado para usarlo en las acciones
