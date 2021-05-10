@@ -27,9 +27,9 @@ CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = ')+^!3q$nko9e_n0(x!qo24xbh8m%k#0&&r6^%4!4_bp+m%=9!v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', '209.145.61.41', 'web.app.com']
+ALLOWED_HOSTS = ['127.0.0.1', '209.145.61.41', 'web.vittoria_app.com']
 
 
 # Application definition
@@ -103,24 +103,7 @@ WSGI_APPLICATION = 'appVittoria.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'vittoria_adm',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': 3307
-    },
-    'vittoria_mdm_db': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'vittoria_mdm',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': 3307
-    }
-}
+DATABASES =config.DATABASES
 
 #AGREGO LAS RUTAS DE LAS DIFERENTES BASES DE DATOS
 # DATABASE_ROUTERS = ['routersDB.MDMRouter',]
@@ -172,6 +155,5 @@ EMAIL_HOST = config.EMAIL_HOST
 EMAIL_HOST_USER = config.EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = config.EMAIL_HOST_PASSWORD
 EMAIL_PORT = config.EMAIL_PORT
-
 #CORS
 CORS_ALLOWED_ORIGINS = config.CORS_ALLOWED_ORIGINS
