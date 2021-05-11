@@ -27,14 +27,11 @@ def createLog(logModel,logRecibida,logTransaccion):
             logModel['tipo']=str(logTransaccion)
         #VERIFICA EL PERMISO TOMA DEL CATALOGO
         try:
-            permiso=Catalogo.objects.filter(idPadre__nombre=str(logModel['tipo']),nombre=str(logModel['modulo'])).only('id','config').first()
+            permiso=Catalogo.objects.filter(tipo='LOG'+str(logModel['tipo']),nombre=str(logModel['accion']),state=1).only('valor').first()
         except Catalogo.DoesNotExist:
             err={'error':'No existe la configuracion de permisos'}
             return Response(err,status=status.HTTP_404_NOT_FOUND)
-    
-        #LEE LA CONFIGURACION
-        permiso= json.loads(permiso.config)[str(logModel['accion'])]
-        if permiso==1:
+        if permiso.valor=='1':
             saveLog(logModel)
     except Exception as e: 
         err={"error":'Un error ha ocurrido: {}'.format(e)}  

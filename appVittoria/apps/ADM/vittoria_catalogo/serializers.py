@@ -9,29 +9,27 @@ class CatalogoSerializer(serializers.ModelSerializer):
        	fields = '__all__'
 
 class CatalogoHijoSerializer(serializers.ModelSerializer):
-    idTipo = serializers.CharField(source='idPadre.id', read_only=True)
     class Meta:
         model = Catalogo
-       	fields = ['id','nombre','idTipo','descripcion']
+       	fields = ['id','valor']
 
 class CatalogoListaSerializer(serializers.ModelSerializer):
-    tipo = serializers.CharField(source='idPadre.tipo', read_only=True)
     class Meta:
         model = Catalogo
-       	fields = ['id','nombre','tipo','descripcion']
+       	fields = ['id','nombre','tipo','tipoVariable','valor','descripcion']
 
 
 class CatalogoFiltroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Catalogo
-       	fields = ['id','nombre']
+       	fields = ['id','valor']
 
 class CatalogoTipoSerializer(serializers.ModelSerializer):
     #asignamos como nombre al dato tipo en la bd
-    nombre = serializers.CharField(source='tipo')
+    valor = serializers.CharField(source='tipo')
     class Meta:
         model = Catalogo
-       	fields = ['id','nombre']
+       	fields = ['valor']
     
 
 
