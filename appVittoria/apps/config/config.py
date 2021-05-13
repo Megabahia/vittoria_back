@@ -13,10 +13,10 @@ if PRODUCTION:
     #NOMBRE KEYWORK TOKEN
     TOKEN_KEYWORD= 'Bearer'
     # This will display email in Console.
-    EMAIL_HOST = 'smtp.mailtrap.io'
-    EMAIL_HOST_USER = 'e1e3590f699072'
-    EMAIL_HOST_PASSWORD = 'f140af20266358'
-    EMAIL_PORT = '2525'
+    EMAIL_HOST = ''
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD = ''
+    EMAIL_PORT = ''
     #CORS
     CORS_ALLOWED_ORIGINS = [
         "http://209.145.61.41:4200",
@@ -49,10 +49,10 @@ else:
     #NOMBRE KEYWORK TOKEN
     TOKEN_KEYWORD= 'Bearer'
     # This will display email in Console.
-    EMAIL_HOST = 'smtp.mailtrap.io'
-    EMAIL_HOST_USER = 'e1e3590f699072'
-    EMAIL_HOST_PASSWORD = 'f140af20266358'
-    EMAIL_PORT = '2525'
+    EMAIL_HOST = ''
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD = ''
+    EMAIL_PORT = ''
     #CORS
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:4200",
