@@ -44,9 +44,9 @@ def catalogo_list(request):
             if 'nombre' in request.data:
                 if request.data['nombre']!='':
                     filters['nombre__startswith'] = str(request.data['nombre'])
-            if 'idTipo' in request.data:
-                if request.data['idTipo']!='':
-                    filters['tipo'] = int(request.data['tipo'])
+            if 'tipo' in request.data:
+                if request.data['tipo']!='':
+                    filters['tipo'] = str(request.data['tipo'])
           
             #Serializar los datos
             query = Catalogo.objects.filter(**filters).order_by('-created_at')
