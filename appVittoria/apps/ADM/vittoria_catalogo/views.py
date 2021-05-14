@@ -273,4 +273,18 @@ def catalogo_list_hijo(request,pk):
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET TIPO DE PARAMETRIZACIONES/CATÁLOGO
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def catalogo_list_hijoNombre(request):
+
+    if request.method == 'POST':
+        try:
+            catalogo= Catalogo.objects.filter(state=1,idPadre__nombre=request.data['nombre'])
+            serializer = CatalogoHijoSerializer(catalogo, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
         
