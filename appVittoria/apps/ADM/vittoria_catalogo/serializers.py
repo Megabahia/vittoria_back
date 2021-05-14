@@ -29,7 +29,7 @@ class CatalogoTipoSerializer(serializers.ModelSerializer):
     valor = serializers.CharField(source='tipo')
     class Meta:
         model = Catalogo
-       	fields = ['id,''valor']
+       	fields = ['id','valor']
     
 
 
