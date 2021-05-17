@@ -74,8 +74,14 @@ def datosAcciones():
 def datosCatalogo():
     data={
         'modulo':'ADM',
-        'api':'catalogo/'
+        'api':'param/'
     }
     return data  
-
+#MODULO MDM-PARAMETRIZACIONES
+def datosParametrizaciones():
+    data={
+        'modulo':'ADM',
+        'api':'param/'
+    }
+    return data  
 

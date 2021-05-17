@@ -3,10 +3,13 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,UserManager
 from apps.ADM.vittoria_roles.models import Roles
 
+def upload_path(instance, filname):
+    return '/'.join(['imgUsuarios', str(instance.username), filname])
 
 # Create your models here.
 class Usuarios(AbstractBaseUser):
     username = models.CharField(max_length=150,unique=True)
+    imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
     nombres = models.CharField(max_length=150)
     apellidos = models.CharField(max_length=250)
     email = models.CharField(max_length=250,unique=True)
