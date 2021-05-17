@@ -2,7 +2,7 @@ from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
 from apps.ADM.vittoria_usuarios.models import Usuarios
-from apps.ADM.vittoria_usuarios.serializers import UsuarioSerializer,UsuarioRolSerializer,UsuarioCrearSerializer
+from apps.ADM.vittoria_usuarios.serializers import UsuarioSerializer,UsuarioImagenSerializer,UsuarioRolSerializer,UsuarioCrearSerializer
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend 
 from django.utils import timezone
