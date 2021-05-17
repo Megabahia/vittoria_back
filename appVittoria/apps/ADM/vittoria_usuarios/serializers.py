@@ -52,5 +52,5 @@ class UsuarioCrearSerializer(serializers.ModelSerializer):
 
 class UsuarioImagenSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Usuarios()
+        model = Usuarios
         fields = ['imagen','updated_at']
