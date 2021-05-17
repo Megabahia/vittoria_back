@@ -1,14 +1,14 @@
-from apps.ADM.vittoria_catalogo.models import Catalogo
-from apps.ADM.vittoria_catalogo.serializers import CatalogoSerializer,CatalogoHijoSerializer,CatalogoListaSerializer,CatalogoFiltroSerializer,CatalogoTipoSerializer
+from apps.MDM.mdm_parametrizaciones.models import Parametrizaciones
+from apps.MDM.mdm_parametrizaciones.serializers import ParametrizacionesSerializer,ParametrizacionesHijoSerializer,ParametrizacionesListaSerializer,ParametrizacionesFiltroSerializer,ParametrizacionesTipoSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
-#logs
-from apps.ADM.vittoria_logs.methods import createLog,datosCatalogo,datosTipoLog
+#logs 
+from apps.ADM.vittoria_logs.methods import createLog,datosParametrizaciones,datosTipoLog
 #declaracion variables log
-datosAux=datosCatalogo()
+datosAux=datosParametrizaciones()
 datosTipoLogAux=datosTipoLog()
 #asignacion datos modulo
 logModulo=datosAux['modulo']
@@ -16,10 +16,10 @@ logApi=datosAux['api']
 #asignacion tipo de datos
 logTransaccion=datosTipoLogAux['transaccion']
 logExcepcion=datosTipoLogAux['excepcion']
-#CRUD catalogo
+#CRUD Parametrizaciones
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def catalogo_list(request):
+def parametrizaciones_list(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'list/',
@@ -49,8 +49,8 @@ def catalogo_list(request):
                     filters['tipo'] = str(request.data['tipo'])
           
             #Serializar los datos
-            query = Catalogo.objects.filter(**filters).order_by('-created_at')
-            serializer = CatalogoListaSerializer(query[offset:limit], many=True)
+            query = Parametrizaciones.objects.filter(**filters).order_by('-created_at')
+            serializer = ParametrizacionesListaSerializer(query[offset:limit], many=True)
             new_serializer_data={'cont': query.count(),
             'info':serializer.data}
             #envio de datos
@@ -65,7 +65,7 @@ def catalogo_list(request):
 #CREAR
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def catalogo_create(request):
+def parametrizaciones_create(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'create/',
@@ -88,7 +88,7 @@ def catalogo_create(request):
                 if request.data['idPadre']=='' or request.data['idPadre']==0:
                     request.data.pop('idPadre')
         
-            serializer = CatalogoSerializer(data=request.data)
+            serializer = ParametrizacionesSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -102,7 +102,7 @@ def catalogo_create(request):
 #ENCONTRAR UNO
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def catalogo_findOne(request, pk):
+def parametrizaciones_findOne(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'listOne/',
@@ -116,14 +116,14 @@ def catalogo_findOne(request, pk):
     }
     try:
         try:
-            catalogo = Catalogo.objects.get(pk=pk, state=1)
-        except Catalogo.DoesNotExist:
+            Parametrizaciones = Parametrizaciones.objects.get(pk=pk, state=1)
+        except Parametrizaciones.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'GET':
-            serializer = CatalogoSerializer(catalogo)
+            serializer = ParametrizacionesSerializer(Parametrizaciones)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
     except Exception as e: 
@@ -138,7 +138,7 @@ def catalogo_findOne(request, pk):
 #ACTUALIZAR 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def catalogo_update(request, pk):
+def parametrizaciones_update(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'update/',
@@ -152,8 +152,8 @@ def catalogo_update(request, pk):
     }
     try:
         try:
-            catalogo = Catalogo.objects.get(pk=pk, state=1)
-        except Catalogo.DoesNotExist:
+            Parametrizaciones = Parametrizaciones.objects.get(pk=pk, state=1)
+        except Parametrizaciones.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
             return Response(err,status=status.HTTP_404_NOT_FOUND)
@@ -167,7 +167,7 @@ def catalogo_update(request, pk):
             if 'idPadre' in request.data:
                 if request.data['idPadre']=='' or request.data['idPadre']==0:
                     request.data['idPadre']=None
-            serializer = CatalogoSerializer(catalogo, data=request.data,partial=True)
+            serializer = ParametrizacionesSerializer(Parametrizaciones, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -182,7 +182,7 @@ def catalogo_update(request, pk):
 #ELIMINAR
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def catalogo_delete(request, pk):
+def parametrizaciones_delete(request, pk):
     nowDate = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'delete/',
@@ -196,15 +196,15 @@ def catalogo_delete(request, pk):
     }
     try:
         try:
-            catalogo = Catalogo.objects.get(pk=pk, state=1)
-        except Catalogo.DoesNotExist:
+            Parametrizaciones = Parametrizaciones.objects.get(pk=pk, state=1)
+        except Parametrizaciones.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
             return Response(err,status=status.HTTP_404_NOT_FOUND)
             return Response(status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'DELETE':
-            serializer = CatalogoSerializer(catalogo, data={'state': '0','updated_at':str(nowDate)},partial=True)
+            serializer = ParametrizacionesSerializer(Parametrizaciones, data={'state': '0','updated_at':str(nowDate)},partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -222,8 +222,8 @@ def estado_list(request):
 
     if request.method == 'GET':
         try:
-            catalogo= Catalogo.objects.filter(state=1,tipo="ESTADO")
-            serializer = CatalogoFiltroSerializer(catalogo, many=True)
+            Parametrizaciones= Parametrizaciones.objects.filter(state=1,tipo="ESTADO")
+            serializer = ParametrizacionesFiltroSerializer(Parametrizaciones, many=True)
             return Response(serializer.data)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -238,8 +238,8 @@ def pais_list(request):
 
     if request.method == 'GET':
         try:
-            catalogo= Catalogo.objects.filter(state=1,tipo="PAIS")
-            serializer = CatalogoFiltroSerializer(catalogo, many=True)
+            Parametrizaciones= Parametrizaciones.objects.filter(state=1,tipo="PAIS")
+            serializer = ParametrizacionesFiltroSerializer(Parametrizaciones, many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -252,8 +252,8 @@ def tipo_list(request):
 
     if request.method == 'GET':
         try:
-            catalogo= Catalogo.objects.filter(state=1).values('tipo').distinct()
-            serializer = CatalogoTipoSerializer(catalogo, many=True)
+            Parametrizaciones= Parametrizaciones.objects.filter(state=1).values('tipo').distinct()
+            serializer = ParametrizacionesTipoSerializer(Parametrizaciones, many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -263,12 +263,12 @@ def tipo_list(request):
 #GET TIPO DE PARAMETRIZACIONES/CATÁLOGO
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def catalogo_list_hijo(request,pk):
+def parametrizaciones_list_hijo(request,pk):
 
     if request.method == 'GET':
         try:
-            catalogo= Catalogo.objects.filter(state=1,idPadre__id=pk)
-            serializer = CatalogoHijoSerializer(catalogo, many=True)
+            Parametrizaciones= Parametrizaciones.objects.filter(state=1,idPadre__id=pk)
+            serializer = ParametrizacionesHijoSerializer(Parametrizaciones, many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -277,12 +277,12 @@ def catalogo_list_hijo(request,pk):
 #GET TIPO DE PARAMETRIZACIONES/CATÁLOGO
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def catalogo_list_hijoNombre(request):
+def parametrizaciones_list_hijoNombre(request):
 
     if request.method == 'POST':
         try:
-            catalogo= Catalogo.objects.filter(state=1,idPadre__nombre=request.data['nombre'])
-            serializer = CatalogoHijoSerializer(catalogo, many=True)
+            Parametrizaciones= Parametrizaciones.objects.filter(state=1,idPadre__nombre=request.data['nombre'])
+            serializer = ParametrizacionesHijoSerializer(Parametrizaciones, many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -291,12 +291,12 @@ def catalogo_list_hijoNombre(request):
 #GET TIPO DE PARAMETRIZACIONES/CATÁLOGO
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def catalogo_list_hijos(request):
+def parametrizaciones_list_hijos(request):
 
     if request.method == 'POST':
         try:
-            catalogo= Catalogo.objects.filter(state=1,idPadre__tipo=str(request.data['tipo']))
-            serializer = CatalogoHijoSerializer(catalogo, many=True)
+            Parametrizaciones= Parametrizaciones.objects.filter(state=1,idPadre__tipo=str(request.data['tipo']))
+            serializer = ParametrizacionesHijoSerializer(Parametrizaciones, many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  

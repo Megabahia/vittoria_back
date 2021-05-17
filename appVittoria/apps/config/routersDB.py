@@ -3,7 +3,7 @@ class MDMRouter:
     A router to control all database operations on models in the
     auth and contenttypes applications.
     """
-    route_app_labels = {'mdm_auth', 'mdm_clientes'}
+    route_app_labels = {'mdm_parametrizaciones'}
 
     def db_for_read(self, model, **hints):
         """

@@ -15,7 +15,7 @@ import pymysql
 import os
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
-from apps.config import config,routersDB
+from apps.config import config
 pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +27,7 @@ CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = ')+^!3q$nko9e_n0(x!qo24xbh8m%k#0&&r6^%4!4_bp+m%=9!v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', '209.145.61.41', 'web.vittoria_app.com']
 
@@ -35,13 +35,15 @@ ALLOWED_HOSTS = ['127.0.0.1', '209.145.61.41', 'web.vittoria_app.com']
 # Application definition
 
 INSTALLED_APPS = [
-    #apps vittoria
+    #apps vittoria ADM
     'apps.ADM.vittoria_logs',
     'apps.ADM.vittoria_roles',
     'apps.ADM.vittoria_usuarios',
     'apps.ADM.vittoria_autenticacion',
     'apps.ADM.vittoria_acciones',
     'apps.ADM.vittoria_catalogo',
+    #apps vittoria MDM+
+    'apps.MDM.mdm_parametrizaciones',
     #CONFIG
     'apps.config',
     #Django external apps
@@ -106,7 +108,7 @@ WSGI_APPLICATION = 'appVittoria.wsgi.application'
 DATABASES =config.DATABASES
 
 #AGREGO LAS RUTAS DE LAS DIFERENTES BASES DE DATOS
-# DATABASE_ROUTERS = ['routersDB.MDMRouter',]
+DATABASE_ROUTERS = ['apps.config.routersDB.MDMRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -151,9 +153,12 @@ TOKEN_EXPIRED_AFTER_SECONDS = config.TOKEN_EXPIRED_AFTER_SECONDS
 TOKEN_KEYWORD= config.TOKEN_KEYWORD
 # Config Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config.EMAIL_HOST
-EMAIL_HOST_USER = config.EMAIL_HOST_USER
-EMAIL_HOST_PASSWORD = config.EMAIL_HOST_PASSWORD
-EMAIL_PORT = config.EMAIL_PORT
+EMAIL_HOST = ''
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = ''
 #CORS
 CORS_ALLOWED_ORIGINS = config.CORS_ALLOWED_ORIGINS
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'

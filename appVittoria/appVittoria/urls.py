@@ -16,6 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 from django.conf.urls import url
+from django.conf.urls.static import static
+from django.conf import settings
+
 
 urlpatterns = [
     #MODULO ADM
@@ -26,4 +29,7 @@ urlpatterns = [
     path('adm/param/', include(('apps.ADM.vittoria_catalogo.urls', 'catalogo'), namespace='catalogo')),
     url(r'^adm/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     # path('auth/password_reset/', include(('django_rest_passwordreset.urls', 'password_reset'), namespace='password_reset')),
+
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
