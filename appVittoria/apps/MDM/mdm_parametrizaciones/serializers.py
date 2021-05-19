@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.ADM.vittoria_Parametrizaciones.models import Parametrizaciones
+from apps.MDM.mdm_parametrizaciones.models import Parametrizaciones
 
 
 class ParametrizacionesSerializer(serializers.ModelSerializer):

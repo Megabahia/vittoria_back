@@ -1,8 +1,8 @@
 from django.urls import path,include
-from apps.ADM.vittoria_parametrizaciones.views import(
+from apps.MDM.mdm_parametrizaciones.views import(
 	parametrizaciones_list,parametrizaciones_create,parametrizaciones_findOne,parametrizaciones_update,parametrizaciones_delete,
-	estado_list, pais_list,tipo_list,parametrizaciones_list_hijo,parametrizaciones_list_hijoNombre,parametrizaciones_list_hijos
-
+	estado_list, pais_list,tipo_list,parametrizaciones_list_hijo,parametrizaciones_list_hijoNombre,parametrizaciones_list_hijos,
+	canales_list, confirmacionProspecto_list, tipoCliente_list
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -28,4 +28,11 @@ urlpatterns = [
 	path('list/tipo/hijo/nombre/', parametrizaciones_list_hijoNombre, name="tijohijonombre_list"), 
 	#buscar todos los nombres que pertenecen al tipo enviado
 	path('list/tipo/hijo/', parametrizaciones_list_hijos, name="tipoPadre__list"), 
+	# CANALES
+	path('list/canales/', canales_list, name="canales_list"), 
+	# CONFIRMACIONES PROSPECTOS
+	path('list/confirmacionProspecto/', confirmacionProspecto_list, name="confirmacionProspecto_list"), 
+	# TIPO CLIENTE
+	path('list/tipoCliente/', tipoCliente_list, name="tipoCliente_list"), 
+
 ]

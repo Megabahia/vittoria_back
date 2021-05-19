@@ -28,7 +28,9 @@ urlpatterns = [
     path('adm/acciones/', include(('apps.ADM.vittoria_acciones.urls', 'acciones'), namespace='acciones')),
     path('adm/param/', include(('apps.ADM.vittoria_catalogo.urls', 'catalogo'), namespace='catalogo')),
     url(r'^adm/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
-    # path('auth/password_reset/', include(('django_rest_passwordreset.urls', 'password_reset'), namespace='password_reset')),
+    #Modulo MDM
+    path('mdm/parametrizaciones/', include(('apps.MDM.mdm_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizaciones')),
+    path('mdm/prospectosClientes/', include(('apps.MDM.mdm_prospectosClientes.urls', 'prospectos_clientes'), namespace='prospectos_clientes')),
 
 ]
 

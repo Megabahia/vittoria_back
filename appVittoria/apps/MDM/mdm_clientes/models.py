@@ -1,33 +1,36 @@
 from django.db import models
 
+def upload_path(instance, filname):
+    return '/'.join(['MDM/imgClientes', str(instance.id) +"_" + filname])
+
 # Create your models here.
 class Clientes(models.Model):
-    idTipoCliente= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    cedula = models.CharField(max_length=10,null=True)
+    tipoCliente = models.CharField(max_length=150,null=True)
+    cedula = models.CharField(max_length=10,null=True,unique=True)
     nombres = models.CharField(max_length=150,null=True)
     apellidos = models.CharField(max_length=150,null=True)
-    idGenero= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idNacionalidad= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    genero= models.CharField(max_length=150,null=True)
+    nacionalidad= models.CharField(max_length=150,null=True)
     fechaNacimiento = models.DateField(null=True)
     edad = models.SmallIntegerField(null=True)
-    idPaisNacimiento= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idProvinciaNacimiento= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idCiudadNacimiento= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idEstadoCivil= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idPaisResidencia= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idProvinciaResidencia= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idCiudadResidencia= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idNivelEstudios= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idProfesion= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    paisNacimiento= models.CharField(max_length=150,null=True)
+    provinciaNacimiento= models.CharField(max_length=150,null=True)
+    ciudadNacimiento= models.CharField(max_length=150,null=True)
+    estadoCivil= models.CharField(max_length=150,null=True)
+    paisResidencia= models.CharField(max_length=150,null=True)
+    provinciaResidencia= models.CharField(max_length=150,null=True)
+    ciudadResidencia= models.CharField(max_length=150,null=True)
+    nivelEstudios= models.CharField(max_length=150,null=True)
+    profesion= models.CharField(max_length=150,null=True)
     lugarTrabajo = models.CharField(max_length=150,null=True)
-    idPaisTrabajo= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idProvinciaTrabajo= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idCiudadTrabajo= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    paisTrabajo= models.CharField(max_length=150,null=True)
+    provinciaTrabajo= models.CharField(max_length=150,null=True)
+    ciudadTrabajo= models.CharField(max_length=150,null=True)
     mesesUltimoTrabajo = models.PositiveIntegerField(null=True)
     mesesTotalTrabajo = models.PositiveIntegerField (null=True)
-    ingresosPromedioMensual = models.DecimalField(null=True)
-    gastosPromedioMensual = models.DecimalField(null=True)
-    foto = models.CharField(max_length=250,null=True)
+    ingresosPromedioMensual = models.FloatField()
+    gastosPromedioMensual = models.FloatField()
+    imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -41,11 +44,11 @@ class Clientes(models.Model):
         return '{}'.format(self.nombres)
 
 class DatosFisicosClientes(models.Model):
-    idCliente= models.ForeignKey(Clientes, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con el cliente
-    idTipoDireccion= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idPais= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idProvincia= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idCiudad= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    cliente= models.ForeignKey(Clientes, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con el cliente
+    tipoDireccion= models.CharField(max_length=150,null=True)
+    pais= models.CharField(max_length=150,null=True)
+    provincia= models.CharField(max_length=150,null=True)
+    ciudad= models.CharField(max_length=150,null=True)
     callePrincipal = models.CharField(max_length=150,null=True)
     numero = models.CharField(max_length=20,null=True)
     calleSecundaria = models.CharField(max_length=150,null=True)
@@ -66,8 +69,8 @@ class DatosFisicosClientes(models.Model):
         return '{}'.format(self.nombres)
 
 class DatosVirtualesClientes(models.Model):
-    idCliente= models.ForeignKey(Clientes, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con el cliente
-    idTipoContacto= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    cliente= models.ForeignKey(Clientes, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con el cliente
+    tipoContacto= models.CharField(max_length=150,null=True)
     informacion = models.CharField(max_length=150,null=True)
     icono = models.CharField(max_length=150,null=True)
     
@@ -83,23 +86,23 @@ class DatosVirtualesClientes(models.Model):
         return '{}'.format(self.nombres)
 
 class Parientes(models.Model):
-    idTipoPariente= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    cedula = models.CharField(max_length=10,null=True)
+    tipoPariente= models.CharField(max_length=150,null=True)
+    cedula = models.CharField(max_length=10,null=True,unique=True)
     nombres = models.CharField(max_length=150,null=True)
     apellidos = models.CharField(max_length=150,null=True)
     fechaMatrimonio = models.DateField(null=True)
     lugarMatrimonio = models.CharField(max_length=150,null=True)
-    idGenero= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idNacionalidad= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    genero= models.CharField(max_length=150,null=True)
+    nacionalidad= models.CharField(max_length=150,null=True)
     fechaNacimiento = models.DateField(null=True)
     edad = models.PositiveSmallIntegerField(null=True)
-    idPaisNacimiento= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idProvinciaNacimiento= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idCiudadNacimiento= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idEstadoCivil= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idPaisResidencia= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idProvinciaResidencia= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idCiudadResidencia= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    paisNacimiento= models.CharField(max_length=150,null=True)
+    provinciaNacimiento= models.CharField(max_length=150,null=True)
+    ciudadNacimiento= models.CharField(max_length=150,null=True)
+    estadoCivil= models.CharField(max_length=150,null=True)
+    paisResidencia= models.CharField(max_length=150,null=True)
+    provinciaResidencia= models.CharField(max_length=150,null=True)
+    ciudadResidencia= models.CharField(max_length=150,null=True)
     callePrincipal = models.CharField(max_length=150,null=True)
     numero = models.CharField(max_length=20,null=True)
     calleSecundaria = models.CharField(max_length=150,null=True)
@@ -118,16 +121,16 @@ class Parientes(models.Model):
     twitter = models.CharField(max_length=150,null=True)
     facebook = models.CharField(max_length=150,null=True)
     instagram = models.CharField(max_length=150,null=True)
-    idNivelEstudios= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idProfesion= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    nivelEstudios= models.CharField(max_length=150,null=True)
+    profesion= models.CharField(max_length=150,null=True)
     lugarTrabajo = models.CharField(max_length=150,null=True)
-    idPaisTrabajo= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idProvinciaTrabajo= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idCiudadTrabajo= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    paisTrabajo= models.CharField(max_length=150,null=True)
+    provinciaTrabajo= models.CharField(max_length=150,null=True)
+    ciudadTrabajo= models.CharField(max_length=150,null=True)
     mesesUltimoTrabajo = models.PositiveIntegerField(null=True)
     mesesTotalTrabajo = models.PositiveIntegerField(null=True)
-    ingresosPromedioMensual = models.DecimalField(null=True)
-    gastosPromedioMensual = models.DecimalField(null=True)
+    ingresosPromedioMensual = models.FloatField()
+    gastosPromedioMensual = models.FloatField()
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

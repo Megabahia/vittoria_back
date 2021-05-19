@@ -43,7 +43,11 @@ INSTALLED_APPS = [
     'apps.ADM.vittoria_acciones',
     'apps.ADM.vittoria_catalogo',
     #apps vittoria MDM+
+    'apps.MDM.mdm_clientes',
+    'apps.MDM.mdm_facturas',
+    'apps.MDM.mdm_negocios',
     'apps.MDM.mdm_parametrizaciones',
+    'apps.MDM.mdm_prospectosClientes',
     #CONFIG
     'apps.config',
     #Django external apps

@@ -9,17 +9,17 @@ class FacturasEncabezados(models.Model):
     idCliente= models.ForeignKey(Clientes, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Clientes
     numeroFactura = models.CharField(max_length=150,null=True)
     fecha = models.DateField(null=True)
-    idTipoIdentificacion= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    tipoIdentificacion = models.CharField(max_length=150,null=True)
     identificacion = models.CharField(max_length=150,null=True)
     razonSocial = models.CharField(max_length=150,null=True)
     direccion = models.CharField(max_length=150,null=True)
     telefono = models.CharField(max_length=150,null=True)
     correo = models.EmailField(max_length=150,null=True)
     nombreVendedor = models.CharField(max_length=150,null=True)
-    subTotal = models.DecimalField(max_length=150,null=True)
-    descuento = models.DecimalField(max_length=150,null=True)
-    iva = models.DecimalField(max_length=150,null=True)
-    total = models.DecimalField(max_length=150,null=True)
+    subTotal = models.FloatField()
+    descuento = models.FloatField()
+    iva = models.FloatField()
+    total = models.FloatField()
         
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -34,13 +34,13 @@ class FacturasEncabezados(models.Model):
 
 
 class FacturasDetalles(models.Model):
-    idArticulo = models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Negocios
-    valorUnitario = models.DecimalField(max_length=150,null=True)
-    cantidad = models.PositiveIntegerField(max_length=150,null=True)
-    precio = models.DecimalField(max_length=150,null=True)
+    articulo = models.CharField(max_length=150,null=True)
+    valorUnitario = models.FloatField()
+    cantidad = models.PositiveIntegerField(null=True)
+    precio = models.FloatField()
     informacionAdicinal = models.CharField(max_length=250,null=True)
-    descuento = models.DecimalField(max_length=150,null=True)
-    impuesto = models.DecimalField(max_length=150,null=True)
+    descuento = models.FloatField()
+    impuesto = models.FloatField()
         
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
