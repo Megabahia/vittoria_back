@@ -2,7 +2,7 @@ from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
 from apps.ADM.vittoria_usuarios.models import Usuarios
-from apps.ADM.vittoria_usuarios.serializers import UsuarioSerializer,UsuarioRolSerializer,UsuarioCrearSerializer
+from apps.ADM.vittoria_usuarios.serializers import UsuarioSerializer,UsuarioImagenSerializer,UsuarioRolSerializer,UsuarioCrearSerializer,UsuarioFiltroSerializer
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend 
 from django.utils import timezone
@@ -265,3 +265,55 @@ def usuario_create(request):
         return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def usuarioImagen_update(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'update/imagen/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'ESCRIBIR',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            usuario = Usuarios.objects.get(pk=pk, state=1)
+        except Usuarios.DoesNotExist:
+            errorNoExiste={'error':'No existe'}
+            createLog(logModel,errorNoExiste,logExcepcion)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'POST':
+            now = timezone.localtime(timezone.now())
+            request.data['updated_at'] = str(now)
+            if 'created_at' in request.data:
+                request.data.pop('created_at')
+            serializer = UsuarioImagenSerializer(usuario, data=request.data,partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                createLog(logModel,serializer.data,logTransaccion)
+                return Response(serializer.data)
+            createLog(logModel,serializer.errors,logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e: 
+        err={"error":'Un error ha ocurrido: {}'.format(e)}  
+        createLog(logModel,err,logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#toma los vendedores
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def vendedor_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Usuarios.objects.filter(state=1,idRol__nombre="Vendedor")
+            serializer = UsuarioFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 

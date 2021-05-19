@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser,UserManager
 from apps.ADM.vittoria_roles.models import Roles
 
 def upload_path(instance, filname):
-    return '/'.join(['imgUsuarios', str(instance.username), filname])
+    return '/'.join(['ADM/imgUsuarios', str(instance.username) +"_" + filname])
 
 # Create your models here.
 class Usuarios(AbstractBaseUser):

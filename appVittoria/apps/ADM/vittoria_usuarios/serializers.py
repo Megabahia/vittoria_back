@@ -25,7 +25,7 @@ class UsuarioCrearSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Usuarios
-		fields = ['imagen','nombres','apellidos','username','email','compania','pais','telefono','whatsapp','idRol','password','estado']
+		fields = ['nombres','apellidos','username','email','compania','pais','telefono','whatsapp','idRol','password','estado']
 		extra_kwargs = {
 				'password': {'write_only': True},
 		}	
@@ -49,3 +49,20 @@ class UsuarioCrearSerializer(serializers.ModelSerializer):
 		usuario.set_password(password)
 		usuario.save()
 		return usuario
+
+class UsuarioImagenSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Usuarios
+        fields = ['imagen','updated_at']
+
+class UsuarioFiltroSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuarios
+        fields = ['id','nombres','apellidos']
+
+    def to_representation(self, instance):
+        data = super(UsuarioFiltroSerializer, self).to_representation(instance)
+        #tomo y uno los nombres y apellidos y los asigno a la data como nombre
+        nombreCompleto = str(data.pop('nombres'))+" "+str(data.pop('apellidos'))
+        data.update({"nombre":nombreCompleto})
+        return data

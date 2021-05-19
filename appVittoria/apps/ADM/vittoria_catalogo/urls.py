@@ -1,7 +1,8 @@
 from django.urls import path,include
 from apps.ADM.vittoria_catalogo.views import(
 	catalogo_list,catalogo_create,catalogo_findOne,catalogo_update,catalogo_delete,
-	estado_list, pais_list,tipo_list,catalogo_list_hijo,catalogo_list_hijoNombre,catalogo_list_hijos
+	estado_list, pais_list,tipo_list,catalogo_list_hijo,catalogo_list_hijoNombre,catalogo_list_hijos,
+	catalogo_list_parametrosTipo
 
 )
 
@@ -28,4 +29,6 @@ urlpatterns = [
 	path('list/tipo/hijo/nombre/', catalogo_list_hijoNombre, name="tijohijonombre_list"), 
 	#buscar todos los nombres que pertenecen al tipo enviado
 	path('list/tipo/hijo/', catalogo_list_hijos, name="tipoPadre__list"), 
+	#buscar todos LOS QUE TENGAN EL PARÁMETRO
+	path('list/tipo/todos/', catalogo_list_parametrosTipo, name="catalogo_list_parametrosTipo"), 
 ]
