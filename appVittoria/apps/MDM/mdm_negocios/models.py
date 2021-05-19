@@ -2,21 +2,21 @@ from django.db import models
 
 # Create your models here.
 class Negocios(models.Model):
-    idTipoNegocio= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    ruc = models.CharField(max_length=150,null=True)
+    tipoNegocio = models.CharField(max_length=150,null=True)
+    ruc = models.CharField(max_length=150,null=True, unique=True)
     razonSocial = models.CharField(max_length=150,null=True)
     nombreComercial = models.CharField(max_length=150,null=True)    
-    idNacionalidad= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    nacionalidad = models.CharField(max_length=150,null=True)
     fechaCreacionNegocio = models.DateField(max_length=150,null=True)
     edadNegocio = models.CharField(max_length=150,null=True)
-    idPaisOrigen= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idPaisResidencia= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idProvinciaResidencia= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idCiudadResidencia= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    paisOrigen= models.CharField(max_length=150,null=True)
+    paisResidencia= models.CharField(max_length=150,null=True)
+    provinciaResidencia = models.CharField(max_length=150,null=True)
+    ciudadResidencia= models.CharField(max_length=150,null=True)
     numeroEmpleados = models.CharField(max_length=150,null=True)
-    idSegmentoActividadEconomica= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idProvincia= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idActividadEcomica= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    segmentoActividadEconomica= models.CharField(max_length=150,null=True)
+    provincia= models.CharField(max_length=150,null=True)
+    actividadEcomica= models.CharField(max_length=150,null=True)
     llevarContabilidad = models.SmallIntegerField(default=1)
     ingresosPromedioMensual = models.CharField(max_length=150,null=True)
     gastosPromedioMensual = models.CharField(max_length=150,null=True)
@@ -47,10 +47,10 @@ class Negocios(models.Model):
 
 class DireccionesEstablecimientosNegocios(models.Model):
     idNegocio= models.ForeignKey(Negocios, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Negocios
-    idTipoDireccion= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idPais= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idProvincia= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    idCiudad= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
+    tipoDireccion= models.CharField(max_length=150,null=True)
+    pais= models.CharField(max_length=150,null=True)
+    provincia= models.CharField(max_length=150,null=True)
+    ciudad= models.CharField(max_length=150,null=True)
     callePrincipal = models.CharField(max_length=150,null=True)
     numero = models.CharField(max_length=20,null=True)
     calleSecundaria = models.CharField(max_length=150,null=True)
@@ -72,8 +72,8 @@ class DireccionesEstablecimientosNegocios(models.Model):
 
 class PersonalNegocios(models.Model):
     idNegocio= models.ForeignKey(Negocios, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Negocios
-    idTipoContacto= models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Padre
-    cedula = models.CharField(max_length=10,null=True)
+    tipoContacto = models.CharField(max_length=10,null=True)
+    cedula = models.CharField(max_length=10,null=True, unique= True)
     nombres = models.CharField(max_length=150,null=True)
     apellidos = models.CharField(max_length=150,null=True)
     telefonoFijo = models.CharField(max_length=15,null=True)

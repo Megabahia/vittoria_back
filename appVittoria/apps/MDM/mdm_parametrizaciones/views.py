@@ -116,14 +116,14 @@ def parametrizaciones_findOne(request, pk):
     }
     try:
         try:
-            Parametrizaciones = Parametrizaciones.objects.get(pk=pk, state=1)
+            query = Parametrizaciones.objects.get(pk=pk, state=1)
         except Parametrizaciones.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'GET':
-            serializer = ParametrizacionesSerializer(Parametrizaciones)
+            serializer = ParametrizacionesSerializer(query)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
     except Exception as e: 
@@ -152,7 +152,7 @@ def parametrizaciones_update(request, pk):
     }
     try:
         try:
-            Parametrizaciones = Parametrizaciones.objects.get(pk=pk, state=1)
+            query = Parametrizaciones.objects.get(pk=pk, state=1)
         except Parametrizaciones.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
@@ -167,7 +167,7 @@ def parametrizaciones_update(request, pk):
             if 'idPadre' in request.data:
                 if request.data['idPadre']=='' or request.data['idPadre']==0:
                     request.data['idPadre']=None
-            serializer = ParametrizacionesSerializer(Parametrizaciones, data=request.data,partial=True)
+            serializer = ParametrizacionesSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -196,7 +196,7 @@ def parametrizaciones_delete(request, pk):
     }
     try:
         try:
-            Parametrizaciones = Parametrizaciones.objects.get(pk=pk, state=1)
+            query = Parametrizaciones.objects.get(pk=pk, state=1)
         except Parametrizaciones.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
@@ -204,7 +204,7 @@ def parametrizaciones_delete(request, pk):
             return Response(status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'DELETE':
-            serializer = ParametrizacionesSerializer(Parametrizaciones, data={'state': '0','updated_at':str(nowDate)},partial=True)
+            serializer = ParametrizacionesSerializer(query, data={'state': '0','updated_at':str(nowDate)},partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -222,8 +222,8 @@ def estado_list(request):
 
     if request.method == 'GET':
         try:
-            Parametrizaciones= Parametrizaciones.objects.filter(state=1,tipo="ESTADO")
-            serializer = ParametrizacionesFiltroSerializer(Parametrizaciones, many=True)
+            query= Parametrizaciones.objects.filter(state=1,tipo="ESTADO")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
             return Response(serializer.data)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -238,8 +238,8 @@ def pais_list(request):
 
     if request.method == 'GET':
         try:
-            Parametrizaciones= Parametrizaciones.objects.filter(state=1,tipo="PAIS")
-            serializer = ParametrizacionesFiltroSerializer(Parametrizaciones, many=True)
+            query= Parametrizaciones.objects.filter(state=1,tipo="PAIS")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -252,8 +252,8 @@ def tipo_list(request):
 
     if request.method == 'GET':
         try:
-            Parametrizaciones= Parametrizaciones.objects.filter(state=1).values('tipo').distinct()
-            serializer = ParametrizacionesTipoSerializer(Parametrizaciones, many=True)
+            query= Parametrizaciones.objects.filter(state=1).values('tipo').distinct()
+            serializer = ParametrizacionesTipoSerializer(query, many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -267,8 +267,8 @@ def parametrizaciones_list_hijo(request,pk):
 
     if request.method == 'GET':
         try:
-            Parametrizaciones= Parametrizaciones.objects.filter(state=1,idPadre__id=pk)
-            serializer = ParametrizacionesHijoSerializer(Parametrizaciones, many=True)
+            query= Parametrizaciones.objects.filter(state=1,idPadre__id=pk)
+            serializer = ParametrizacionesHijoSerializer(query, many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -281,8 +281,8 @@ def parametrizaciones_list_hijoNombre(request):
 
     if request.method == 'POST':
         try:
-            Parametrizaciones= Parametrizaciones.objects.filter(state=1,idPadre__nombre=request.data['nombre'])
-            serializer = ParametrizacionesHijoSerializer(Parametrizaciones, many=True)
+            query= Parametrizaciones.objects.filter(state=1,idPadre__nombre=request.data['nombre'])
+            serializer = ParametrizacionesHijoSerializer(query, many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -295,10 +295,51 @@ def parametrizaciones_list_hijos(request):
 
     if request.method == 'POST':
         try:
-            Parametrizaciones= Parametrizaciones.objects.filter(state=1,idPadre__tipo=str(request.data['tipo']))
-            serializer = ParametrizacionesHijoSerializer(Parametrizaciones, many=True)
+            query= Parametrizaciones.objects.filter(state=1,idPadre__tipo=str(request.data['tipo']))
+            serializer = ParametrizacionesHijoSerializer(query, many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
+#GET CANALES
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def canales_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="CANAL")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET CONFIRMACIONES PROSPECTOS
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def confirmacionProspecto_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="CONFIRMACION_PROSPECTO")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET TIPO CLIENTE
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def tipoCliente_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="TIPO_CLIENTE")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 

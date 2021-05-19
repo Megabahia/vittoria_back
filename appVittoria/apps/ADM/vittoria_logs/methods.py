@@ -80,8 +80,36 @@ def datosCatalogo():
 #MODULO MDM-PARAMETRIZACIONES
 def datosParametrizaciones():
     data={
-        'modulo':'ADM',
+        'modulo':'MDM',
         'api':'param/'
+    }
+    return data  
+#MODULO MDM-CLIENTES
+def datosClientes():
+    data={
+        'modulo':'MDM',
+        'api':'clientes/'
+    }
+    return data  
+#MODULO MDM-PROSPECTOS-CLIENTES
+def datosProspectosClientes():
+    data={
+        'modulo':'MDM',
+        'api':'prospectosClientes/'
+    }
+    return data  
+#MODULO MDM-NEGOCIOS
+def datosNegocios():
+    data={
+        'modulo':'MDM',
+        'api':'negocios/'
+    }
+    return data  
+#MODULO MDM-FACTURAS
+def datosFacturas():
+    data={
+        'modulo':'MDM',
+        'api':'facturas/'
     }
     return data  
 
