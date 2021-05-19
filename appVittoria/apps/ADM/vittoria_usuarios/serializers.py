@@ -54,3 +54,15 @@ class UsuarioImagenSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Usuarios
         fields = ['imagen','updated_at']
+
+class UsuarioFiltroSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuarios
+        fields = ['id','nombres','apellidos']
+
+    def to_representation(self, instance):
+        data = super(UsuarioFiltroSerializer, self).to_representation(instance)
+        #tomo y uno los nombres y apellidos y los asigno a la data como nombre
+        nombreCompleto = str(data.pop('nombres'))+" "+str(data.pop('apellidos'))
+        data.update({"nombre":nombreCompleto})
+        return data
