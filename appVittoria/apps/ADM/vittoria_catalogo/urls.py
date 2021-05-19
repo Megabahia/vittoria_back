@@ -30,5 +30,5 @@ urlpatterns = [
 	#buscar todos los nombres que pertenecen al tipo enviado
 	path('list/tipo/hijo/', catalogo_list_hijos, name="tipoPadre__list"), 
 	#buscar todos LOS QUE TENGAN EL PARÁMETRO
-	path('list/tipo/hijo/', catalogo_list_parametrosTipo, name="catalogo_list_parametrosTipo"), 
+	path('list/tipo/todos/', catalogo_list_parametrosTipo, name="catalogo_list_parametrosTipo"), 
 ]
