@@ -28,8 +28,8 @@ class Clientes(models.Model):
     ciudadTrabajo= models.CharField(max_length=150,null=True)
     mesesUltimoTrabajo = models.PositiveIntegerField(null=True)
     mesesTotalTrabajo = models.PositiveIntegerField (null=True)
-    ingresosPromedioMensual = models.FloatField()
-    gastosPromedioMensual = models.FloatField()
+    ingresosPromedioMensual = models.FloatField(null=True)
+    gastosPromedioMensual = models.FloatField(null=True)
     imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -129,8 +129,8 @@ class Parientes(models.Model):
     ciudadTrabajo= models.CharField(max_length=150,null=True)
     mesesUltimoTrabajo = models.PositiveIntegerField(null=True)
     mesesTotalTrabajo = models.PositiveIntegerField(null=True)
-    ingresosPromedioMensual = models.FloatField()
-    gastosPromedioMensual = models.FloatField()
+    ingresosPromedioMensual = models.FloatField(null=True)
+    gastosPromedioMensual = models.FloatField(null=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

@@ -1,5 +1,5 @@
-from apps.MDM.mdm_negocios.models import Clientes
-from apps.MDM.mdm_negocios.serializers import ClientesSerializer, ClientesListarSerializer, ClienteImagenSerializer
+from apps.MDM.mdm_clientes.models import Clientes
+from apps.MDM.mdm_clientes.serializers import ClientesSerializer, ClientesListarSerializer, ClienteImagenSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -42,12 +42,12 @@ def cliente_list(request):
             limit = offset + page_size
             #Filtros
             filters={"state":"1"}
-            # if 'whatsapp' in request.data:
-            #     if request.data['whatsapp']!='':
-            #         filters['whatsapp__startswith'] = str(request.data['whatsapp'])
-            # if 'cedula' in request.data:
-            #     if request.data['cedula']!='':
-            #         filters['cedula'] = str(request.data['cedula'])
+            if 'nombres' in request.data:
+                if request.data['nombres']!='':
+                    filters['nombres__startswith'] = str(request.data['nombres'])
+            if 'apellidos' in request.data:
+                if request.data['apellidos']!='':
+                    filters['apellidos'] = str(request.data['apellidos'])
             # if 'twitter' in request.data:
             #     if request.data['twitter']!='':
             #         filters['twitter'] = str(request.data['twitter'])
@@ -214,7 +214,7 @@ def cliente_delete(request, pk):
 # SUBIR IMAGEN
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def clientesImagen_update(request, pk):
+def clienteImagen_update(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'update/imagen/',
