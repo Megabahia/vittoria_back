@@ -1,7 +1,10 @@
 from django.db import models
 
 def upload_path(instance, filname):
-    return '/'.join(['MDM/imgProspectosClientes', str(instance.id) +"_" + filname])
+    return '/'.join(['MDM/prospectosClientes/imgProspectosClientes', str(instance.id) +"_" + filname])
+
+def uploadProductos_path(instance, filname):
+    return '/'.join(['MDM/prospectosClientes/productosInteres', str(instance.id) +"_" + filname])
 
 # Create your models here.
 class ProspectosClientes(models.Model):
@@ -19,7 +22,7 @@ class ProspectosClientes(models.Model):
     canal = models.CharField(max_length=150,null=True)
     codigoProducto = models.CharField(max_length=150,null=True)
     nombreProducto = models.CharField(max_length=150,null=True)
-    foto = models.CharField(max_length=250,null=True)
+    foto = models.ImageField(blank=True,null=True,upload_to=uploadProductos_path)
     precio = models.FloatField(null=True)
     tipoPrecio = models.CharField(max_length=250,null=True)
     nombreVendedor = models.CharField(max_length=250,null=True)

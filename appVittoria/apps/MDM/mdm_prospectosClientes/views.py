@@ -6,6 +6,8 @@ from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from datetime import datetime
+#excel
+import openpyxl
 #logs
 from apps.ADM.vittoria_logs.methods import createLog,datosTipoLog, datosProspectosClientes
 #declaracion variables log
@@ -250,3 +252,124 @@ def prospectosclientesImagen_update(request, pk):
         err={"error":'Un error ha ocurrido: {}'.format(e)}  
         createLog(logModel,err,logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def uploadCSV_crearProspectosClientes(request):
+    contValidos=0
+    contInvalidos=0
+    contTotal=0
+    errores=[]
+    try:
+        if request.method == 'POST':
+            first = True    #si tiene encabezado
+            uploaded_file = request.FILES['documento']
+            lines = uploaded_file.readlines()
+            for line in lines:
+                contTotal+=1
+                if first:
+                    line.decode(encoding='utf-8').split(",")
+                    first = False
+                    continue
+                else:
+                    dato = line.decode(encoding='utf-8').split(",")
+                    if len(dato)==18:
+                        resultadoInsertar=insertarDato_prospectoCliente(dato)
+                        if resultadoInsertar!='Dato insertado correctamente':
+                            contInvalidos+=1   
+                            errores.append({"error":"Error en la línea "+str(contTotal)+": "+str(resultadoInsertar)})
+                        else:
+                            contValidos+=1
+                    else:
+                        contInvalidos+=1    
+                        errores.append({"error":"Error en la línea "+str(contTotal)+": la fila tiene un tamaño incorrecto ("+str(len(dato))+")"}) 
+
+            result={"mensaje":"La Importación se Realizo Correctamente",
+            "correctos":contValidos,
+            "incorrectos":contInvalidos,
+            "errores":errores
+            }
+            return Response(result, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        err={"error":'Error verifique el archivo, un error ha ocurrido: {}'.format(e)}  
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def uploadEXCEL_crearProspectosClientes(request):
+    contValidos=0
+    contInvalidos=0
+    contTotal=0
+    errores=[]
+    try:
+        if request.method == 'POST':
+            first = True    #si tiene encabezado
+            uploaded_file = request.FILES['documento']
+            # you may put validations here to check extension or file size
+            wb = openpyxl.load_workbook(uploaded_file)
+            # getting a particular sheet by name out of many sheets
+            worksheet = wb["prospectosClientes"]
+            lines = list()
+        for row in worksheet.iter_rows():
+            row_data = list()
+            for cell in row:
+                row_data.append(str(cell.value))
+            lines.append(row_data)
+
+        for dato in lines:
+            contTotal+=1
+            if first:
+                first = False
+                continue
+            else:
+                if len(dato)==18:
+                    resultadoInsertar=insertarDato_prospectoCliente(dato)
+                    if resultadoInsertar!='Dato insertado correctamente':
+                        contInvalidos+=1 
+                        errores.append({"error":"Error en la línea "+str(contTotal)+": "+str(resultadoInsertar)})
+                    else:
+                        contValidos+=1
+                else:
+                    contInvalidos+=1    
+                    errores.append({"error":"Error en la línea "+str(contTotal)+": la fila tiene un tamaño incorrecto ("+str(len(dato))+")"}) 
+
+        result={"mensaje":"La Importación se Realizo Correctamente",
+        "correctos":contValidos,
+        "incorrectos":contInvalidos,
+        "errores":errores
+        }
+        return Response(result, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        err={"error":'Error verifique el archivo, un error ha ocurrido: {}'.format(e)}  
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+def insertarDato_prospectoCliente(dato):
+    try:
+        timezone_now = timezone.localtime(timezone.now())
+        data={}
+        data['nombres'] = str(dato[0])
+        data['apellidos'] = dato[1]
+        data['telefono'] = dato[2]
+        data['tipoCliente'] = dato[3]
+        data['whatsapp'] = dato[4]
+        data['facebook'] = dato[5]
+        data['twitter'] = dato[6]
+        data['instagram'] = dato[7]
+        data['correo1'] = dato[8]
+        data['correo2'] = dato[9]
+        data['ciudad'] = dato[10]
+        data['canal'] = dato[11]
+        data['codigoProducto'] = dato[12]
+        data['nombreProducto'] = dato[13]
+        data['precio'] = dato[14]
+        data['tipoPrecio'] = dato[15]
+        data['nombreVendedor'] = dato[16]
+        data['confirmacionProspecto'] = dato[17]
+        data['created_at'] = str(timezone_now)
+        #inserto el dato con los campos requeridos
+        ProspectosClientes.objects.create(**data)
+        return 'Dato insertado correctamente'
+    except Exception as e:
+        return str(e)
