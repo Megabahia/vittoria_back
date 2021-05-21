@@ -24,8 +24,8 @@ def negocio_list(request):
 
     if request.method == 'GET':
         try:
-            negocios= Negocios.objects.filter(state=1)
-            serializer = NegociosSerializer(negocios, many=True)
+            query= Negocios.objects.filter(state=1)
+            serializer = NegociosSerializer(query, many=True)
             return Response(serializer.data)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -48,14 +48,14 @@ def negocio_findOne(request, pk):
     }
     try:
         try:
-            negocios = Negocios.objects.get(pk=pk, state=1)
+            query = Negocios.objects.get(pk=pk, state=1)
         except Negocios.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'GET':
-            serializer = NegociosSerializer(negocios)
+            serializer = NegociosSerializer(query)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
     except Exception as e: 
@@ -115,7 +115,7 @@ def negocio_update(request, pk):
     try:
         try:
             logModel['dataEnviada'] = str(request.data)
-            negocios = Negocios.objects.get(pk=pk, state=1)
+            query = Negocios.objects.get(pk=pk, state=1)
         except Negocios.DoesNotExist:
             errorNoExiste={'error':'No existe'}
             createLog(logModel,errorNoExiste,logExcepcion)
@@ -125,7 +125,7 @@ def negocio_update(request, pk):
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
-            serializer = NegociosSerializer(negocios, data=request.data,partial=True)
+            serializer = NegociosSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -154,7 +154,7 @@ def negocio_delete(request, pk):
     }
     try:
         try:
-            negocios = Negocios.objects.get(pk=pk, state=1)
+            query = Negocios.objects.get(pk=pk, state=1)
         except Negocios.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
@@ -162,7 +162,7 @@ def negocio_delete(request, pk):
             return Response(status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'DELETE':
-            serializer = NegociosSerializer(negocios, data={'state': '0','updated_at':str(nowDate)},partial=True)
+            serializer = NegociosSerializer(query, data={'state': '0','updated_at':str(nowDate)},partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)

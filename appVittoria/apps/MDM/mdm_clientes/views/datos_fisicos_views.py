@@ -1,5 +1,5 @@
-from apps.MDM.mdm_negocios.models import DatosFisicosClientes
-from apps.MDM.mdm_negocios.serializers import DatosFisicosClientesSerializer
+from apps.MDM.mdm_clientes.models import DatosFisicosClientes
+from apps.MDM.mdm_clientes.serializers import DatosFisicosClientesSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -18,17 +18,42 @@ logTransaccion=datosTipoLogAux['transaccion']
 logExcepcion=datosTipoLogAux['excepcion']
 #CRUD DIRECCION ESTABLECIMIENTOS
 #LISTAR TODOS
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def datosFisicos_list(request):
-
-    if request.method == 'GET':
+def datosFisicos_list(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
         try:
-            datosFisicos= DatosFisicosClientes.objects.filter(state=1)
-            serializer = DatosFisicosClientesSerializer(datosFisicos, many=True)
-            return Response(serializer.data)
+            logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=int(request.data['page_size'])
+            page=int(request.data['page'])
+            offset = page_size* page
+            limit = offset + page_size
+            #Filtros
+            filters={"state":"1"}
+            filters['cliente'] = pk    
+          
+            #Serializar los datos
+            query = DatosFisicosClientes.objects.filter(**filters).order_by('-created_at')
+            serializer = DatosFisicosClientesSerializer(query[offset:limit], many=True)
+            new_serializer_data={'cont': query.count(),
+            'info':serializer.data}
+            #envio de datos
+            return Response(new_serializer_data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
 #ENCONTRAR UNO
@@ -48,14 +73,14 @@ def datosFisicos_findOne(request, pk):
     }
     try:
         try:
-            datosFisicos = DatosFisicosClientes.objects.get(pk=pk, state=1)
+            query = DatosFisicosClientes.objects.get(pk=pk, state=1)
         except DatosFisicosClientes.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'GET':
-            serializer = DatosFisicosClientesSerializer(datosFisicos)
+            serializer = DatosFisicosClientesSerializer(query)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
     except Exception as e: 
@@ -115,7 +140,7 @@ def datosFisicos_update(request, pk):
     try:
         try:
             logModel['dataEnviada'] = str(request.data)
-            datosFisicos = DatosFisicosClientes.objects.get(pk=pk, state=1)
+            query = DatosFisicosClientes.objects.get(pk=pk, state=1)
         except DatosFisicosClientes.DoesNotExist:
             errorNoExiste={'error':'No existe'}
             createLog(logModel,errorNoExiste,logExcepcion)
@@ -125,7 +150,7 @@ def datosFisicos_update(request, pk):
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
-            serializer = DatosFisicosClientesSerializer(datosFisicos, data=request.data,partial=True)
+            serializer = DatosFisicosClientesSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -154,7 +179,7 @@ def datosFisicos_delete(request, pk):
     }
     try:
         try:
-            datosFisicos = DatosFisicosClientes.objects.get(pk=pk, state=1)
+            query = DatosFisicosClientes.objects.get(pk=pk, state=1)
         except DatosFisicosClientes.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
@@ -162,7 +187,7 @@ def datosFisicos_delete(request, pk):
             return Response(status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'DELETE':
-            serializer = DatosFisicosClientesSerializer(datosFisicos, data={'state': '0','updated_at':str(nowDate)},partial=True)
+            serializer = DatosFisicosClientesSerializer(query, data={'state': '0','updated_at':str(nowDate)},partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)

@@ -24,8 +24,8 @@ def direccionesNegocio_list(request):
 
     if request.method == 'GET':
         try:
-            direccionesNegocios= DireccionesEstablecimientosNegocios.objects.filter(state=1)
-            serializer = DireccionesEstablecimientosNegociosSerializer(direccionesNegocios, many=True)
+            query= DireccionesEstablecimientosNegocios.objects.filter(state=1)
+            serializer = DireccionesEstablecimientosNegociosSerializer(query, many=True)
             return Response(serializer.data)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
@@ -48,14 +48,14 @@ def direccionesNegocio_findOne(request, pk):
     }
     try:
         try:
-            direccionesNegocios = DireccionesEstablecimientosNegocios.objects.get(pk=pk, state=1)
+            query = DireccionesEstablecimientosNegocios.objects.get(pk=pk, state=1)
         except DireccionesEstablecimientosNegocios.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'GET':
-            serializer = DireccionesEstablecimientosNegociosSerializer(direccionesNegocios)
+            serializer = DireccionesEstablecimientosNegociosSerializer(query)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
     except Exception as e: 
@@ -115,7 +115,7 @@ def direccionesNegocio_update(request, pk):
     try:
         try:
             logModel['dataEnviada'] = str(request.data)
-            direccionesNegocios = DireccionesEstablecimientosNegocios.objects.get(pk=pk, state=1)
+            query = DireccionesEstablecimientosNegocios.objects.get(pk=pk, state=1)
         except DireccionesEstablecimientosNegocios.DoesNotExist:
             errorNoExiste={'error':'No existe'}
             createLog(logModel,errorNoExiste,logExcepcion)
@@ -125,7 +125,7 @@ def direccionesNegocio_update(request, pk):
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
-            serializer = DireccionesEstablecimientosNegociosSerializer(direccionesNegocios, data=request.data,partial=True)
+            serializer = DireccionesEstablecimientosNegociosSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -154,7 +154,7 @@ def direccionesNegocio_delete(request, pk):
     }
     try:
         try:
-            direccionesNegocios = DireccionesEstablecimientosNegocios.objects.get(pk=pk, state=1)
+            query = DireccionesEstablecimientosNegocios.objects.get(pk=pk, state=1)
         except DireccionesEstablecimientosNegocios.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
@@ -162,7 +162,7 @@ def direccionesNegocio_delete(request, pk):
             return Response(status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'DELETE':
-            serializer = DireccionesEstablecimientosNegociosSerializer(direccionesNegocios, data={'state': '0','updated_at':str(nowDate)},partial=True)
+            serializer = DireccionesEstablecimientosNegociosSerializer(query, data={'state': '0','updated_at':str(nowDate)},partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)

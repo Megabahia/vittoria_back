@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+#excel
+import openpyxl
 #logs
 from apps.ADM.vittoria_logs.methods import createLog,datosTipoLog, datosClientes
 #declaracion variables log
@@ -48,12 +50,12 @@ def cliente_list(request):
             if 'apellidos' in request.data:
                 if request.data['apellidos']!='':
                     filters['apellidos'] = str(request.data['apellidos'])
-            # if 'twitter' in request.data:
-            #     if request.data['twitter']!='':
-            #         filters['twitter'] = str(request.data['twitter'])
-            # if 'instagram' in request.data:
-            #     if request.data['instagram']!='':
-            #         filters['instagram'] = str(request.data['instagram'])
+            if 'cedula' in request.data:
+                if request.data['cedula']!='':
+                    filters['cedula'] = str(request.data['cedula'])
+            # if 'created_at__startswith' in request.data:
+            #     if request.data['created_at__startswith']!='':
+            #         filters['created_at__startswith'] = str(request.data['created_at__startswith'])
             
           
             #Serializar los datos
@@ -85,14 +87,14 @@ def cliente_findOne(request, pk):
     }
     try:
         try:
-            clientes = Clientes.objects.get(pk=pk, state=1)
+            query = Clientes.objects.get(pk=pk, state=1)
         except Clientes.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'GET':
-            serializer = ClientesSerializer(clientes)
+            serializer = ClientesSerializer(query)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
     except Exception as e: 
@@ -152,7 +154,7 @@ def cliente_update(request, pk):
     try:
         try:
             logModel['dataEnviada'] = str(request.data)
-            clientes = Clientes.objects.get(pk=pk, state=1)
+            query = Clientes.objects.get(pk=pk, state=1)
         except Clientes.DoesNotExist:
             errorNoExiste={'error':'No existe'}
             createLog(logModel,errorNoExiste,logExcepcion)
@@ -162,7 +164,7 @@ def cliente_update(request, pk):
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
-            serializer = ClientesSerializer(clientes, data=request.data,partial=True)
+            serializer = ClientesSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -191,7 +193,7 @@ def cliente_delete(request, pk):
     }
     try:
         try:
-            clientes = Clientes.objects.get(pk=pk, state=1)
+            query = Clientes.objects.get(pk=pk, state=1)
         except Clientes.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
@@ -199,7 +201,7 @@ def cliente_delete(request, pk):
             return Response(status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'DELETE':
-            serializer = ClientesSerializer(clientes, data={'state': '0','updated_at':str(nowDate)},partial=True)
+            serializer = ClientesSerializer(query, data={'state': '0','updated_at':str(nowDate)},partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -229,7 +231,7 @@ def clienteImagen_update(request, pk):
     try:
         try:
             logModel['dataEnviada'] = str(request.data)
-            prospectosCliente = Clientes.objects.get(pk=pk, state=1)
+            query = Clientes.objects.get(pk=pk, state=1)
         except Clientes.DoesNotExist:
             errorNoExiste={'error':'No existe'}
             createLog(logModel,errorNoExiste,logExcepcion)
@@ -239,7 +241,7 @@ def clienteImagen_update(request, pk):
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
-            serializer = ClienteImagenSerializer(prospectosCliente, data=request.data,partial=True)
+            serializer = ClienteImagenSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -250,3 +252,133 @@ def clienteImagen_update(request, pk):
         err={"error":'Un error ha ocurrido: {}'.format(e)}  
         createLog(logModel,err,logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+# METODO SUBIR ARCHIVOS CSV
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def uploadCSV_crearClientes(request):
+    contValidos=0
+    contInvalidos=0
+    contTotal=0
+    errores=[]
+    try:
+        if request.method == 'POST':
+            first = True    #si tiene encabezado
+            uploaded_file = request.FILES['documento']
+            lines = uploaded_file.readlines()
+            for line in lines:
+                contTotal+=1
+                if first:
+                    line.decode(encoding='utf-8').split(",")
+                    first = False
+                    continue
+                else:
+                    dato = line.decode(encoding='utf-8').split(",")
+                    if len(dato)==25:
+                        resultadoInsertar=insertarDato_cliente(dato)
+                        if resultadoInsertar!='Dato insertado correctamente':
+                            contInvalidos+=1   
+                            errores.append({"error":"Error en la línea "+str(contTotal)+": "+str(resultadoInsertar)})
+                        else:
+                            contValidos+=1
+                    else:
+                        contInvalidos+=1    
+                        errores.append({"error":"Error en la línea "+str(contTotal)+": la fila tiene un tamaño incorrecto ("+str(len(dato))+")"}) 
+
+            result={"mensaje":"La Importación se Realizo Correctamente",
+            "correctos":contValidos,
+            "incorrectos":contInvalidos,
+            "errores":errores
+            }
+            return Response(result, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        err={"error":'Error verifique el archivo, un error ha ocurrido: {}'.format(e)}  
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+# METODO SUBIR ARCHIVOS EXCEL
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def uploadEXCEL_crearClientes(request):
+    contValidos=0
+    contInvalidos=0
+    contTotal=0
+    errores=[]
+    try:
+        if request.method == 'POST':
+            first = True    #si tiene encabezado
+            uploaded_file = request.FILES['documento']
+            # you may put validations here to check extension or file size
+            wb = openpyxl.load_workbook(uploaded_file)
+            # getting a particular sheet by name out of many sheets
+            worksheet = wb["Clientes"]
+            lines = list()
+        for row in worksheet.iter_rows():
+            row_data = list()
+            for cell in row:
+                row_data.append(str(cell.value))
+            lines.append(row_data)
+
+        for dato in lines:
+            contTotal+=1
+            if first:
+                first = False
+                continue
+            else:
+                if len(dato)==25:
+                    resultadoInsertar=insertarDato_cliente(dato)
+                    if resultadoInsertar!='Dato insertado correctamente':
+                        contInvalidos+=1 
+                        errores.append({"error":"Error en la línea "+str(contTotal)+": "+str(resultadoInsertar)})
+                    else:
+                        contValidos+=1
+                else:
+                    contInvalidos+=1    
+                    errores.append({"error":"Error en la línea "+str(contTotal)+": la fila tiene un tamaño incorrecto ("+str(len(dato))+")"}) 
+
+        result={"mensaje":"La Importación se Realizo Correctamente",
+        "correctos":contValidos,
+        "incorrectos":contInvalidos,
+        "errores":errores
+        }
+        return Response(result, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        err={"error":'Error verifique el archivo, un error ha ocurrido: {}'.format(e)}  
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+# INSERTAR DATOS EN LA BASE INDIVIDUAL
+def insertarDato_cliente(dato):
+    try:
+        timezone_now = timezone.localtime(timezone.now())
+        data={}
+        data['tipoCliente'] = dato[0].replace('"', "") if dato[0].replace('"', "") != "NULL" else None
+        data['cedula'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
+        data['nombres'] = dato[2].replace('"', "") if dato[2] != "NULL" else None
+        data['apellidos'] = dato[3].replace('"', "") if dato[3] != "NULL" else None
+        data['genero'] = dato[4].replace('"', "") if dato[4] != "NULL" else None
+        data['nacionalidad'] = dato[5].replace('"', "") if dato[5] != "NULL" else None
+        data['fechaNacimiento'] = dato[6].replace('"', "")[:10] if dato[6] != "NULL" else None
+        data['edad'] = dato[7].replace('"', "") if dato[7] != "NULL" else None
+        data['paisNacimiento'] = dato[8].replace('"', "") if dato[8] != "NULL" else None
+        data['provinciaNacimiento'] = dato[9].replace('"', "") if dato[9] != "NULL" else None
+        data['ciudadNacimiento'] = dato[10].replace('"', "") if dato[10] != "NULL" else None
+        data['estadoCivil'] = dato[11].replace('"', "") if dato[11] != "NULL" else None
+        data['paisResidencia'] = dato[12].replace('"', "") if dato[12] != "NULL" else None
+        data['provinciaResidencia'] = dato[13].replace('"', "") if dato[13] != "NULL" else None
+        data['ciudadResidencia'] = dato[14].replace('"', "") if dato[14] != "NULL" else None
+        data['nivelEstudios'] = dato[15].replace('"', "") if dato[15] != "NULL" else None
+        data['profesion'] = dato[16].replace('"', "") if dato[16] != "NULL" else None
+        data['lugarTrabajo'] = dato[17].replace('"', "") if dato[17] != "NULL" else None
+        data['paisTrabajo'] = dato[18].replace('"', "") if dato[18] != "NULL" else None
+        data['provinciaTrabajo'] = dato[19].replace('"', "") if dato[19] != "NULL" else None
+        data['ciudadTrabajo'] = dato[20].replace('"', "") if dato[20] != "NULL" else None
+        data['mesesUltimoTrabajo'] = dato[21].replace('"', "") if dato[21] != "NULL" else None
+        data['mesesTotalTrabajo'] = dato[22].replace('"', "") if dato[22] != "NULL" else None
+        data['ingresosPromedioMensual'] = dato[23].replace('"', "") if dato[23] != "NULL" else None
+        data['gastosPromedioMensual'] = dato[24].replace('"', "") if dato[24] != "NULL" else None
+        data['created_at'] = str(timezone_now)
+        #inserto el dato con los campos requeridos
+        Clientes.objects.create(**data)
+        return 'Dato insertado correctamente'
+    except Exception as e:
+        return str(e)
