@@ -31,7 +31,7 @@ class Clientes(models.Model):
     ingresosPromedioMensual = models.FloatField(null=True)
     gastosPromedioMensual = models.FloatField(null=True)
     imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
-    estado=models.CharField(max_length=200,default="ACTIVO")
+    estado=models.CharField(max_length=200,default="Inactivo")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -133,7 +133,7 @@ class Parientes(models.Model):
     mesesTotalTrabajo = models.PositiveIntegerField(null=True)
     ingresosPromedioMensual = models.FloatField(null=True)
     gastosPromedioMensual = models.FloatField(null=True)
-    estado=models.CharField(max_length=200,default="ACTIVO")
+    estado=models.CharField(max_length=200,default="Inactivo")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

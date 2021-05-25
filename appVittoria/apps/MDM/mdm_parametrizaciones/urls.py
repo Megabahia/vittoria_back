@@ -3,7 +3,8 @@ from apps.MDM.mdm_parametrizaciones.views import(
 	parametrizaciones_list,parametrizaciones_create,parametrizaciones_findOne,parametrizaciones_update,parametrizaciones_delete,
 	estado_list, pais_list,tipo_list,parametrizaciones_list_hijo,parametrizaciones_list_hijoNombre,parametrizaciones_list_hijos,
 	canales_list, confirmacionProspecto_list, tipoCliente_list,parametrosTipo_list, nacionalidad_list, genero_list,
-	nivelEstudios_list, profesion_list, tipoDireccion_list, tipoContacto_list, tipoPariente_list, estadoCivil_list
+	nivelEstudios_list, profesion_list, tipoDireccion_list, tipoContacto_list, tipoPariente_list, estadoCivil_list,
+	tipoNegocio_list, segmentoActividadEconomica_list, actividadEconomica_list, tipoContactoNegocio_list, llevarContabilidad_list
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -53,4 +54,14 @@ urlpatterns = [
 	path('list/tipoPariente/', tipoPariente_list, name="tipoPariente_list"),
 	# ESTADO CIVIL
 	path('list/estadoCivil/', estadoCivil_list, name="estadoCivil_list"),
+	# TIPO NEGOCIO
+	path('list/tipoNegocio/', tipoNegocio_list, name="tipoNegocio_list"),
+	# SEGMENTO ACTIVIDAD ECONOMICA
+	path('list/segmentoActividadEconomica/', segmentoActividadEconomica_list, name="segmentoActividadEconomica_list"),
+	# SEGMENTO ACTIVIDAD ECONOMICA
+	path('list/actividadEconomica/', actividadEconomica_list, name="actividadEconomica_list"),
+	# TIPO CONTACTO NEGOCIO
+	path('list/tipoContactoNegocio/', tipoContactoNegocio_list, name="tipoContactoNegocio_list"),
+	# LLEVAR CONTABILIDAD
+	path('list/llevarContabilidad/', llevarContabilidad_list, name="llevarContabilidad_list"),
 ]

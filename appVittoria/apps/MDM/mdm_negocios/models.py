@@ -1,5 +1,8 @@
 from django.db import models
 
+def upload_path(instance, filname):
+    return '/'.join(['MDM/imgNegocios', str(instance.id) +"_" + filname])
+
 # Create your models here.
 class Negocios(models.Model):
     tipoNegocio = models.CharField(max_length=150,null=True)
@@ -32,7 +35,8 @@ class Negocios(models.Model):
     twitter = models.CharField(max_length=150,null=True)
     facebook = models.CharField(max_length=150,null=True)
     instagram = models.CharField(max_length=150,null=True)
-    foto = models.CharField(max_length=150,null=True)
+    imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
+    estado=models.CharField(max_length=200,default="Inactivo")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -46,7 +50,7 @@ class Negocios(models.Model):
         return '{}'.format(self.nombres)
 
 class DireccionesEstablecimientosNegocios(models.Model):
-    idNegocio= models.ForeignKey(Negocios, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Negocios
+    negocio= models.ForeignKey(Negocios, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Negocios
     tipoDireccion= models.CharField(max_length=150,null=True)
     pais= models.CharField(max_length=150,null=True)
     provincia= models.CharField(max_length=150,null=True)
@@ -71,8 +75,8 @@ class DireccionesEstablecimientosNegocios(models.Model):
         return '{}'.format(self.nombres)
 
 class PersonalNegocios(models.Model):
-    idNegocio= models.ForeignKey(Negocios, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Negocios
-    tipoContacto = models.CharField(max_length=10,null=True)
+    negocio= models.ForeignKey(Negocios, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Negocios
+    tipoContacto = models.CharField(max_length=150,null=True)
     cedula = models.CharField(max_length=10,null=True, unique= True)
     nombres = models.CharField(max_length=150,null=True)
     apellidos = models.CharField(max_length=150,null=True)
@@ -84,6 +88,7 @@ class PersonalNegocios(models.Model):
     whatsappPersonal = models.CharField(max_length=15,null=True)
     correoEmpresa = models.CharField(max_length=150,null=True)
     correoPersonal = models.CharField(max_length=150,null=True)
+    estado=models.CharField(max_length=200,default="Inactivo")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
