@@ -357,3 +357,115 @@ def parametrosTipo_list(request):
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET TIPO NACIONALIDAD
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def nacionalidad_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="NACIONALIDAD")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET GENERO
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def genero_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="GENERO")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET NIVEL_ESTUDIOS
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def nivelEstudios_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="NIVEL_ESTUDIOS")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET PROFESION
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def profesion_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="PROFESION")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET TIPO DIRECCION
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def tipoDireccion_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="TIPO_DIRECCION")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET TIPO CONTACTO
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def tipoContacto_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="TIPO_CONTACTO")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET TIPO PARIENTE
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def tipoPariente_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="TIPO_PARIENTE")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET ESTADO CIVIL
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def estadoCivil_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="ESTADO_CIVIL")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 

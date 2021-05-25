@@ -16,10 +16,10 @@ class FacturasEncabezados(models.Model):
     telefono = models.CharField(max_length=150,null=True)
     correo = models.EmailField(max_length=150,null=True)
     nombreVendedor = models.CharField(max_length=150,null=True)
-    subTotal = models.FloatField()
-    descuento = models.FloatField()
-    iva = models.FloatField()
-    total = models.FloatField()
+    subTotal = models.FloatField(null=True)
+    descuento = models.FloatField(null=True)
+    iva = models.FloatField(null=True)
+    total = models.FloatField(null=True)
         
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -35,12 +35,12 @@ class FacturasEncabezados(models.Model):
 
 class FacturasDetalles(models.Model):
     articulo = models.CharField(max_length=150,null=True)
-    valorUnitario = models.FloatField()
+    valorUnitario = models.FloatField(null=True)
     cantidad = models.PositiveIntegerField(null=True)
-    precio = models.FloatField()
+    precio = models.FloatField(null=True)
     informacionAdicinal = models.CharField(max_length=250,null=True)
-    descuento = models.FloatField()
-    impuesto = models.FloatField()
+    descuento = models.FloatField(null=True)
+    impuesto = models.FloatField(null=True)
         
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

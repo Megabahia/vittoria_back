@@ -31,6 +31,7 @@ urlpatterns = [
     #Modulo MDM
     path('mdm/param/', include(('apps.MDM.mdm_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizaciones')),
     path('mdm/prospectosClientes/', include(('apps.MDM.mdm_prospectosClientes.urls', 'prospectos_clientes'), namespace='prospectos_clientes')),
+    path('mdm/clientes/', include(('apps.MDM.mdm_clientes.urls', 'clientes'), namespace='clientes')),
 
 ]
 
