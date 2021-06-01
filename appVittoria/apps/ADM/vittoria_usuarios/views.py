@@ -318,10 +318,10 @@ def vendedor_list(request):
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
-#toma los vendedores
+#toma los usuarios
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def vendedor_list_rol(request):
+def usuarios_list_rol(request):
 
     if request.method == 'POST':
         try:
