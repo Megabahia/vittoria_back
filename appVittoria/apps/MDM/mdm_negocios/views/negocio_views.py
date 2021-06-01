@@ -1,5 +1,5 @@
 from apps.MDM.mdm_negocios.models import Negocios
-from apps.MDM.mdm_negocios.serializers import NegociosSerializer
+from apps.MDM.mdm_negocios.serializers import NegociosSerializer, NegociosListarSerializer, NegociosImagenSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -18,17 +18,60 @@ logTransaccion=datosTipoLogAux['transaccion']
 logExcepcion=datosTipoLogAux['excepcion']
 #CRUD NEGOCIOS
 #LISTAR TODOS
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def negocio_list(request):
-
-    if request.method == 'GET':
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
         try:
-            query= Negocios.objects.filter(state=1)
-            serializer = NegociosSerializer(query, many=True)
-            return Response(serializer.data)
+            logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=int(request.data['page_size'])
+            page=int(request.data['page'])
+            offset = page_size* page
+            limit = offset + page_size
+            #Filtros
+            filters={"state":"1"}
+            if 'nombreComercial' in request.data:
+                if request.data['nombreComercial']!='':
+                    filters['nombreComercial'] = str(request.data['nombreComercial'])
+            if 'razonSocial' in request.data:
+                if request.data['razonSocial']!='':
+                    filters['razonSocial'] = str(request.data['razonSocial'])
+            if 'cedula' in request.data:
+                if request.data['cedula']!='':
+                    filters['cedula'] = str(request.data['cedula'])
+            # if 'desde' in request.data:
+            #     if request.data['desde']!='':
+            #         filters['created_at__startswith'] = str(request.data['desde'])
+            # if 'hasta' in request.data:
+            #     if request.data['hasta']!='':
+            #         filters['created_at__startswith'] = str(request.data['hasta'])
+            # if 'hasta' in request.data:
+            #     if request.data['hasta']!='':
+            #         filters['created_at__range'] = [request.data['desde'],request.data['hasta']]
+            
+          
+            #Serializar los datos
+            query = Negocios.objects.filter(**filters).order_by('-created_at')
+            serializer = NegociosListarSerializer(query[offset:limit], many=True)
+            new_serializer_data={'cont': query.count(),
+            'info':serializer.data}
+            #envio de datos
+            return Response(new_serializer_data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
 #ENCONTRAR UNO
@@ -173,3 +216,43 @@ def negocio_delete(request, pk):
         err={"error":'Un error ha ocurrido: {}'.format(e)}  
         createLog(logModel,err,logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+# SUBIR IMAGEN
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def negociosImagen_update(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'update/imagen/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'ESCRIBIR',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            query = Negocios.objects.get(pk=pk, state=1)
+        except Negocios.DoesNotExist:
+            errorNoExiste={'error':'No existe'}
+            createLog(logModel,errorNoExiste,logExcepcion)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'POST':
+            now = timezone.localtime(timezone.now())
+            request.data['updated_at'] = str(now)
+            if 'created_at' in request.data:
+                request.data.pop('created_at')
+            serializer = NegociosImagenSerializer(query, data=request.data,partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                createLog(logModel,serializer.data,logTransaccion)
+                return Response(serializer.data)
+            createLog(logModel,serializer.errors,logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e: 
+        err={"error":'Un error ha ocurrido: {}'.format(e)}  
+        createLog(logModel,err,logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)

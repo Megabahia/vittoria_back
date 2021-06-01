@@ -7,7 +7,8 @@ from apps.ADM.vittoria_usuarios.views import(
 	usuario_update,
 	usuario_delete,
 	usuarioImagen_update,
-	vendedor_list
+	vendedor_list,
+	vendedor_list_rol
 )
 app_name = 'usuarios'
 
@@ -20,5 +21,6 @@ urlpatterns = [
 	path('delete/<int:pk>', usuario_delete, name="usuario_delete"),
 	path('update/imagen/<int:pk>', usuarioImagen_update, name="usuarioImagen_update"),
 	path('list/vendedor/', vendedor_list, name="vendedor_list"),
+	path('list/vendedor/rol/', vendedor_list_rol, name="vendedor_list_rol"),
 ]
 

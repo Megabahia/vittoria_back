@@ -8,7 +8,17 @@ class NegociosSerializer(serializers.ModelSerializer):
         model = Negocios
        	fields = '__all__'
 
+# LISTAR NEGOCIOS
+class NegociosListarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Negocios
+       	fields = ['id','nombreComercial','razonSocial','imagen']
 
+# SUBIR IMAGEN
+class NegociosImagenSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Negocios
+        fields = ['imagen','updated_at']
 
 # DIRECCIONES ESTABLECIMIENTOS
 class DireccionesEstablecimientosNegociosSerializer(serializers.ModelSerializer):

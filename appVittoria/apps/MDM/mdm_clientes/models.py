@@ -31,7 +31,7 @@ class Clientes(models.Model):
     ingresosPromedioMensual = models.FloatField(null=True)
     gastosPromedioMensual = models.FloatField(null=True)
     imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
-    estado=models.CharField(max_length=200,default="ACTIVO")
+    estado=models.CharField(max_length=200,default="Inactivo")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -41,8 +41,8 @@ class Clientes(models.Model):
         # self.tipo = self.tipo.upper()
         return super(Clientes, self).save(*args, **kwargs)
 
-    def __str__(self):
-        return '{}'.format(self.nombres)
+    # def __str__(self):
+    #     return '{}'.format(self.nombres)
 
 class DatosFisicosClientes(models.Model):
     cliente= models.ForeignKey(Clientes, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con el cliente
@@ -133,7 +133,7 @@ class Parientes(models.Model):
     mesesTotalTrabajo = models.PositiveIntegerField(null=True)
     ingresosPromedioMensual = models.FloatField(null=True)
     gastosPromedioMensual = models.FloatField(null=True)
-    estado=models.CharField(max_length=200,default="ACTIVO")
+    estado=models.CharField(max_length=200,default="Inactivo")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

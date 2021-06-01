@@ -469,3 +469,73 @@ def estadoCivil_list(request):
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET TIPO NEGOCIO
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def tipoNegocio_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="TIPO_NEGOCIO")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET SEGMENTO ACTIVIDAD ECONOMICA
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def segmentoActividadEconomica_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="SEGMENTO_ACTIVIDAD_ECONOMICA")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET ACTIVIDAD ECONOMICA
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def actividadEconomica_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="ACTIVIDAD_ECONOMICA")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#GET TIPO CONTACTO NEGOCIO
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def tipoContactoNegocio_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="TIPO_CONTACTO_NEGOCIO")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+#GET LLEVAR CONTABILIDAD
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def llevarContabilidad_list(request):
+
+    if request.method == 'GET':
+        try:
+            query= Parametrizaciones.objects.filter(state=1,tipo="LLEVAR_CONTABILIDAD")
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)

@@ -46,17 +46,18 @@ def cliente_list(request):
             filters={"state":"1"}
             if 'nombres' in request.data:
                 if request.data['nombres']!='':
-                    filters['nombres__startswith'] = str(request.data['nombres'])
+                    filters['nombres'] = str(request.data['nombres'])
             if 'apellidos' in request.data:
                 if request.data['apellidos']!='':
                     filters['apellidos'] = str(request.data['apellidos'])
             if 'cedula' in request.data:
                 if request.data['cedula']!='':
                     filters['cedula'] = str(request.data['cedula'])
-            # if 'created_at__startswith' in request.data:
-            #     if request.data['created_at__startswith']!='':
-            #         filters['created_at__startswith'] = str(request.data['created_at__startswith'])
-            
+            if 'inicio' and 'fin' in request.data:                
+                # if request.data['inicio'] !='':
+                #     filters['created_at__startswith'] = str(request.data['inicio'])
+                if request.data['inicio'] and request.data['fin'] !='':
+                    filters['created_at__range'] = [str(request.data['inicio']),str(request.data['fin'])]            
           
             #Serializar los datos
             query = Clientes.objects.filter(**filters).order_by('-created_at')

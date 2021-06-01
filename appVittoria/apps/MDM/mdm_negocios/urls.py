@@ -1,7 +1,7 @@
 from django.urls import path,include
 from apps.MDM.mdm_negocios.views.negocio_views import(
 	negocio_list, negocio_findOne, negocio_create,
-	negocio_update, negocio_delete
+	negocio_update, negocio_delete, negociosImagen_update
 )
 from apps.MDM.mdm_negocios.views.direccion_establecimiento_views import(
 	direccionesNegocio_list, direccionesNegocio_findOne, direccionesNegocio_create,
@@ -23,14 +23,15 @@ urlpatterns = [
 	path('listOne/<int:pk>', negocio_findOne, name="negocio_findOne"), 
 	path('update/<int:pk>', negocio_update, name="negocio_update"), 
 	path('delete/<int:pk>', negocio_delete, name="negocio_delete"),
+	path('update/imagen/<int:pk>', negociosImagen_update, name="negociosImagen_update"),	
     # DIREECIONES ESTABLECIMIENTOS
-    path('direcciones/list/', direccionesNegocio_list, name="direccionesNegocio_list"),
+    path('direcciones/list/<int:pk>', direccionesNegocio_list, name="direccionesNegocio_list"),
 	path('direcciones/create/', direccionesNegocio_create, name="direccionesNegocio_create"),
 	path('direcciones/listOne/<int:pk>', direccionesNegocio_findOne, name="direccionesNegocio_findOne"), 
 	path('direcciones/update/<int:pk>', direccionesNegocio_update, name="direccionesNegocio_update"), 
 	path('direcciones/delete/<int:pk>', direccionesNegocio_delete, name="direccionesNegocio_delete"),
     # PERSONAL
-    path('personal/list/', personalNegocios_list, name="personalNegocios_list"),
+    path('personal/list/<int:pk>', personalNegocios_list, name="personalNegocios_list"),
 	path('personal/create/', personalNegocios_create, name="personalNegocios_create"),
 	path('personal/listOne/<int:pk>', personalNegocios_findOne, name="personalNegocios_findOne"), 
 	path('personal/update/<int:pk>', personalNegocios_update, name="personalNegocios_update"), 
