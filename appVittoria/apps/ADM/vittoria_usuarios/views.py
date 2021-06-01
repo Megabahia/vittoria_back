@@ -317,3 +317,17 @@ def vendedor_list(request):
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#toma los vendedores
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def vendedor_list_rol(request):
+
+    if request.method == 'POST':
+        try:
+            query= Usuarios.objects.filter(state=1,idRol__nombre=request.data['rol'])
+            serializer = UsuarioFiltroSerializer(query, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
