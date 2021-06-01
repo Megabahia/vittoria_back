@@ -46,8 +46,8 @@ class Negocios(models.Model):
         # self.tipo = self.tipo.upper()
         return super(Negocios, self).save(*args, **kwargs)
 
-    def __str__(self):
-        return '{}'.format(self.nombres)
+    # def __str__(self):
+    #     return '{}'.format(self.nombres)
 
 class DireccionesEstablecimientosNegocios(models.Model):
     negocio= models.ForeignKey(Negocios, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Negocios

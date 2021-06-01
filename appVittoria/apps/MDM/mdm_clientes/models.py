@@ -41,8 +41,8 @@ class Clientes(models.Model):
         # self.tipo = self.tipo.upper()
         return super(Clientes, self).save(*args, **kwargs)
 
-    def __str__(self):
-        return '{}'.format(self.nombres)
+    # def __str__(self):
+    #     return '{}'.format(self.nombres)
 
 class DatosFisicosClientes(models.Model):
     cliente= models.ForeignKey(Clientes, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con el cliente
