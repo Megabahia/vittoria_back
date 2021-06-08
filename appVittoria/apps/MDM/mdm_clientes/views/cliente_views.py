@@ -44,12 +44,12 @@ def cliente_list(request):
             limit = offset + page_size
             #Filtros
             filters={"state":"1"}
-            if 'nombres' in request.data:
-                if request.data['nombres']!='':
-                    filters['nombres'] = str(request.data['nombres'])
-            if 'apellidos' in request.data:
-                if request.data['apellidos']!='':
-                    filters['apellidos'] = str(request.data['apellidos'])
+            if 'nombreCompleto' in request.data:
+                if request.data['nombreCompleto']!='':
+                    filters['nombreCompleto__icontains'] = str(request.data['nombreCompleto'])
+            # if 'apellidos' in request.data:
+            #     if request.data['apellidos']!='':
+            #         filters['apellidos__icontains'] = str(request.data['apellidos'])
             if 'cedula' in request.data:
                 if request.data['cedula']!='':
                     filters['cedula'] = str(request.data['cedula'])
@@ -122,6 +122,7 @@ def cliente_create(request):
         try:
             logModel['dataEnviada'] = str(request.data)
             request.data['created_at'] = str(timezone_now)
+            request.data['nombreCompleto'] = str(request.data['nombres']) +" "+str(request.data['apellidos'])
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
         
@@ -354,6 +355,7 @@ def insertarDato_cliente(dato):
         data={}
         data['tipoCliente'] = dato[0].replace('"', "") if dato[0].replace('"', "") != "NULL" else None
         data['cedula'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
+        data['nombreCompleto'] = dato[2].replace('"', "")+ " "+dato[3].replace('"', "") if dato[2] != "NULL" else None
         data['nombres'] = dato[2].replace('"', "") if dato[2] != "NULL" else None
         data['apellidos'] = dato[3].replace('"', "") if dato[3] != "NULL" else None
         data['genero'] = dato[4].replace('"', "") if dato[4] != "NULL" else None
