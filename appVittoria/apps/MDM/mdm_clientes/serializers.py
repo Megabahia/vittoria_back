@@ -11,7 +11,7 @@ class ClientesSerializer(serializers.ModelSerializer):
 class ClientesListarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clientes
-       	fields = ['id','nombreCompleto','correo']
+       	fields = ['id','nombreCompleto','nombres','apellidos','correo']
 
 class ClienteImagenSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
