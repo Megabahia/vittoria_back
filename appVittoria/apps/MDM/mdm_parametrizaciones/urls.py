@@ -4,7 +4,8 @@ from apps.MDM.mdm_parametrizaciones.views import(
 	estado_list, pais_list,tipo_list,parametrizaciones_list_hijo,parametrizaciones_list_hijoNombre,parametrizaciones_list_hijos,
 	canales_list, confirmacionProspecto_list, tipoCliente_list,parametrosTipo_list, nacionalidad_list, genero_list,
 	nivelEstudios_list, profesion_list, tipoDireccion_list, tipoContacto_list, tipoPariente_list, estadoCivil_list,
-	tipoNegocio_list, segmentoActividadEconomica_list, actividadEconomica_list, tipoContactoNegocio_list, llevarContabilidad_list
+	tipoNegocio_list, segmentoActividadEconomica_list, actividadEconomica_list, tipoContactoNegocio_list, llevarContabilidad_list,
+	parametrizaciones_filter_name
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -64,4 +65,6 @@ urlpatterns = [
 	path('list/tipoContactoNegocio/', tipoContactoNegocio_list, name="tipoContactoNegocio_list"),
 	# LLEVAR CONTABILIDAD
 	path('list/llevarContabilidad/', llevarContabilidad_list, name="llevarContabilidad_list"),
+	# FILTRO Y NOMBRE
+	path('list/filtro/nombre', parametrizaciones_filter_name, name="parametrizaciones_filter_name"),
 ]
