@@ -11,7 +11,7 @@ class ClientesSerializer(serializers.ModelSerializer):
 class ClientesUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clientes
-       	exclude = {'imagen'}
+       	exclude = ('imagen')
 
 class ClientesListarSerializer(serializers.ModelSerializer):
     class Meta:
