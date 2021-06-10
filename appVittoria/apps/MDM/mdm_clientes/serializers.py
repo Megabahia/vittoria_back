@@ -8,6 +8,11 @@ class ClientesSerializer(serializers.ModelSerializer):
         model = Clientes
        	fields = '__all__'
 
+class ClientesUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Clientes
+       	exclude = {'imagen'}
+
 class ClientesListarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clientes

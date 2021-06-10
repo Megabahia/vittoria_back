@@ -1,5 +1,5 @@
 from apps.MDM.mdm_clientes.models import Clientes
-from apps.MDM.mdm_clientes.serializers import ClientesSerializer, ClientesListarSerializer, ClienteImagenSerializer
+from apps.MDM.mdm_clientes.serializers import ClientesSerializer, ClientesListarSerializer, ClienteImagenSerializer, ClientesUpdateSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -166,7 +166,7 @@ def cliente_update(request, pk):
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
-            serializer = ClientesSerializer(query, data=request.data,partial=True)
+            serializer = ClientesUpdateSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
