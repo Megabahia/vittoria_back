@@ -23,7 +23,7 @@ logExcepcion=datosTipoLogAux['excepcion']
 #LISTAR TODOS
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def factura_list(request, pk):
+def factura_list(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'list/',
@@ -44,14 +44,13 @@ def factura_list(request, pk):
             offset = page_size* page
             limit = offset + page_size
             #Filtros
-            filters={"state":"1"}
-            filters['cliente'] = pk
-            # if 'nombres' in request.data:
-            #     if request.data['nombres']!='':
-            #         filters['nombres'] = str(request.data['nombres'])
-            # if 'apellidos' in request.data:
-            #     if request.data['apellidos']!='':
-            #         filters['apellidos'] = str(request.data['apellidos'])
+            filters={"state":"1"}            
+            if 'negocio' in request.data:
+                if request.data['negocio']!='':
+                    filters['negocio'] = request.data['negocio']
+            if 'cliente' in request.data:
+                if request.data['cliente']!='':
+                    filters['cliente'] = request.data['cliente']
             # if 'cedula' in request.data:
             #     if request.data['cedula']!='':
             #         filters['cedula'] = str(request.data['cedula'])
