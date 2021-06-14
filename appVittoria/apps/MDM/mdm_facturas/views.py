@@ -71,6 +71,83 @@ def factura_list(request):
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+#LISTAR TODOS NEGOCIOS
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def factura_list_negocio(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=int(request.data['page_size'])
+            page=int(request.data['page'])
+            offset = page_size* page
+            limit = offset + page_size
+            #Filtros
+            filters={"state":"1"}     
+            filters['negocio__isnull'] = False       
+          
+            #Serializar los datos
+            query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
+            serializer = FacturasListarSerializer(query[offset:limit], many=True)
+            new_serializer_data={'cont': query.count(),
+            'info':serializer.data}
+            #envio de datos
+            return Response(new_serializer_data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#LISTAR TODOS CLIENTES
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def factura_list_cliente(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=int(request.data['page_size'])
+            page=int(request.data['page'])
+            offset = page_size* page
+            limit = offset + page_size
+            #Filtros
+            filters={"state":"1"}     
+            filters['cliente__isnull'] = False    
+          
+            #Serializar los datos
+            query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
+            serializer = FacturasListarSerializer(query[offset:limit], many=True)
+            new_serializer_data={'cont': query.count(),
+            'info':serializer.data}
+            #envio de datos
+            return Response(new_serializer_data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
 #ENCONTRAR UNO
 @api_view(['GET'])
