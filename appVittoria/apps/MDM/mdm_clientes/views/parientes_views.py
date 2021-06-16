@@ -1,5 +1,5 @@
 from apps.MDM.mdm_clientes.models import Parientes
-from apps.MDM.mdm_clientes.serializers import ParientesSerializer
+from apps.MDM.mdm_clientes.serializers import ParientesSerializer, TablaParientesSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -17,10 +17,10 @@ logApi=datosAux['api']
 logTransaccion=datosTipoLogAux['transaccion']
 logExcepcion=datosTipoLogAux['excepcion']
 #CRUD CLIENTES
-#LISTAR TODOS
+#LISTAR TODOS TABLA
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def parientes_list(request, pk):
+def parientes_tabla_list(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'list/',
@@ -46,7 +46,7 @@ def parientes_list(request, pk):
           
             #Serializar los datos
             query = Parientes.objects.filter(**filters).order_by('-created_at')
-            serializer = ParientesSerializer(query[offset:limit], many=True)
+            serializer = TablaParientesSerializer(query[offset:limit], many=True)
             new_serializer_data={'cont': query.count(),
             'info':serializer.data}
             #envio de datos

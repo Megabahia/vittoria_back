@@ -17,7 +17,7 @@ from apps.MDM.mdm_clientes.views.datos_virtuales_views import(
 
 from apps.MDM.mdm_clientes.views.parientes_views import(
 	parientes_create, parientes_findOne, parientes_update,
-	parientes_delete, parientes_list
+	parientes_delete, parientes_tabla_list
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -47,7 +47,7 @@ urlpatterns = [
 	path('datos-virtuales-cliente/update/<int:pk>', datosVirtuales_update, name="datosVirtuales_update"),
 	path('datos-virtuales-cliente/delete/<int:pk>', datosVirtuales_delete, name="datosVirtuales_delete"),
 	# PARIENTES
-	path('parientes-cliente/list/<int:pk>', parientes_list, name="parientes_list"),
+	path('parientes-cliente/list/<int:pk>', parientes_tabla_list, name="parientes_tabla_list"),
 	path('parientes-cliente/create/', parientes_create, name="parientes_create"),
 	path('parientes-cliente/findOne/<int:pk>', parientes_findOne, name="parientes_findOne"),
 	path('parientes-cliente/update/<int:pk>', parientes_update, name="parientes_update"),

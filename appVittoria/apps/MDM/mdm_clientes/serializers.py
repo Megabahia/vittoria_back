@@ -38,4 +38,9 @@ class ParientesSerializer(serializers.ModelSerializer):
         model = Parientes
        	fields = '__all__'
 
+class TablaParientesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Parientes
+       	fields = ['id','created_at','tipoPariente','nombres','apellidos','edad','celularPersonal','correoPersonal']
+
 
