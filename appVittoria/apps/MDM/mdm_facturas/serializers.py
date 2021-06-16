@@ -60,6 +60,12 @@ class FacturasListarSerializer(serializers.ModelSerializer):
         model = FacturasEncabezados
        	fields = '__all__'
 
+# Listar las facturas cabecera 
+class FacturasListarTablaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FacturasEncabezados
+       	fields = ['id','numeroFactura','created_at','canalCompra','numeroProductosComprados','total']
+
 
 # Crear factura
 class DetallesSerializer(serializers.ModelSerializer):

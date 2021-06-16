@@ -149,6 +149,141 @@ def factura_list_cliente(request):
             createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
+#LISTAR TODOS CLIENTE EN ESPECIFICO
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def factura_list_rango_fecha_cliente(request,pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=int(request.data['page_size'])
+            page=int(request.data['page'])
+            offset = page_size* page
+            limit = offset + page_size
+            #Filtros
+            filters={"state":"1"}     
+            filters['cliente__isnull'] = False    
+            filters['cliente'] = pk    
+            if 'inicio' and 'fin' in request.data:                
+                # if request.data['inicio'] !='':
+                #     filters['created_at__startswith'] = str(request.data['inicio'])
+                if request.data['inicio'] and request.data['fin'] !='':
+                    filters['created_at__range'] = [str(request.data['inicio']),str(request.data['fin'])]    
+          
+            #Serializar los datos
+            query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
+            serializer = FacturasListarTablaSerializer(query[offset:limit], many=True)
+            new_serializer_data={'cont': query.count(),
+            'info':serializer.data}
+            #envio de datos
+            return Response(new_serializer_data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+#LISTAR TODOS CLIENTE EN ESPECIFICO
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def factura_list_rango_fecha_cliente_grafica(request,pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=int(request.data['page_size'])
+            page=int(request.data['page'])
+            offset = page_size* page
+            limit = offset + page_size
+            #Filtros
+            filters={"state":"1"}     
+            filters['cliente__isnull'] = False    
+            filters['cliente'] = pk    
+            #  filters['created_at__week_day'] = 2   
+            if 'inicio' and 'fin' in request.data:                
+                # if request.data['inicio'] !='':
+                #     filters['created_at__startswith'] = str(request.data['inicio'])
+                if request.data['inicio'] and request.data['fin'] !='':
+                    filters['created_at__range'] = [str(request.data['inicio']),str(request.data['fin'])]    
+           
+            #Serializar los datos
+            query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
+            print(query.filter(created_at__iso_week_day=6))
+            serializer = FacturasListarSerializer(query[offset:limit], many=True)
+            new_serializer_data={'cont': query.count(),
+            'info':serializer.data}
+            #envio de datos
+            return Response(new_serializer_data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+#LISTAR TODOS NEGOCIO EN ESPECIFICO
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def factura_list_rango_fecha_negocio(request,pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=int(request.data['page_size'])
+            page=int(request.data['page'])
+            offset = page_size* page
+            limit = offset + page_size
+            #Filtros
+            filters={"state":"1"}     
+            filters['negocio__isnull'] = False    
+            filters['negocio'] = pk    
+            if 'inicio' and 'fin' in request.data:                
+                # if request.data['inicio'] !='':
+                #     filters['created_at__startswith'] = str(request.data['inicio'])
+                if request.data['inicio'] and request.data['fin'] !='':
+                    filters['created_at__range'] = [str(request.data['inicio']),str(request.data['fin'])]    
+          
+            #Serializar los datos
+            query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
+            serializer = FacturasListarTablaSerializer(query[offset:limit], many=True)
+            new_serializer_data={'cont': query.count(),
+            'info':serializer.data}
+            #envio de datos
+            return Response(new_serializer_data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
 #ENCONTRAR UNO
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
