@@ -1,11 +1,12 @@
 from apps.MDM.mdm_facturas.models import FacturasEncabezados, FacturasDetalles
-from apps.MDM.mdm_facturas.serializers import FacturasSerializer, FacturasDetallesSerializer, FacturasListarSerializer, FacturaSerializer
+from apps.MDM.mdm_facturas.serializers import FacturasSerializer, FacturasDetallesSerializer, FacturasListarSerializer, FacturaSerializer, FacturasListarTablaSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from datetime import datetime
+from django.core import serializers
 #excel
 import openpyxl
 #logs
@@ -193,7 +194,7 @@ def factura_list_rango_fecha_cliente(request,pk):
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
-#LISTAR TODOS CLIENTE EN ESPECIFICO
+#LISTAR TODOS CLIENTE EN ESPECIFICO GRAFICA
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def factura_list_rango_fecha_cliente_grafica(request,pk):
@@ -217,24 +218,56 @@ def factura_list_rango_fecha_cliente_grafica(request,pk):
             offset = page_size* page
             limit = offset + page_size
             #Filtros
-            filters={"state":"1"}     
-            filters['cliente__isnull'] = False    
-            filters['cliente'] = pk    
-            #  filters['created_at__week_day'] = 2   
-            if 'inicio' and 'fin' in request.data:                
-                # if request.data['inicio'] !='':
-                #     filters['created_at__startswith'] = str(request.data['inicio'])
-                if request.data['inicio'] and request.data['fin'] !='':
-                    filters['created_at__range'] = [str(request.data['inicio']),str(request.data['fin'])]    
-           
+            
+            query = FacturasEncabezados.objects.raw('''
+            SELECT id,YEAR(created_at) anio,MONTH(created_at) mes , COUNT(*) cantidad FROM vittoria_mdm.mdm_facturas_facturasencabezados 
+            WHERE  created_at between %s AND %s AND cliente_id = %s AND cliente_id is not null AND state = 1
+            GROUP BY MONTH (created_at), YEAR(created_at) ORDER BY MONTH (created_at);''',[str(request.data['inicio']),str(request.data['fin']),pk])
             #Serializar los datos
-            query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
-            print(query.filter(created_at__iso_week_day=6))
-            serializer = FacturasListarSerializer(query[offset:limit], many=True)
-            new_serializer_data={'cont': query.count(),
-            'info':serializer.data}
+            data = []
+            for raw in query:
+                data.append({'anio': raw.anio,'mes': raw.mes,'cantidad': raw.cantidad})
             #envio de datos
-            return Response(new_serializer_data,status=status.HTTP_200_OK)
+            return Response(data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+#LISTAR TODOS CLIENTE EN ESPECIFICO
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def factura_list_rango_fecha_negocio_grafica(request,pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=int(request.data['page_size'])
+            page=int(request.data['page'])
+            offset = page_size* page
+            limit = offset + page_size
+            #Filtros
+            
+            query = FacturasEncabezados.objects.raw('''
+            SELECT id,YEAR(created_at) anio,MONTH(created_at) mes , COUNT(*) cantidad FROM vittoria_mdm.mdm_facturas_facturasencabezados 
+            WHERE  created_at between %s AND %s AND negocio_id = %s AND negocio_id is not null AND state = 1
+            GROUP BY MONTH (created_at), YEAR(created_at) ORDER BY MONTH (created_at);''',[str(request.data['inicio']),str(request.data['fin']),pk])
+            #Serializar los datos
+            data = []
+            for raw in query:
+                data.append({'anio': raw.anio,'mes': raw.mes,'cantidad': raw.cantidad})
+            #envio de datos
+            return Response(data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             createLog(logModel,err,logExcepcion)
