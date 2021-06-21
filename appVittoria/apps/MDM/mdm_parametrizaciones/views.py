@@ -561,8 +561,8 @@ def parametrizaciones_filter_listOne_name_tipo(request):
 
     if request.method == 'POST':
         try:
-            query= Parametrizaciones.objects.filter(state=1,nombre=request.data['nombre'],tipo=request.data['tipo'])
-            serializer = ParametrizacionesSerializer(query, many=True)
+            query= Parametrizaciones.objects.get(state=1,nombre=request.data['nombre'],tipo=request.data['tipo'])
+            serializer = ParametrizacionesSerializer(query)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
