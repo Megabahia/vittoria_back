@@ -382,7 +382,7 @@ def factura_list_latest(request):
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'GET':
-            serializer = FacturasSerializer(query)
+            serializer = FacturasListarSerializer(query)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
     except Exception as e: 
