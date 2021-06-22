@@ -349,6 +349,47 @@ def factura_findOne(request, pk):
             createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+#ENCONTRAR LA ULTIMA FACTURA
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def factura_list_latest(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'listLatest/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            filters={"state":"1"}  
+            if 'negocio' in request.data:                
+                if request.data['negocio'] !='':   
+                    filters['negocio__isnull'] = False
+
+            if 'cliente' in request.data:                
+                if request.data['cliente'] !='':   
+                    filters['cliente__isnull'] = False
+            
+            query = FacturasEncabezados.objects.filter(**filters).order_by('-id')[0]
+        except FacturasEncabezados.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'GET':
+            serializer = FacturasSerializer(query)
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 #CREAR
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

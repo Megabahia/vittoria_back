@@ -10,7 +10,7 @@ from apps.MDM.mdm_clientes.models import Clientes
 class FacturasEncabezados(models.Model):
     negocio= models.ForeignKey(Negocios, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Negocios
     cliente= models.ForeignKey(Clientes, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Clientes
-    numeroFactura = models.CharField(max_length=150,null=True)
+    numeroFactura = models.CharField(max_length=150,null=True, blank=True)
     fecha = models.DateField(null=True)
     tipoIdentificacion = models.CharField(max_length=150,null=True)
     identificacion = models.CharField(max_length=150,null=True)

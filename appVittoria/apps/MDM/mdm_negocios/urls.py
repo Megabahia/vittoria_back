@@ -1,7 +1,7 @@
 from django.urls import path,include
 from apps.MDM.mdm_negocios.views.negocio_views import(
 	negocio_list, negocio_findOne, negocio_create,
-	negocio_update, negocio_delete, negociosImagen_update
+	negocio_update, negocio_delete, negociosImagen_update, negocio_findOne_ruc
 )
 from apps.MDM.mdm_negocios.views.direccion_establecimiento_views import(
 	direccionesNegocio_list, direccionesNegocio_findOne, direccionesNegocio_create,
@@ -21,6 +21,7 @@ urlpatterns = [
 	path('list/', negocio_list, name="negocio_list"),
 	path('create/', negocio_create, name="negocio_create"),
 	path('listOne/<int:pk>', negocio_findOne, name="negocio_findOne"), 
+	path('listOne/ruc/', negocio_findOne_ruc, name="negocio_findOne_ruc"), 
 	path('update/<int:pk>', negocio_update, name="negocio_update"), 
 	path('delete/<int:pk>', negocio_delete, name="negocio_delete"),
 	path('update/imagen/<int:pk>', negociosImagen_update, name="negociosImagen_update"),	
