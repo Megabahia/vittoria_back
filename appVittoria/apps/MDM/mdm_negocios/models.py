@@ -18,7 +18,7 @@ class Negocios(models.Model):
     ciudadResidencia= models.CharField(max_length=150,null=True)
     numeroEmpleados = models.CharField(max_length=150,null=True)
     segmentoActividadEconomica= models.CharField(max_length=150,null=True)
-    provincia= models.CharField(max_length=150,null=True)
+    profesion= models.CharField(max_length=150,null=True)
     actividadEcomica= models.CharField(max_length=150,null=True)
     llevarContabilidad = models.SmallIntegerField(default=1)
     ingresosPromedioMensual = models.CharField(max_length=150,null=True)
