@@ -56,7 +56,7 @@ class FacturasDetalles(models.Model):
     valorUnitario = models.FloatField(null=True)
     cantidad = models.PositiveIntegerField(null=True)
     precio = models.FloatField(null=True)
-    informacionAdicinal = models.CharField(max_length=250,null=True)
+    informacionAdicional = models.CharField(max_length=250,null=True)
     descuento = models.FloatField(null=True)
     impuesto = models.FloatField(null=True)
     valorDescuento = models.FloatField(null=True)
