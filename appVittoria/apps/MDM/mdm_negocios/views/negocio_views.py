@@ -107,7 +107,7 @@ def negocio_findOne(request, pk):
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 #ENCONTRAR UNO
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def negocio_findOne_ruc(request):
     timezone_now = timezone.localtime(timezone.now())
@@ -129,7 +129,7 @@ def negocio_findOne_ruc(request):
             createLog(logModel,err,logExcepcion)
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
-        if request.method == 'GET':
+        if request.method == 'POST':
             serializer = NegociosSerializer(query)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)

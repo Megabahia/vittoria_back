@@ -104,7 +104,7 @@ def cliente_findOne(request, pk):
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 #ENCONTRAR UNO
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def cliente_findOne_cedula(request):
     timezone_now = timezone.localtime(timezone.now())
@@ -126,7 +126,7 @@ def cliente_findOne_cedula(request):
             createLog(logModel,err,logExcepcion)
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
-        if request.method == 'GET':
+        if request.method == 'POST':
             serializer = ClientesSerializer(query)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
