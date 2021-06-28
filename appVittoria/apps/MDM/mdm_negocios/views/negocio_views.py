@@ -44,13 +44,13 @@ def negocio_list(request):
             filters={"state":"1"}
             if 'nombreComercial' in request.data:
                 if request.data['nombreComercial']!='':
-                    filters['nombreComercial'] = str(request.data['nombreComercial'])
+                    filters['nombreComercial__icontains'] = str(request.data['nombreComercial'])
             if 'razonSocial' in request.data:
                 if request.data['razonSocial']!='':
-                    filters['razonSocial'] = str(request.data['razonSocial'])
-            if 'cedula' in request.data:
-                if request.data['cedula']!='':
-                    filters['cedula'] = str(request.data['cedula'])
+                    filters['razonSocial__icontains'] = str(request.data['razonSocial'])
+            if 'ruc' in request.data:
+                if request.data['ruc']!='':
+                    filters['ruc'] = str(request.data['ruc'])
             # if 'desde' in request.data:
             #     if request.data['desde']!='':
             #         filters['created_at__startswith'] = str(request.data['desde'])

@@ -59,6 +59,7 @@ class FacturasDetalles(models.Model):
     informacionAdicinal = models.CharField(max_length=250,null=True)
     descuento = models.FloatField(null=True)
     impuesto = models.FloatField(null=True)
+    valorDescuento = models.FloatField(null=True)
         
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
