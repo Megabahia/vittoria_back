@@ -34,6 +34,10 @@ urlpatterns = [
     path('mdm/clientes/', include(('apps.MDM.mdm_clientes.urls', 'clientes'), namespace='clientes')),
     path('mdm/negocios/', include(('apps.MDM.mdm_negocios.urls', 'negocios'), namespace='negocios')),
     path('mdm/facturas/', include(('apps.MDM.mdm_facturas.urls', 'facturas'), namespace='facturas')),
+    #Modulo MDP
+    path('mdp/param/', include(('apps.MDP.mdp_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizaciones')),
+    path('mdp/categorias/', include(('apps.MDP.mdp_categorias.urls', 'categorias'), namespace='categorias')),
+    path('mdp/subCategorias/', include(('apps.MDP.mdp_subCategorias.urls', 'subCategorias'), namespace='subCategorias')),
 
 ]
 

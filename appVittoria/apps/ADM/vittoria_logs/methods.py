@@ -112,4 +112,26 @@ def datosFacturas():
         'api':'facturas/'
     }
     return data  
+#MODULO MDP-PARAMETRIZACIONES
+def datosParametrizacionesMDP():
+    data={
+        'modulo':'MDP',
+        'api':'param/'
+    }
+    return data  
 
+#MODULO MDP-CATEGORIAS
+def datosCategoriasMDP():
+    data={
+        'modulo':'MDP',
+        'api':'categorias/'
+    }
+    return data  
+
+#MODULO MDP-SUBCATEGORIAS
+def datosSubCategoriasMDP():
+    data={
+        'modulo':'MDP',
+        'api':'subCategorias/'
+    }
+    return data  

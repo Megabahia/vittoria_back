@@ -1,0 +1,19 @@
+from django.db import models
+
+# Create your models here.
+class Categorias(models.Model):
+    nombre = models.CharField(max_length=150,null=False)
+    codigoCategoria = models.CharField(max_length=150,null=False)
+    descripcion = models.CharField(max_length=150,null=True)
+    estado = models.CharField(max_length=150,null=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True)
+    state = models.SmallIntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        return super(Categorias, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return '{}'.format(self.nombre)
+
