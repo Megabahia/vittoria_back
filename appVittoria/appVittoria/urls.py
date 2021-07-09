@@ -38,6 +38,8 @@ urlpatterns = [
     path('mdp/param/', include(('apps.MDP.mdp_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizaciones')),
     path('mdp/categorias/', include(('apps.MDP.mdp_categorias.urls', 'categorias'), namespace='categorias')),
     path('mdp/subCategorias/', include(('apps.MDP.mdp_subCategorias.urls', 'subCategorias'), namespace='subCategorias')),
+    path('mdp/productos/', include(('apps.MDP.mdp_productos.urls', 'productos'), namespace='productos')),
+    path('mdp/fichaTecnicaProductos/', include(('apps.MDP.mdp_fichaTecnicaProductos.urls', 'fichaTecnicaProductos'), namespace='fichaTecnicaProductos')),
 
 ]
 
