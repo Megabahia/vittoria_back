@@ -1,0 +1,17 @@
+appVittoria/apps/ADM/vittoria_acciones/__pycache__/
+appVittoria/apps/ADM/vittoria_autenticacion/__pycache__/
+appVittoria/apps/ADM/vittoria_catalogo/__pycache__/
+appVittoria/apps/ADM/vittoria_logs/__pycache__/
+appVittoria/apps/ADM/vittoria_roles/__pycache__/
+appVittoria/apps/ADM/vittoria_usuarios/__pycache__/
+appVittoria/apps/config/__pycache__/
+appVittoria/apps/MDM/mdm_clientes/__pycache__/
+appVittoria/apps/MDM/mdm_facturas/__pycache__/
+appVittoria/apps/MDM/mdm_negocios/__pycache__/
+appVittoria/apps/MDM/mdm_parametrizaciones/__pycache__/
+appVittoria/apps/MDM/mdm_prospectosClientes/__pycache__/
+appVittoria/apps/MDM/mdp_categorias/__pycache__/
+appVittoria/apps/MDM/mdp_fichaTecnicaProductos/__pycache__/
+appVittoria/apps/MDM/mdp_parametrizaciones/__pycache__/
+appVittoria/apps/MDM/mdp_productos/__pycache__/
+appVittoria/apps/MDM/mdp_subCategorias/__pycache__/
