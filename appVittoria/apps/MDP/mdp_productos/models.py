@@ -30,3 +30,21 @@ class Productos(models.Model):
     def __str__(self):
         return '{}'.format(self.nombre)
 
+# Create your models here.
+class ReporteAbastecimiento(models.Model):
+    producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
+    # stockActual = models.IntegerField(max_length=150,null=True)
+    # alertaAbastecimiento = models.CharField(max_length=150,null=True)
+    cantidadSugeridaStock = models.CharField(max_length=150,null=True)
+    fechaMaximaStock = models.DateTimeField(null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True)
+    state = models.SmallIntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        return super(Productos, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return '{}'.format(self.nombre)
+
