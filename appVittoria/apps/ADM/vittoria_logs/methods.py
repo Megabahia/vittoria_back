@@ -135,3 +135,19 @@ def datosSubCategoriasMDP():
         'api':'subCategorias/'
     }
     return data  
+
+#MODULO MDP-PRODUCTOS
+def datosProductosMDP():
+    data={
+        'modulo':'MDP',
+        'api':'productos/'
+    }
+    return data  
+
+#MODULO MDP-FICHA TECNICA PRODUCTOS
+def datosFichaTecnicaProductosMDP():
+    data={
+        'modulo':'MDP',
+        'api':'fichaTecnicaProductos/'
+    }
+    return data  
