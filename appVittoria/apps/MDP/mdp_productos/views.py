@@ -197,3 +197,85 @@ def productos_delete(request, pk):
         err={"error":'Un error ha ocurrido: {}'.format(e)}  
         createLog(logModel,err,logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#BUSCAR CODIGO BARRAS
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def find_codigo_barras_list(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=int(request.data['page_size'])
+            page=int(request.data['page'])
+            offset = page_size* page
+            limit = offset + page_size
+            #Filtros
+            filters={"state":"1"}
+            if 'codigoBarras' in request.data:
+                if request.data['codigoBarras']!='':
+                    filters['codigoBarras__icontains'] = str(request.data['codigoBarras'])     
+          
+            #Serializar los datos
+            query = Productos.objects.filter(**filters).order_by('-created_at')
+            serializer = ProductosListSerializer(query[offset:limit], many=True)
+            new_serializer_data={'cont': query.count(),
+            'info':serializer.data}
+            #envio de datos
+            return Response(new_serializer_data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#BUSCAR NOMBRE
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def find_nombre_producto_list(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=int(request.data['page_size'])
+            page=int(request.data['page'])
+            offset = page_size* page
+            limit = offset + page_size
+            #Filtros
+            filters={"state":"1"}
+            if 'nombre' in request.data:
+                if request.data['nombre']!='':
+                    filters['nombre__icontains'] = str(request.data['nombre'])     
+          
+            #Serializar los datos
+            query = Productos.objects.filter(**filters).order_by('-created_at')
+            serializer = ProductosListSerializer(query[offset:limit], many=True)
+            new_serializer_data={'cont': query.count(),
+            'info':serializer.data}
+            #envio de datos
+            return Response(new_serializer_data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
