@@ -118,8 +118,10 @@ WSGI_APPLICATION = 'appVittoria.wsgi.application'
 DATABASES =config.DATABASES
 
 #AGREGO LAS RUTAS DE LAS DIFERENTES BASES DE DATOS
-DATABASE_ROUTERS = ['apps.config.routersDB.MDMRouter']
-DATABASE_ROUTERS = ['apps.config.routersDB.MDPRouter']
+DATABASE_ROUTERS = [
+    'apps.config.routersDB.MDMRouter',
+    'apps.config.routersDB.MDPRouter'
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
