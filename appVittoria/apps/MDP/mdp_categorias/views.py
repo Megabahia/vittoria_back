@@ -238,3 +238,19 @@ def categoria_delete(request, pk):
         err={"error":'Un error ha ocurrido: {}'.format(e)}  
         createLog(logModel,err,logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#LISTA COMBO CATEGORIA
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_categoria_combo(request):
+    if request.method == 'GET':
+        try:
+            query= Categorias.objects.filter(state=1)
+            serializer = CategoriasListarSerializer(query, many=True)
+            return Response(serializer.data)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+
+
