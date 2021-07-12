@@ -79,7 +79,7 @@ def subCategoria_findOne(request, pk):
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'GET':
-            serializer = ListSubCategoriasSerializer(query)
+            serializer = SubCategoriasSerializer(query)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
     except Exception as e: 
