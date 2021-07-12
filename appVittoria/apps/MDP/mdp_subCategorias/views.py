@@ -1,5 +1,5 @@
 from apps.MDP.mdp_subCategorias.models import SubCategorias
-from apps.MDP.mdp_subCategorias.serializers import SubCategoriasSerializer
+from apps.MDP.mdp_subCategorias.serializers import SubCategoriasSerializer, ListSubCategoriasSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -45,7 +45,7 @@ def subCategorias_list(request):
 
             #Serializar los datos
             query = SubCategorias.objects.filter(**filters).order_by('-created_at')
-            serializer = SubCategoriasSerializer(query[offset:limit], many=True)
+            serializer = ListSubCategoriasSerializer(query[offset:limit], many=True)
             new_serializer_data={'cont': query.count(),
             'info':serializer.data}
             #envio de datos
@@ -79,7 +79,7 @@ def subCategoria_findOne(request, pk):
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'GET':
-            serializer = SubCategoriasSerializer(query)
+            serializer = ListSubCategoriasSerializer(query)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
     except Exception as e: 
