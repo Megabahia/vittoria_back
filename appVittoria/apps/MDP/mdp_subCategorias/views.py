@@ -1,5 +1,5 @@
 from apps.MDP.mdp_subCategorias.models import SubCategorias
-from apps.MDP.mdp_subCategorias.serializers import SubCategoriasSerializer, ListSubCategoriasSerializer
+from apps.MDP.mdp_subCategorias.serializers import SubCategoriasSerializer, ListSubCategoriasSerializer, SubCategoriasListarSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -197,3 +197,17 @@ def subCategoria_delete(request, pk):
         err={"error":'Un error ha ocurrido: {}'.format(e)}  
         createLog(logModel,err,logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#LISTA COMBO CATEGORIA
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_subcategorias_padre_combo(request,pk):
+    if request.method == 'GET':
+        try:
+            query= SubCategorias.objects.filter(state=1,categoria=pk)
+            serializer = SubCategoriasListarSerializer(query, many=True)
+            return Response(serializer.data)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+

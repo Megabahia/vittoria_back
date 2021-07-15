@@ -20,7 +20,7 @@ logExcepcion=datosTipoLogAux['excepcion']
 #LISTAR TODOS
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def fichaTecnicaProductos_list(request):
+def fichaTecnicaProductos_list(request,pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'list/',
@@ -37,6 +37,7 @@ def fichaTecnicaProductos_list(request):
             logModel['dataEnviada'] = str(request.data)
             #Filtros
             filters={"state":"1"}
+            filters['producto'] = pk
 
             #Serializar los datos
             query = FichaTecnicaProductos.objects.filter(**filters).order_by('-created_at')

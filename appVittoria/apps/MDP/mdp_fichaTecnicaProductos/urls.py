@@ -10,7 +10,7 @@ app_name = 'fichaTecnicaProductos'
 
 urlpatterns = [
 	#FICHA TECNICA
-	path('list/', fichaTecnicaProductos_list, name="fichaTecnicaProductos_list"),
+	path('list/<int:pk>', fichaTecnicaProductos_list, name="fichaTecnicaProductos_list"),
 	path('create/', fichaTecnicaProductos_create, name="fichaTecnicaProductos_create"),
 	path('listOne/<int:pk>', fichaTecnicaProductos_findOne, name="fichaTecnicaProductos_findOne"), 
 	path('update/<int:pk>', fichaTecnicaProductos_update, name="fichaTecnicaProductos_update"), 
