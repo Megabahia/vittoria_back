@@ -1,5 +1,8 @@
 from django.db import models
 
+def upload_path(instance, filname):
+    return '/'.join(['MDP/imgProductos', str(instance.id) +"_" + filname])
+
 # Create your models here.
 class Productos(models.Model):
     categoria = models.CharField(max_length=150,null=True)
@@ -19,6 +22,7 @@ class Productos(models.Model):
     precioVentaBultos = models.FloatField(null=True)
     alertaAbastecimiento = models.CharField(max_length=150,null=True)
     estado = models.CharField(max_length=150,null=True)
+    variableRefil = models.CharField(max_length=150,null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -37,6 +41,90 @@ class ReporteAbastecimiento(models.Model):
     # alertaAbastecimiento = models.CharField(max_length=150,null=True)
     cantidadSugeridaStock = models.CharField(max_length=150,null=True)
     fechaMaximaStock = models.DateTimeField(null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True)
+    state = models.SmallIntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        return super(Productos, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return '{}'.format(self.nombre)
+
+# Create your models here.
+class ProductoImagen(models.Model):
+    producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
+    imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True)
+    state = models.SmallIntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        return super(Productos, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return '{}'.format(self.nombre)
+
+# Create your models here.
+class ReporteStock(models.Model):
+    producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
+    fechaUltimaStock = models.DateTimeField(null=True)
+    montoCompra = models.FloatField(null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True)
+    state = models.SmallIntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        return super(Productos, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return '{}'.format(self.nombre)
+
+# Create your models here.
+class ReporteCaducidad(models.Model):
+    producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
+    fechaCaducidad = models.DateTimeField(null=True)
+    productosCaducados = models.IntegerField(max_length=150,null=True)
+    diasParaCaducar = models.IntegerField(max_length=150,null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True)
+    state = models.SmallIntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        return super(Productos, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return '{}'.format(self.nombre)
+
+# Create your models here.
+class ReporteRotacion(models.Model):
+    producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
+    fechaInicio = models.DateTimeField(null=True)
+    fechaFin = models.DateTimeField(null=True)
+    diasPeriodo = models.IntegerField(max_length=150,null=True)
+    productosVendidos = models.IntegerField(max_length=150,null=True)
+    tipoRotacion = models.IntegerField(max_length=150,null=True)
+    montoVenta = models.FloatField(null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True)
+    state = models.SmallIntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        return super(Productos, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return '{}'.format(self.nombre)
+
+# Create your models here.
+class ReporteRefil(models.Model):
+    producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria    
+    diasRefil = models.IntegerField(max_length=150,null=True)
+    variableRefil = models.IntegerField(max_length=150,null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
