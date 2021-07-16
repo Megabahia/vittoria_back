@@ -18,7 +18,7 @@ logTransaccion=datosTipoLogAux['transaccion']
 logExcepcion=datosTipoLogAux['excepcion']
 #CRUD CLIENTES
 #LISTAR TODOS
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def fichaTecnicaProductos_list(request,pk):
     timezone_now = timezone.localtime(timezone.now())
@@ -32,7 +32,7 @@ def fichaTecnicaProductos_list(request,pk):
         'fechaFin': str(timezone_now),
         'dataRecibida' : '{}'
     }
-    if request.method == 'POST':
+    if request.method == 'GET':
         try:
             logModel['dataEnviada'] = str(request.data)
             #Filtros
