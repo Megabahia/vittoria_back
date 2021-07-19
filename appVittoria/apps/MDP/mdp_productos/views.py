@@ -198,10 +198,10 @@ def productos_delete(request, pk):
         createLog(logModel,err,logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
-#BUSCAR CODIGO BARRAS
+# SEARCH PRODUCTO
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def find_codigo_barras_list(request):
+def search_producto_list(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'list/',
@@ -225,7 +225,10 @@ def find_codigo_barras_list(request):
             filters={"state":"1"}
             if 'codigoBarras' in request.data:
                 if request.data['codigoBarras']!='':
-                    filters['codigoBarras__icontains'] = str(request.data['codigoBarras'])     
+                    filters['codigoBarras__icontains'] = str(request.data['codigoBarras'])
+            if 'nombre' in request.data:
+                if request.data['nombre']!='':
+                    filters['nombre__icontains'] = str(request.data['nombre'])
           
             #Serializar los datos
             query = Productos.objects.filter(**filters).order_by('-created_at')
@@ -239,10 +242,10 @@ def find_codigo_barras_list(request):
             createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
-#BUSCAR NOMBRE
+#LISTAR TODOS
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def find_nombre_producto_list(request):
+def refil_list(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'list/',
@@ -264,10 +267,7 @@ def find_nombre_producto_list(request):
             limit = offset + page_size
             #Filtros
             filters={"state":"1"}
-            if 'nombre' in request.data:
-                if request.data['nombre']!='':
-                    filters['nombre__icontains'] = str(request.data['nombre'])     
-          
+
             #Serializar los datos
             query = Productos.objects.filter(**filters).order_by('-created_at')
             serializer = ProductosListSerializer(query[offset:limit], many=True)
