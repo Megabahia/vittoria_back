@@ -1,6 +1,6 @@
 from apps.MDP.mdp_productos.models import (
     ProductoImagen,
-    Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion, ReporteRefil
+    Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion
 )
 from apps.MDP.mdp_productos.serializers import (
     DetallesSerializer,
@@ -501,20 +501,20 @@ def refil_list(request):
             #Filtros
             filters={"state":"1"}
             if request.data['inicio']!='' and request.data['fin'] != '':
-                filters['diasRefil__range'] = [int(request.data['inicio']), int(request.data['fin'])]
+                filters['refil__range'] = [int(request.data['inicio']), int(request.data['fin'])]
             elif request.data['inicio']!='':
-                filters['diasRefil__gte'] = str(request.data['inicio'])   
+                filters['refil__gte'] = str(request.data['inicio'])   
             elif request.data['fin']!='':
-                filters['diasRefil__lte'] = str(request.data['fin'])              
+                filters['refil__lte'] = str(request.data['fin'])              
             if 'categoria' in request.data:
                 if request.data['categoria']!='':
-                    filters['producto__categoria__icontains'] = str(request.data['categoria'])                    
+                    filters['categoria__icontains'] = str(request.data['categoria'])                    
             if 'subCategoria' in request.data:
                 if request.data['subCategoria']!='':
-                    filters['producto__subCategoria__icontains'] = str(request.data['subCategoria'])                    
+                    filters['subCategoria__icontains'] = str(request.data['subCategoria'])                    
 
             #Serializar los datos
-            query = ReporteRefil.objects.filter(**filters).order_by('-created_at')
+            query = Productos.objects.filter(**filters).order_by('-created_at')
             serializer = RefilListSerializer(query[offset:limit], many=True)
             new_serializer_data={'cont': query.count(),
             'info':serializer.data}

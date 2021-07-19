@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.MDP.mdp_productos.models import (
     Productos, ProductoImagen,
-    ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion, ReporteRefil
+    ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion
 )
 
 
@@ -121,20 +121,7 @@ class RotacionListSerializer(serializers.ModelSerializer):
 
 # REFIL
 class RefilListSerializer(serializers.ModelSerializer):
-    producto = ProductosSerializer(many=False, read_only=True)
     class Meta:
-        model = ReporteRefil
-       	fields = '__all__'
-    def to_representation(self, instance):
-        data = super(RefilListSerializer, self).to_representation(instance)
-        producto = data.pop('producto')
-        if producto['codigoBarras']:
-            data['codigoBarras'] = producto['codigoBarras']
-        if producto['nombre']:
-            data['nombre'] = producto['nombre']
-        if producto['categoria']:
-            data['categoria'] = producto['categoria']
-        if producto['subCategoria']:
-            data['subCategoria'] = producto['subCategoria']
-        return data
+        model = Productos
+       	fields = ['id','codigoBarras','nombre','categoria','subCategoria','refil','variableRefil']
 
