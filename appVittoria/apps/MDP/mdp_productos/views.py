@@ -1,9 +1,10 @@
 from apps.MDP.mdp_productos.models import (
-    Productos, ReporteCaducidad, ReporteRotacion, ReporteRefil
+    Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion, ReporteRefil
 )
 from apps.MDP.mdp_productos.serializers import (
-    ProductosSerializer, ProductosListSerializer, 
-    CaducidadListSerializer, RotacionListSerializer, RefilListSerializer
+    ProductosSerializer, ProductosListSerializer,
+    AbastecimientoListSerializer,
+    StockListSerializer, CaducidadListSerializer, RotacionListSerializer, RefilListSerializer
 )
 from rest_framework import status
 from rest_framework.response import Response
@@ -246,6 +247,102 @@ def search_producto_list(request):
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+# ABASTECIMIENTO
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def abastecimiento_list(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'abastecimiento/list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=int(request.data['page_size'])
+            page=int(request.data['page'])
+            offset = page_size* page
+            limit = offset + page_size
+            #Filtros
+            filters={"state":"1"}
+            if request.data['inicio']!='':
+                filters['fechaMaximaStock__gte'] = str(request.data['inicio'])   
+            if request.data['fin']!='':
+                filters['fechaMaximaStock__lte'] = str(request.data['fin'])              
+            if 'categoria' in request.data:
+                if request.data['categoria']!='':
+                    filters['producto__categoria__icontains'] = str(request.data['categoria'])                    
+            if 'subCategoria' in request.data:
+                if request.data['subCategoria']!='':
+                    filters['producto__subCategoria__icontains'] = str(request.data['subCategoria'])                    
+
+            #Serializar los datos
+            query = ReporteAbastecimiento.objects.filter(**filters).order_by('-created_at')
+            serializer = AbastecimientoListSerializer(query[offset:limit], many=True)
+            new_serializer_data={'cont': query.count(),
+            'info':serializer.data}
+            #envio de datos
+            return Response(new_serializer_data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+# STOCK
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def stock_list(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'caducidad/list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=int(request.data['page_size'])
+            page=int(request.data['page'])
+            offset = page_size* page
+            limit = offset + page_size
+            #Filtros
+            filters={"state":"1"}
+            if request.data['inicio']!='':
+                filters['fechaUltimaStock__gte'] = str(request.data['inicio'])   
+            if request.data['fin']!='':
+                filters['fechaUltimaStock__lte'] = str(request.data['fin'])              
+            if 'categoria' in request.data:
+                if request.data['categoria']!='':
+                    filters['producto__categoria__icontains'] = str(request.data['categoria'])                    
+            if 'subCategoria' in request.data:
+                if request.data['subCategoria']!='':
+                    filters['producto__subCategoria__icontains'] = str(request.data['subCategoria'])                    
+
+            #Serializar los datos
+            query = ReporteStock.objects.filter(**filters).order_by('-created_at')
+            serializer = StockListSerializer(query[offset:limit], many=True)
+            new_serializer_data={'cont': query.count(),
+            'info':serializer.data}
+            #envio de datos
+            return Response(new_serializer_data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 # CADUCIDAD
 @api_view(['POST'])
