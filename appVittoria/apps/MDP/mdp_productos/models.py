@@ -35,6 +35,18 @@ class Productos(models.Model):
         return '{}'.format(self.nombre)
 
 # Create your models here.
+class ProductoImagen(models.Model):
+    producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
+    imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True)
+    state = models.SmallIntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        return super(ProductoImagen, self).save(*args, **kwargs)
+
+# Create your models here.
 class ReporteAbastecimiento(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
     # stockActual = models.IntegerField(max_length=150,null=True)
@@ -47,25 +59,7 @@ class ReporteAbastecimiento(models.Model):
     state = models.SmallIntegerField(default=1)
 
     def save(self, *args, **kwargs):
-        return super(Productos, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return '{}'.format(self.nombre)
-
-# Create your models here.
-class ProductoImagen(models.Model):
-    producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
-    imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(null=True)
-    state = models.SmallIntegerField(default=1)
-
-    def save(self, *args, **kwargs):
-        return super(Productos, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return '{}'.format(self.nombre)
+        return super(ReporteAbastecimiento, self).save(*args, **kwargs)
 
 # Create your models here.
 class ReporteStock(models.Model):
@@ -78,10 +72,7 @@ class ReporteStock(models.Model):
     state = models.SmallIntegerField(default=1)
 
     def save(self, *args, **kwargs):
-        return super(Productos, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return '{}'.format(self.nombre)
+        return super(ReporteStock, self).save(*args, **kwargs)
 
 # Create your models here.
 class ReporteCaducidad(models.Model):
@@ -95,10 +86,7 @@ class ReporteCaducidad(models.Model):
     state = models.SmallIntegerField(default=1)
 
     def save(self, *args, **kwargs):
-        return super(Productos, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return '{}'.format(self.nombre)
+        return super(ReporteCaducidad, self).save(*args, **kwargs)
 
 # Create your models here.
 class ReporteRotacion(models.Model):
@@ -115,7 +103,7 @@ class ReporteRotacion(models.Model):
     state = models.SmallIntegerField(default=1)
 
     def save(self, *args, **kwargs):
-        return super(Productos, self).save(*args, **kwargs)
+        return super(ReporteRotacion, self).save(*args, **kwargs)
     
 # Create your models here.
 class ReporteRefil(models.Model):
@@ -128,6 +116,6 @@ class ReporteRefil(models.Model):
     state = models.SmallIntegerField(default=1)
 
     def save(self, *args, **kwargs):
-        return super(Productos, self).save(*args, **kwargs)
+        return super(ReporteRefil, self).save(*args, **kwargs)
 
 
