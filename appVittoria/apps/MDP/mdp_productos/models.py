@@ -107,7 +107,7 @@ class ReporteRotacion(models.Model):
     fechaFin = models.DateTimeField(null=True)
     diasPeriodo = models.IntegerField(max_length=150,null=True)
     productosVendidos = models.IntegerField(max_length=150,null=True)
-    tipoRotacion = models.IntegerField(max_length=150,null=True)
+    tipoRotacion = models.CharField(max_length=150,null=True)
     montoVenta = models.FloatField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -116,15 +116,12 @@ class ReporteRotacion(models.Model):
 
     def save(self, *args, **kwargs):
         return super(Productos, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return '{}'.format(self.nombre)
-
+    
 # Create your models here.
 class ReporteRefil(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria    
     diasRefil = models.IntegerField(max_length=150,null=True)
-    variableRefil = models.IntegerField(max_length=150,null=True)
+    variableRefil = models.CharField(max_length=150,null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -133,6 +130,4 @@ class ReporteRefil(models.Model):
     def save(self, *args, **kwargs):
         return super(Productos, self).save(*args, **kwargs)
 
-    def __str__(self):
-        return '{}'.format(self.nombre)
 

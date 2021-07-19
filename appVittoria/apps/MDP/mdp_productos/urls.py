@@ -1,8 +1,8 @@
 from django.urls import path,include
 
-from apps.MDP.mdp_productos.views import(
+from apps.MDP.mdp_productos.views import (
 	productos_list, productos_create, productos_findOne, productos_update, productos_delete,
-	search_producto_list
+	search_producto_list, rotacion_list, refil_list
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -17,6 +17,8 @@ urlpatterns = [
 	path('update/<int:pk>', productos_update, name="productos_update"), 
 	path('delete/<int:pk>', productos_delete, name="productos_delete"),
 	path('search/producto/', search_producto_list, name="search_producto_list"),
+	# REPORTE ROTACION
+	path('rotacion/list/', rotacion_list, name="rotacion_list"),
 	# REPORTE REFIL
-	# path('refil/list/', find_nombre_producto_list, name="find_nombre_producto_list"),
+	path('refil/list/', refil_list, name="refil_list"),
 ]
