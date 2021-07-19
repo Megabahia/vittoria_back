@@ -1,7 +1,9 @@
 from apps.MDP.mdp_productos.models import (
+    ProductoImagen,
     Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion, ReporteRefil
 )
 from apps.MDP.mdp_productos.serializers import (
+    DetallesSerializer,
     ProductoCreateSerializer,
     ProductosSerializer, ProductosListSerializer,
     AbastecimientoListSerializer,
@@ -87,6 +89,38 @@ def productos_findOne(request, pk):
         #tomar el dato
         if request.method == 'GET':
             serializer = ProductosSerializer(query)
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+# ENCONTRAR IMAGENES
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def producto_images_findOne(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'listOne/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            query = ProductoImagen.objects.filter(producto=pk, state=1)
+        except ProductoImagen.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'GET':
+            serializer = DetallesSerializer(query, many=True)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
     except Exception as e: 

@@ -2,6 +2,7 @@ from django.urls import path,include
 
 from apps.MDP.mdp_productos.views import (
 	productos_list, productos_create, productos_findOne, productos_update, productos_delete,
+	producto_images_findOne,
 	search_producto_list, abastecimiento_list, stock_list, caducidad_list, rotacion_list, refil_list
 )
 
@@ -17,6 +18,8 @@ urlpatterns = [
 	path('update/<int:pk>', productos_update, name="productos_update"), 
 	path('delete/<int:pk>', productos_delete, name="productos_delete"),
 	path('search/producto/', search_producto_list, name="search_producto_list"),
+	# IMAGENES PRODUCTOS
+	path('imagen/<int:pk>', producto_images_findOne, name="producto_images_findOne"), 
 	# REPORTE ABASTECIMIENTO
 	path('abastecimiento/list/', abastecimiento_list, name="abastecimiento_list"),
 	# REPORTE STOCK

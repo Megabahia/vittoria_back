@@ -11,6 +11,7 @@ class ProductosSerializer(serializers.ModelSerializer):
         model = Productos
        	fields = '__all__'
 
+# LISTAR PRODUCTOS TABLA
 class ProductosListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Productos
@@ -35,8 +36,6 @@ class ProductoCreateSerializer(serializers.ModelSerializer):
         for detalle_data in detalles_data:
             ProductoImagen.objects.create(producto=producto, **detalle_data)
         return producto
-    
-    
 
 # STOCK
 class AbastecimientoListSerializer(serializers.ModelSerializer):
