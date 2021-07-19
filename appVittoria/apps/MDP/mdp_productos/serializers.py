@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from apps.MDP.mdp_productos.models import (
-    Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion, ReporteRefil
+    Productos, ProductoImagen,
+    ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion, ReporteRefil
 )
 
 
@@ -14,6 +15,28 @@ class ProductosListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Productos
        	fields = ['id','codigoBarras','nombre','categoria','subCategoria','stock','estado']
+
+# DETALLES IMAGENES
+class DetallesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductoImagen
+       	fields = '__all__'
+
+# CREAR PRODUCTO
+class ProductoCreateSerializer(serializers.ModelSerializer):
+    detalles = DetallesSerializer(many=True,write_only=True)
+    class Meta:
+        model = Productos
+       	fields = '__all__'
+
+    def create(self, validated_data):        
+        detalles_data = validated_data.pop('detalles')
+        producto = Productos.objects.create(**validated_data)
+        for detalle_data in detalles_data:
+            ProductoImagen.objects.create(producto=producto, **detalle_data)
+        return producto
+    
+    
 
 # STOCK
 class AbastecimientoListSerializer(serializers.ModelSerializer):

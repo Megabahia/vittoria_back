@@ -1,7 +1,7 @@
 from django.db import models
 
 def upload_path(instance, filname):
-    return '/'.join(['MDP/imgProductos', str(instance.id) +"_" + filname])
+    return '/'.join(['MDP/imgProductos', str(instance.producto.id) +"_" + filname])
 
 # Create your models here.
 class Productos(models.Model):

@@ -2,6 +2,7 @@ from apps.MDP.mdp_productos.models import (
     Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion, ReporteRefil
 )
 from apps.MDP.mdp_productos.serializers import (
+    ProductoCreateSerializer,
     ProductosSerializer, ProductosListSerializer,
     AbastecimientoListSerializer,
     StockListSerializer, CaducidadListSerializer, RotacionListSerializer, RefilListSerializer
@@ -115,7 +116,7 @@ def productos_create(request):
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
         
-            serializer = ProductosSerializer(data=request.data)
+            serializer = ProductoCreateSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
