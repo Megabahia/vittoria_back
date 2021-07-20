@@ -14,6 +14,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+#excel
+import openpyxl
 #logs
 from apps.ADM.vittoria_logs.methods import createLog,datosTipoLog, datosProductosMDP
 #declaracion variables log
@@ -525,3 +527,76 @@ def refil_list(request):
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+# METODO SUBIR ARCHIVOS EXCEL
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def uploadEXCEL_crearProductos(request):
+    contValidos=0
+    contInvalidos=0
+    contTotal=0
+    errores=[]
+    try:
+        if request.method == 'POST':
+            first = True    #si tiene encabezado
+            uploaded_file = request.FILES['documento']
+            # you may put validations here to check extension or file size
+            wb = openpyxl.load_workbook(uploaded_file)
+            # getting a particular sheet by name out of many sheets
+            worksheet = wb["Hoja1"]
+            lines = list()
+        for row in worksheet.iter_rows():
+            row_data = list()
+            for cell in row:
+                row_data.append(str(cell.value))
+            lines.append(row_data)
+
+        for dato in lines:
+            contTotal+=1
+            if first:
+                first = False
+                continue
+            else:
+                if len(dato)==3:
+                    resultadoInsertar=insertarDato_Producto(dato)
+                    if resultadoInsertar!='Dato insertado correctamente':
+                        if resultadoInsertar in 'Codigo producto':
+                            contInvalidos+=1 
+                            errores.append({"error":"Producto no encontrado "+str(contTotal)+": "+str(resultadoInsertar)})
+                        else:
+                            contInvalidos+=1 
+                            errores.append({"error":"Error en la línea "+str(contTotal)+": "+str(resultadoInsertar)})
+                    else:
+                        contValidos+=1
+                else:
+                    contInvalidos+=1    
+                    errores.append({"error":"Error en la línea "+str(contTotal)+": la fila tiene un tamaño incorrecto ("+str(len(dato))+")"}) 
+
+        result={"mensaje":"La Importación se Realizo Correctamente",
+        "correctos":contValidos,
+        "incorrectos":contInvalidos,
+        "errores":errores
+        }
+        return Response(result, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        err={"error":'Error verifique el archivo, un error ha ocurrido: {}'.format(e)}  
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+# INSERTAR DATOS EN LA BASE INDIVIDUAL
+def insertarDato_Producto(dato):
+    try:
+        timezone_now = timezone.localtime(timezone.now())
+        data={}
+        data['codigoBarras'] = dato[0].replace('"', "") if dato[0].replace('"', "") != "NULL" else None
+        data['descripcion'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
+        data['stock'] = dato[2].replace('"', "") if dato[2] != "NULL" else None        
+        data['updated_at'] = str(timezone_now)
+        #inserto el dato con los campos requeridos
+        query = Productos.objects.filter(codigoBarras=data['codigoBarras']).update(**data)
+        if query == 0:
+            return 'Codigo producto %(code)s no existe' % {"code": data['codigoBarras']}
+        return 'Dato insertado correctamente'
+    except Exception as e:
+        return str(e)
+
