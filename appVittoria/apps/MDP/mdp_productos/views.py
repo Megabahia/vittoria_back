@@ -3,7 +3,7 @@ from apps.MDP.mdp_productos.models import (
     Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion
 )
 from apps.MDP.mdp_productos.serializers import (
-    DetallesSerializer,
+    DetallesSerializer, ProductosActualizarSerializer,
     ProductoCreateSerializer,
     ProductosSerializer, ProductosListSerializer,
     AbastecimientoListSerializer,
@@ -181,6 +181,7 @@ def productos_update(request, pk):
         try:
             logModel['dataEnviada'] = str(request.data)
             query = Productos.objects.get(pk=pk, state=1)
+            # print(query.detalles.count())
         except Productos.DoesNotExist:
             errorNoExiste={'error':'No existe'}
             createLog(logModel,errorNoExiste,logExcepcion)
@@ -190,7 +191,7 @@ def productos_update(request, pk):
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
-            serializer = ProductosSerializer(query, data=request.data,partial=True)
+            serializer = ProductosActualizarSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)

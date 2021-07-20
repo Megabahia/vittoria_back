@@ -31,12 +31,13 @@ class Productos(models.Model):
     def save(self, *args, **kwargs):
         return super(Productos, self).save(*args, **kwargs)
 
-    def __str__(self):
-        return '{}'.format(self.nombre)
+    # def __str__(self):
+    #     return '{}'.format(self.nombre)
 
 # Create your models here.
 class ProductoImagen(models.Model):
-    producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
+    # NOMBRAMOS A LA RELACION DETALLATES    
+    producto= models.ForeignKey(Productos, related_name='imagenes', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con producto
     imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -45,6 +46,9 @@ class ProductoImagen(models.Model):
 
     def save(self, *args, **kwargs):
         return super(ProductoImagen, self).save(*args, **kwargs)
+    
+    def __str__(self):
+        return '{}'.format(self.id)
 
 # Create your models here.
 class ReporteAbastecimiento(models.Model):

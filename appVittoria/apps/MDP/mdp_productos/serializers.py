@@ -25,17 +25,66 @@ class DetallesSerializer(serializers.ModelSerializer):
 
 # CREAR PRODUCTO
 class ProductoCreateSerializer(serializers.ModelSerializer):
-    detalles = DetallesSerializer(many=True,write_only=True)
+    imagenes = DetallesSerializer(many=True)
     class Meta:
         model = Productos
        	fields = '__all__'
 
     def create(self, validated_data):        
-        detalles_data = validated_data.pop('detalles')
+        detalles_data = validated_data.pop('imagenes')
         producto = Productos.objects.create(**validated_data)
         for detalle_data in detalles_data:
             ProductoImagen.objects.create(producto=producto, **detalle_data)
         return producto
+
+# ACTUALIZAR PRODUCTO
+class DetallesImagenesSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    class Meta:
+        model = ProductoImagen
+       	fields = '__all__'
+
+class ProductosActualizarSerializer(serializers.ModelSerializer):
+    imagenes = DetallesImagenesSerializer(many=True)
+    class Meta:
+        model = Productos
+       	fields = '__all__'
+
+    def create(self, validated_data):        
+        detalles_data = validated_data.pop('imagenes')
+        producto = Productos.objects.create(**validated_data)
+        for detalle_data in detalles_data:
+            ProductoImagen.objects.create(producto=producto, **detalle_data)
+        return producto
+    
+    def update(self, instance, validated_data):
+        # for detalle in instance.imagenes.all():
+        #     print(detalle)
+        detalles_database = {detalle.id: detalle for detalle in instance.imagenes.all()}
+        detalles_actualizar = {item['id']: item for item in validated_data['imagenes']}
+
+        # Actualiza la factura cabecera
+        instance.__dict__.update(validated_data) 
+        instance.save()
+
+        # Eliminar los imagenes que no esté incluida en la solicitud de la factura imagenes
+        for detalle in instance.imagenes.all():
+            print(detalle.id)
+            if detalle.id not in detalles_actualizar:
+                detalle.delete()
+
+        # Crear o actualizar instancias de imagenes que se encuentran en la solicitud de factura imagenes
+        for detalle_id, data in detalles_actualizar.items():
+            detalle = detalles_database.get(detalle_id, None)
+            if detalle is None:
+                data.pop('id')
+                ProductoImagen.objects.create(**data)
+            else:
+                now = timezone.localtime(timezone.now())
+                data['updated_at'] = str(now)
+                ProductoImagen.objects.filter(id=detalle.id).update(**data)
+
+        return instance
 
 # STOCK
 class AbastecimientoListSerializer(serializers.ModelSerializer):
