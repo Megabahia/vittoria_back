@@ -5,6 +5,7 @@ from apps.MDP.mdp_productos.models import (
     ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion
 )
 
+from django.utils import timezone
 
 class ProductosSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,31 +59,29 @@ class ProductosActualizarSerializer(serializers.ModelSerializer):
         return producto
     
     def update(self, instance, validated_data):
-        # for detalle in instance.imagenes.all():
-        #     print(detalle)
         detalles_database = {detalle.id: detalle for detalle in instance.imagenes.all()}
         detalles_actualizar = {item['id']: item for item in validated_data['imagenes']}
 
-        # Actualiza la factura cabecera
+        # Actualiza el producto
         instance.__dict__.update(validated_data) 
         instance.save()
 
-        # Eliminar los imagenes que no esté incluida en la solicitud de la factura imagenes
+        # Eliminar los imagenes que no esté incluida en la solicitud de la productos imagenes
         for detalle in instance.imagenes.all():
-            print(detalle.id)
             if detalle.id not in detalles_actualizar:
+                detalle.imagen.delete()
                 detalle.delete()
 
-        # Crear o actualizar instancias de imagenes que se encuentran en la solicitud de factura imagenes
+        # Crear o actualizar instancias de imagenes que se encuentran en la solicitud de producto imagenes
         for detalle_id, data in detalles_actualizar.items():
             detalle = detalles_database.get(detalle_id, None)
             if detalle is None:
                 data.pop('id')
                 ProductoImagen.objects.create(**data)
-            else:
-                now = timezone.localtime(timezone.now())
-                data['updated_at'] = str(now)
-                ProductoImagen.objects.filter(id=detalle.id).update(**data)
+            # else:
+            #     now = timezone.localtime(timezone.now())
+            #     data['updated_at'] = str(now)
+            #     ProductoImagen.objects.filter(id=detalle.id).update(**data)
 
         return instance
 
