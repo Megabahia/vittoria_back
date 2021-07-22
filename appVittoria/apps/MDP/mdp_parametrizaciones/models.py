@@ -6,6 +6,8 @@ class Parametrizaciones(models.Model):
     nombre = models.CharField(max_length=150,null=True)
     tipo = models.CharField(max_length=150,null=False)
     tipoVariable = models.CharField(max_length=150,null=False)
+    minimo = models.IntegerField(max_length=150,null=True)
+    maximo = models.IntegerField(max_length=150,null=True)
     valor = models.CharField(max_length=150,null=False)
     descripcion = models.CharField(max_length=250,null=True)
     created_at = models.DateTimeField(auto_now_add=True)

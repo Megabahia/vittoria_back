@@ -2,7 +2,8 @@ from rest_framework import serializers
 
 from apps.MDP.mdp_productos.models import (
     Productos, ProductoImagen,
-    ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion
+    ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion,
+    HistorialAvisos
 )
 
 from django.utils import timezone
@@ -85,7 +86,7 @@ class ProductosActualizarSerializer(serializers.ModelSerializer):
 
         return instance
 
-# STOCK
+# ABASTECIMIENTO
 class AbastecimientoListSerializer(serializers.ModelSerializer):
     producto = ProductosSerializer(many=False, read_only=True)
     class Meta:
@@ -107,6 +108,12 @@ class AbastecimientoListSerializer(serializers.ModelSerializer):
         if producto['alertaAbastecimiento']:
             data['alertaAbastecimiento'] = producto['alertaAbastecimiento']
         return data
+
+# HISTORIAL ABASTECIMIENTO
+class HistorialAvisosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HistorialAvisos
+       	fields = '__all__'
 
 # STOCK
 class StockListSerializer(serializers.ModelSerializer):

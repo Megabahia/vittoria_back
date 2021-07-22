@@ -7,7 +7,8 @@ from apps.MDP.mdp_productos.serializers import (
     ProductoCreateSerializer,
     ProductosSerializer, ProductosListSerializer,
     AbastecimientoListSerializer,
-    StockListSerializer, CaducidadListSerializer, RotacionListSerializer, RefilListSerializer
+    StockListSerializer, CaducidadListSerializer, RotacionListSerializer, RefilListSerializer,
+    HistorialAvisosSerializer
 )
 from rest_framework import status
 from rest_framework.response import Response
@@ -599,4 +600,38 @@ def insertarDato_Producto(dato):
         return 'Dato insertado correctamente'
     except Exception as e:
         return str(e)
+
+#CREAR ABASTECIMIENTO
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def abastecimiento_create(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'abastecimiento/create/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'CREAR',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            # request.data['created_at'] = str(timezone_now)
+            # if 'updated_at' in request.data:
+            #     request.data.pop('updated_at')
+
+            serializer = HistorialAvisosSerializer(data=request.data['data'], many=True)
+            if serializer.is_valid():
+                serializer.save()
+                createLog(logModel,serializer.data,logTransaccion)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            createLog(logModel,serializer.errors,logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 

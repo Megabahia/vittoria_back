@@ -4,6 +4,7 @@ from apps.MDP.mdp_productos.views import (
 	productos_list, productos_create, productos_findOne, productos_update, productos_delete,
 	producto_images_findOne,
 	search_producto_list, abastecimiento_list, stock_list, caducidad_list, rotacion_list, refil_list,
+	abastecimiento_create,
 	uploadEXCEL_crearProductos
 )
 
@@ -23,6 +24,7 @@ urlpatterns = [
 	# IMAGENES PRODUCTOS
 	path('imagen/<int:pk>', producto_images_findOne, name="producto_images_findOne"), 
 	# REPORTE ABASTECIMIENTO
+	path('abastecimiento/create/', abastecimiento_create, name="abastecimiento_create"),
 	path('abastecimiento/list/', abastecimiento_list, name="abastecimiento_list"),
 	# REPORTE STOCK
 	path('stock/list/', stock_list, name="stock_list"),
