@@ -91,7 +91,7 @@ def productos_findOne(request, pk):
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'GET':
-            serializer = ProductosSerializer(query)
+            serializer = ProductoCreateSerializer(query)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
     except Exception as e: 
@@ -594,7 +594,10 @@ def insertarDato_Producto(dato):
         data['stock'] = dato[2].replace('"', "") if dato[2] != "NULL" else None        
         data['updated_at'] = str(timezone_now)
         #inserto el dato con los campos requeridos
-        query = Productos.objects.filter(codigoBarras=data['codigoBarras']).update(**data)
+        query = Productos.objects.get(codigoBarras=data['codigoBarras'])
+        for key, value in data.items():
+            setattr(query, key, value)
+        query.save()
         if query == 0:
             return 'Codigo producto %(code)s no existe' % {"code": data['codigoBarras']}
         return 'Dato insertado correctamente'

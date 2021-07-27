@@ -1,10 +1,12 @@
+from django.db.models.signals import pre_save, post_save
+from django.dispatch import receiver
 from django.db import models
 
-from django.db.models import Avg, Min, Max, Count
+from django.db.models import Avg, Min, Max, Count, Sum
 import datetime
 from django.utils import timezone
-#lib email
-from apps.config.util import sendEmail
+# IMPORTAR ENVIO CONFIGURACION CORREO
+from apps.config.util2 import sendEmail
 
 from apps.MDP.mdp_parametrizaciones.models import Parametrizaciones
 
@@ -31,6 +33,9 @@ class Productos(models.Model):
     parametrizacion= models.ForeignKey(Parametrizaciones, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
     estado = models.CharField(max_length=150,null=True)
     variableRefil = models.CharField(max_length=150,null=True)
+    lote = models.CharField(max_length=150,null=True)
+    fechaElaboracion = models.DateTimeField(null=True)
+    fechaCaducidad = models.DateTimeField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -130,6 +135,7 @@ class HistorialAvisos(models.Model):
 
     def save(self, *args, **kwargs):
         # TRIGGER ACTUALIZAR STOCK
+        # Quita producto
         product = Productos.objects.get(codigoBarras=self.codigoBarras)
         timezone_now = timezone.localtime(timezone.now())
         product.stock -= self.productosVendidos
@@ -137,31 +143,63 @@ class HistorialAvisos(models.Model):
         product.save()
         if product.parametrizacion.valor == 'stock':
             if product.parametrizacion.minimo < product.stock and product.stock < product.parametrizacion.maximo:
-                datos = HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).aggregate(promedioProductos=Avg('productosVendidos'),fechaMinima=Min('fechaCompra'),fechaMaxima=Max('fechaCompra'),totalRegistros=Count('alerta'))                
-                supplyReport = ReporteAbastecimiento.objects.get(producto=product)
-                supplyReport.cantidadSugeridaStock = datos['promedioProductos']
-                supplyReport.mostrarAviso = 1
-                supplyReport.notificacionEnviada = 1
-                daysAvg = ((datos['fechaMaxima'] - datos['fechaMinima']).days) / datos['totalRegistros']
-                maxDate = timezone_now + datetime.timedelta(days=daysAvg)
-                supplyReport.fechaMaximaStock = str(maxDate)
-                supplyReport.save()
-                self.alerta = 1
-                HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).update(alerta=1)
-                enviarEmailAsignacionPassword(product)
+                datos = HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).aggregate(promedioProductos=Avg('productosVendidos'),fechaMinima=Min('fechaCompra'),fechaMaxima=Max('fechaCompra'),totalRegistros=Count('alerta'))
+                if datos['totalRegistros'] != 0:
+                    supplyReport = ReporteAbastecimiento.objects.get(producto=product)
+                    supplyReport.producto = product
+                    supplyReport.cantidadSugeridaStock = datos['promedioProductos']
+                    supplyReport.mostrarAviso = 1
+                    supplyReport.notificacionEnviada = 1
+                    daysAvg = ((datos['fechaMaxima'] - datos['fechaMinima']).days) / datos['totalRegistros']
+                    maxDate = timezone_now + datetime.timedelta(days=daysAvg)
+                    supplyReport.fechaMaximaStock = str(maxDate)
+                    supplyReport.save()
+                    self.alerta = 1
+                    HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).update(alerta=1)
+                    enviarEmailAvisoAbastecimiento(product, maxDate)
         else:
-            print("Dias")
+            diasAlerta = (product.fechaCaducidad - timezone_now ).days
+            if diasAlerta <= product.parametrizacion.maximo:
+                datos = HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).aggregate(promedioProductos=Avg('productosVendidos'),fechaMinima=Min('fechaCompra'),fechaMaxima=Max('fechaCompra'),totalRegistros=Count('alerta'))                
+                if datos['totalRegistros'] != 0:
+                    supplyReport = ReporteAbastecimiento.objects.get(producto=product)
+                    supplyReport.producto = product
+                    supplyReport.cantidadSugeridaStock = datos['promedioProductos']
+                    supplyReport.mostrarAviso = 1
+                    supplyReport.notificacionEnviada = 1
+                    daysAvg = ((datos['fechaMaxima'] - datos['fechaMinima']).days) / datos['totalRegistros']
+                    maxDate = timezone_now + datetime.timedelta(days=daysAvg)
+                    supplyReport.fechaMaximaStock = str(maxDate)
+                    supplyReport.save()
+                    self.alerta = 1
+                    HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).update(alerta=1)
+                    enviarEmailAvisoAbastecimiento(product, maxDate)
         # FIN TRIGGER ACTUALIZAR STOCK
         return super(HistorialAvisos, self).save(*args, **kwargs)
+
+# Create your models here.
+class Lotes(models.Model):
+    producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
+    cantidad = models.IntegerField(max_length=150,null=True)
+    fechaElaboracion = models.DateTimeField(null=True)
+    fechaCaducidad = models.DateTimeField(null=True)
+    precioCompra = models.FloatField(null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True)
+    state = models.SmallIntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        return super(Lotes, self).save(*args, **kwargs)
     
-def enviarEmailAsignacionPassword(product):
+def enviarEmailAvisoAbastecimiento(product, maxDate):
     try:
         #enviar por email            
-        subject, from_email, to = 'Solicitud de Reinicio de contraseña Viitoria', "73ddd8bfb3-995a16@inbox.mailtrap.io",'jimmy1817@hotmail.com'
+        subject, from_email, to = 'Aviso de abastecimiento', "1760ab7178-1f5a2f@inbox.mailtrap.io",'jsyar@pucesi.edu.ec'
         txt_content="""
                 Alerta de abastecimiento Vittoria
                 
-                Si al hacer click en el enlace anterior no funciona, copie y pegue la URL en una nueva ventana del navegador
+                Aviso de stock inferior """+str(product.stock)+""" """+str(product.stock)+""" del producto """+str(product.nombre)+""" se aconseja que la fecha maxima de reponer es """+str(maxDate.strftime('%Y-%m-%d'))+"""
                 Atentamente,
                 Equipo Vittoria.
         """
@@ -169,18 +207,35 @@ def enviarEmailAsignacionPassword(product):
         <html>
             <body>
                 <h1>Alerta de abastecimiento Vittoria</h1>
-                Haga clic en el siguiente enlace para registrar su contraseña:<br>
+                
                 <br>
-                Si al hacer click en el enlace anterior no funciona, copie y pegue la URL en una nueva ventana del navegador<br>
+                Aviso de stock inferior a """+str(product.stock)+""" del producto """+str(product.nombre)+""" se aconseja que la fecha maxima de reponer es """+str(maxDate.strftime('%Y-%m-%d'))+"""<br>
                 Atentamente,<br>
                 Equipo Vittoria.<br>
             </body>
         </html>
-        """
-        if sendEmail():
+        """        
+        if sendEmail(subject, txt_content, from_email,to,html_content):
             return True
         return False
     except:
         return False
     
 
+@receiver(post_save, sender=Productos)
+def createTablesReport(sender, instance, **kwargs):
+    timezone_now = timezone.localtime(timezone.now())
+    # CREAR LOTE
+    Lotes.objects.create(cantidad = instance.stock, fechaElaboracion = instance.fechaElaboracion, fechaCaducidad = instance.fechaCaducidad, precioCompra = instance.costoCompra, producto = instance)
+    # CREAR REPORTE STOCK
+    ReporteStock.objects.create(fechaUltimaStock = str(timezone_now), montoCompra = instance.costoCompra, producto = instance)
+    # CREAR REPORTE ABASTECIMIENTO
+    ReporteAbastecimiento.objects.create(cantidadSugeridaStock=0,fechaMaximaStock="",state=1,producto=instance)
+    lote = Lotes.objects.filter(fechaCaducidad__lte=str(timezone_now), state=1,producto=instance.id).aggregate(productosCaducados=Sum("cantidad"))    
+    if instance.fechaCaducidad != None:
+        diasParaCaducar = (instance.fechaCaducidad - timezone_now).days
+    else:
+        diasParaCaducar = 0
+    # CREAR REPORTE CADUCIDAD
+    ReporteCaducidad.objects.create(fechaCaducidad = instance.fechaCaducidad, productosCaducados = lote["productosCaducados"], diasParaCaducar = diasParaCaducar , producto = instance)
+    return
