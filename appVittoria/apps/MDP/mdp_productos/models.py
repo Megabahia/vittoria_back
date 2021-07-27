@@ -223,19 +223,28 @@ def enviarEmailAvisoAbastecimiento(product, maxDate):
     
 
 @receiver(post_save, sender=Productos)
-def createTablesReport(sender, instance, **kwargs):
+def createTablesReport(sender, instance, **kwargs):    
     timezone_now = timezone.localtime(timezone.now())
-    # CREAR LOTE
-    IngresoProductos.objects.create(cantidad = instance.stock, fechaElaboracion = instance.fechaElaboracion, fechaCaducidad = instance.fechaCaducidad, precioCompra = instance.costoCompra, producto = instance)
+    # CREAR INGRESO PRODUCTOS
+    IngresoProductos.objects.create(cantidad = instance.stock, fechaElaboracion = str(instance.fechaElaboracion), fechaCaducidad = str(instance.fechaCaducidad), precioCompra = instance.costoCompra, producto = instance)
     # CREAR REPORTE STOCK
     ReporteStock.objects.create(fechaUltimaStock = str(timezone_now), montoCompra = instance.costoCompra, producto = instance)
     # CREAR REPORTE ABASTECIMIENTO
     ReporteAbastecimiento.objects.create(cantidadSugeridaStock=0,state=1,producto=instance)
-    lote = IngresoProductos.objects.filter(fechaCaducidad__lte=str(timezone_now), state=1,producto=instance.id).aggregate(productosCaducados=Sum("cantidad"))    
+    # CREAR REPORTE ROTACION PRODUCTOS
+    diasPeriodo = 7
+    fechaFin = timezone_now + datetime.timedelta(days=diasPeriodo)
+    ReporteRotacion.objects.create(fechaInicio=str(timezone_now),fechaFin=str(fechaFin),diasPeriodo=diasPeriodo,productosVendidos=0,tipoRotacion="Bajo",montoVenta=0,producto=instance)
+    ingresoProducto = IngresoProductos.objects.filter(fechaCaducidad__lte=str(timezone_now), state=1,producto=instance.id).aggregate(productosCaducados=Sum("cantidad"))        
     if instance.fechaCaducidad != None:
-        diasParaCaducar = (instance.fechaCaducidad - timezone_now).days
+        ahora = instance.fechaCaducidad
+        if isinstance(ahora, str):
+            datetimeobj=datetime.datetime.strptime(ahora, "%Y-%m-%d %H:%M:%S")
+            diasParaCaducar = (datetimeobj - timezone_now.replace(tzinfo=None)).days
+        else:
+            diasParaCaducar = (ahora - timezone_now).days
     else:
         diasParaCaducar = 0
     # CREAR REPORTE CADUCIDAD
-    ReporteCaducidad.objects.create(fechaCaducidad = instance.fechaCaducidad, productosCaducados = lote["productosCaducados"], diasParaCaducar = diasParaCaducar , producto = instance)
+    reporte = ReporteCaducidad.objects.create(fechaCaducidad = instance.fechaCaducidad, productosCaducados = ingresoProducto["productosCaducados"], diasParaCaducar = diasParaCaducar , producto = instance)    
     return

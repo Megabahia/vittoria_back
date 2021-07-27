@@ -180,31 +180,31 @@ def productos_update(request, pk):
         'fechaFin': str(timezone_now),
         'dataRecibida' : '{}'
     }
+    # try:
     try:
-        try:
-            logModel['dataEnviada'] = str(request.data)
-            query = Productos.objects.get(pk=pk, state=1)
-            # print(query.detalles.count())
-        except Productos.DoesNotExist:
-            errorNoExiste={'error':'No existe'}
-            createLog(logModel,errorNoExiste,logExcepcion)
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        if request.method == 'POST':
-            now = timezone.localtime(timezone.now())
-            request.data['updated_at'] = str(now)
-            if 'created_at' in request.data:
-                request.data.pop('created_at')
-            serializer = ProductosActualizarSerializer(query, data=request.data,partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                createLog(logModel,serializer.data,logTransaccion)
-                return Response(serializer.data)
-            createLog(logModel,serializer.errors,logExcepcion)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e: 
-        err={"error":'Un error ha ocurrido: {}'.format(e)}  
-        createLog(logModel,err,logExcepcion)
-        return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+        logModel['dataEnviada'] = str(request.data)
+        query = Productos.objects.get(pk=pk, state=1)
+        # print(query.detalles.count())
+    except Productos.DoesNotExist:
+        errorNoExiste={'error':'No existe'}
+        createLog(logModel,errorNoExiste,logExcepcion)
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'POST':
+        now = timezone.localtime(timezone.now())
+        request.data['updated_at'] = str(now)
+        if 'created_at' in request.data:
+            request.data.pop('created_at')
+        serializer = ProductosActualizarSerializer(query, data=request.data,partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data)
+        createLog(logModel,serializer.errors,logExcepcion)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # except Exception as e: 
+    #     err={"error":'Un error ha ocurrido: {}'.format(e)}  
+    #     createLog(logModel,err,logExcepcion)
+    #     return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
 #ELIMINAR
 @api_view(['DELETE'])
@@ -558,7 +558,7 @@ def uploadEXCEL_crearProductos(request):
                 first = False
                 continue
             else:
-                if len(dato)==3:
+                if worksheet.iter_cols():
                     resultadoInsertar=insertarDato_Producto(dato)
                     if resultadoInsertar!='Dato insertado correctamente':
                         if resultadoInsertar in 'Codigo producto':
@@ -593,8 +593,8 @@ def insertarDato_Producto(dato):
         data['descripcion'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
         data['stock'] = dato[2].replace('"', "") if dato[2] != "NULL" else None        
         data['lote'] = dato[3].replace('"', "") if dato[3] != "NULL" else None
-        data['fechaElaboracion'] = dato[4].replace('"', "") if dato[4] != "NULL" else None
-        data['fechaCaducidad'] = dato[5].replace('"', "") if dato[5] != "NULL" else None
+        data['fechaElaboracion'] = dato[4] if dato[4] != "NULL" else None        
+        data['fechaCaducidad'] = dato[5] if dato[5] != "NULL" else None
         data['updated_at'] = str(timezone_now)
         #inserto el dato con los campos requeridos
         query = Productos.objects.get(codigoBarras=data['codigoBarras'])
