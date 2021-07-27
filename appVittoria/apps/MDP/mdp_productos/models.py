@@ -141,11 +141,11 @@ class HistorialAvisos(models.Model):
         product.stock -= self.productosVendidos
         product.updated_at = str(timezone_now)
         product.save()
-        if product.parametrizacion.valor == 'stock':
+        if product.parametrizacion.valor == 'stock':            
             if product.parametrizacion.minimo < product.stock and product.stock < product.parametrizacion.maximo:
                 datos = HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).aggregate(promedioProductos=Avg('productosVendidos'),fechaMinima=Min('fechaCompra'),fechaMaxima=Max('fechaCompra'),totalRegistros=Count('alerta'))
                 if datos['totalRegistros'] != 0:
-                    supplyReport = ReporteAbastecimiento.objects.get(producto=product)
+                    supplyReport = ReporteAbastecimiento.objects.filter(producto=product).order_by('-created_at')[:1].get()
                     supplyReport.producto = product
                     supplyReport.cantidadSugeridaStock = datos['promedioProductos']
                     supplyReport.mostrarAviso = 1
@@ -162,7 +162,8 @@ class HistorialAvisos(models.Model):
             if diasAlerta <= product.parametrizacion.maximo:
                 datos = HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).aggregate(promedioProductos=Avg('productosVendidos'),fechaMinima=Min('fechaCompra'),fechaMaxima=Max('fechaCompra'),totalRegistros=Count('alerta'))                
                 if datos['totalRegistros'] != 0:
-                    supplyReport = ReporteAbastecimiento.objects.get(producto=product)
+                    supplyReport = ReporteAbastecimiento.objects.filter(producto=product).order_by('-created_at')[:1].get()
+                    print(supplyReport)
                     supplyReport.producto = product
                     supplyReport.cantidadSugeridaStock = datos['promedioProductos']
                     supplyReport.mostrarAviso = 1
