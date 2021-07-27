@@ -178,7 +178,7 @@ class HistorialAvisos(models.Model):
         return super(HistorialAvisos, self).save(*args, **kwargs)
 
 # Create your models here.
-class Lotes(models.Model):
+class IngresoProductos(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
     cantidad = models.IntegerField(max_length=150,null=True)
     fechaElaboracion = models.DateTimeField(null=True)
@@ -190,7 +190,7 @@ class Lotes(models.Model):
     state = models.SmallIntegerField(default=1)
 
     def save(self, *args, **kwargs):
-        return super(Lotes, self).save(*args, **kwargs)
+        return super(IngresoProductos, self).save(*args, **kwargs)
     
 def enviarEmailAvisoAbastecimiento(product, maxDate):
     try:
@@ -226,12 +226,12 @@ def enviarEmailAvisoAbastecimiento(product, maxDate):
 def createTablesReport(sender, instance, **kwargs):
     timezone_now = timezone.localtime(timezone.now())
     # CREAR LOTE
-    Lotes.objects.create(cantidad = instance.stock, fechaElaboracion = instance.fechaElaboracion, fechaCaducidad = instance.fechaCaducidad, precioCompra = instance.costoCompra, producto = instance)
+    IngresoProductos.objects.create(cantidad = instance.stock, fechaElaboracion = instance.fechaElaboracion, fechaCaducidad = instance.fechaCaducidad, precioCompra = instance.costoCompra, producto = instance)
     # CREAR REPORTE STOCK
     ReporteStock.objects.create(fechaUltimaStock = str(timezone_now), montoCompra = instance.costoCompra, producto = instance)
     # CREAR REPORTE ABASTECIMIENTO
-    ReporteAbastecimiento.objects.create(cantidadSugeridaStock=0,fechaMaximaStock="",state=1,producto=instance)
-    lote = Lotes.objects.filter(fechaCaducidad__lte=str(timezone_now), state=1,producto=instance.id).aggregate(productosCaducados=Sum("cantidad"))    
+    ReporteAbastecimiento.objects.create(cantidadSugeridaStock=0,state=1,producto=instance)
+    lote = IngresoProductos.objects.filter(fechaCaducidad__lte=str(timezone_now), state=1,producto=instance.id).aggregate(productosCaducados=Sum("cantidad"))    
     if instance.fechaCaducidad != None:
         diasParaCaducar = (instance.fechaCaducidad - timezone_now).days
     else:

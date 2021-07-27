@@ -592,6 +592,9 @@ def insertarDato_Producto(dato):
         data['codigoBarras'] = dato[0].replace('"', "") if dato[0].replace('"', "") != "NULL" else None
         data['descripcion'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
         data['stock'] = dato[2].replace('"', "") if dato[2] != "NULL" else None        
+        data['lote'] = dato[3].replace('"', "") if dato[3] != "NULL" else None
+        data['fechaElaboracion'] = dato[4].replace('"', "") if dato[4] != "NULL" else None
+        data['fechaCaducidad'] = dato[5].replace('"', "") if dato[5] != "NULL" else None
         data['updated_at'] = str(timezone_now)
         #inserto el dato con los campos requeridos
         query = Productos.objects.get(codigoBarras=data['codigoBarras'])
