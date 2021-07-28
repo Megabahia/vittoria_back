@@ -127,6 +127,7 @@ class HistorialAvisos(models.Model):
     codigoBarras = models.CharField(max_length=150,null=True)
     fechaCompra = models.DateTimeField(null=True)
     productosVendidos = models.IntegerField(max_length=150,null=True)
+    precioVenta = models.FloatField(null=True)
     alerta = models.SmallIntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -163,7 +164,6 @@ class HistorialAvisos(models.Model):
                 datos = HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).aggregate(promedioProductos=Avg('productosVendidos'),fechaMinima=Min('fechaCompra'),fechaMaxima=Max('fechaCompra'),totalRegistros=Count('alerta'))                
                 if datos['totalRegistros'] != 0:
                     supplyReport = ReporteAbastecimiento.objects.filter(producto=product).order_by('-created_at')[:1].get()
-                    print(supplyReport)
                     supplyReport.producto = product
                     supplyReport.cantidadSugeridaStock = datos['promedioProductos']
                     supplyReport.mostrarAviso = 1
@@ -175,6 +175,11 @@ class HistorialAvisos(models.Model):
                     self.alerta = 1
                     HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).update(alerta=1)
                     enviarEmailAvisoAbastecimiento(product, maxDate)
+        # AUMENTAR VENTA ROTACION
+        rotacion = ReporteRotacion.objects.filter(producto=product).order_by('-created_at')[:1].get()
+        rotacion.productosVendidos += self.productosVendidos
+        rotacion.montoVenta += self.precioVenta
+        rotacion.save()
         # FIN TRIGGER ACTUALIZAR STOCK
         return super(HistorialAvisos, self).save(*args, **kwargs)
 
@@ -233,9 +238,9 @@ def createTablesReport(sender, instance, **kwargs):
     # CREAR REPORTE ABASTECIMIENTO
     ReporteAbastecimiento.objects.create(cantidadSugeridaStock=0,state=1,producto=instance)
     # CREAR REPORTE ROTACION PRODUCTOS
-    diasPeriodo = 7
-    fechaFin = timezone_now + datetime.timedelta(days=diasPeriodo)
-    ReporteRotacion.objects.create(fechaInicio=str(timezone_now),fechaFin=str(fechaFin),diasPeriodo=diasPeriodo,productosVendidos=0,tipoRotacion="Bajo",montoVenta=0,producto=instance)
+    # diasPeriodo = 7
+    # fechaFin = timezone_now + datetime.timedelta(days=diasPeriodo)
+    # ReporteRotacion.objects.create(fechaInicio=str(timezone_now),fechaFin=str(fechaFin),diasPeriodo=diasPeriodo,productosVendidos=0,tipoRotacion="Bajo",montoVenta=0,producto=instance)
     ingresoProducto = IngresoProductos.objects.filter(fechaCaducidad__lte=str(timezone_now), state=1,producto=instance.id).aggregate(productosCaducados=Sum("cantidad"))        
     if instance.fechaCaducidad != None:
         ahora = instance.fechaCaducidad
