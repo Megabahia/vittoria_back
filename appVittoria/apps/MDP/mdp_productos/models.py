@@ -234,7 +234,6 @@ def enviarEmailAvisoAbastecimiento(product, maxDate):
 
 @receiver(post_save, sender=Productos)
 def createTablesReport(sender, instance, **kwargs):    
-    print("holsss")
     timezone_now = timezone.localtime(timezone.now())
     # CREAR INGRESO PRODUCTOS
     IngresoProductos.objects.create(cantidad = instance.stock, fechaElaboracion = str(instance.fechaElaboracion), fechaCaducidad = str(instance.fechaCaducidad), precioCompra = instance.costoCompra, producto = instance)

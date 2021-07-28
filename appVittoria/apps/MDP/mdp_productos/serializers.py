@@ -6,6 +6,8 @@ from apps.MDP.mdp_productos.models import (
     HistorialAvisos
 )
 
+from apps.MDP.mdp_parametrizaciones.models import Parametrizaciones
+
 from django.utils import timezone
 
 class ProductosSerializer(serializers.ModelSerializer):
@@ -105,8 +107,9 @@ class AbastecimientoListSerializer(serializers.ModelSerializer):
             data['subCategoria'] = producto['subCategoria']
         if producto['stock']:
             data['stock'] = producto['stock']
-        if producto['alertaAbastecimiento']:
-            data['alertaAbastecimiento'] = producto['alertaAbastecimiento']
+        if producto['parametrizacion']:
+            query = Parametrizaciones.objects.get(id=producto['parametrizacion'])
+            data['alertaAbastecimiento'] = query.nombre
         return data
 
 # HISTORIAL ABASTECIMIENTO
