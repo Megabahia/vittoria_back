@@ -147,7 +147,7 @@ def productos_create(request):
         'dataRecibida' : '{}'
     }
     if request.method == 'POST':
-        try:
+        # try:
             logModel['dataEnviada'] = str(request.data)
             request.data['created_at'] = str(timezone_now)
             if 'updated_at' in request.data:
@@ -160,10 +160,10 @@ def productos_create(request):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel,serializer.errors,logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        # except Exception as e: 
+        #     err={"error":'Un error ha ocurrido: {}'.format(e)}  
+        #     createLog(logModel,err,logExcepcion)
+        #     return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 # ACTUALIZAR
 @api_view(['POST'])

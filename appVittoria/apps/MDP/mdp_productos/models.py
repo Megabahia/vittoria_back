@@ -34,8 +34,8 @@ class Productos(models.Model):
     estado = models.CharField(max_length=150,null=True)
     variableRefil = models.CharField(max_length=150,null=True)
     lote = models.CharField(max_length=150,null=True)
-    fechaElaboracion = models.DateTimeField(null=True)
-    fechaCaducidad = models.DateTimeField(null=True)
+    fechaElaboracion = models.DateField(null=True)
+    fechaCaducidad = models.DateField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -191,8 +191,8 @@ class HistorialAvisos(models.Model):
 class IngresoProductos(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
     cantidad = models.IntegerField(max_length=150,null=True)
-    fechaElaboracion = models.DateTimeField(null=True)
-    fechaCaducidad = models.DateTimeField(null=True)
+    fechaElaboracion = models.DateField(null=True)
+    fechaCaducidad = models.DateField(null=True)
     precioCompra = models.FloatField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -245,14 +245,14 @@ def createTablesReport(sender, instance, **kwargs):
     diasPeriodo = 7
     fechaFin = timezone_now + datetime.timedelta(days=diasPeriodo)
     ReporteRotacion.objects.create(fechaInicio=str(timezone_now),fechaFin=str(fechaFin),diasPeriodo=diasPeriodo,productosVendidos=0,tipoRotacion="Bajo",montoVenta=0,producto=instance)
-    ingresoProducto = IngresoProductos.objects.filter(fechaCaducidad__lte=str(timezone_now), state=1,producto=instance.id).aggregate(productosCaducados=Sum("cantidad"))        
+    ingresoProducto = IngresoProductos.objects.filter(fechaCaducidad__lte=str(datetime.datetime.now().date()), state=1,producto=instance.id).aggregate(productosCaducados=Sum("cantidad"))        
     if instance.fechaCaducidad != None:
         ahora = instance.fechaCaducidad
         if isinstance(ahora, str):
             datetimeobj=datetime.datetime.strptime(ahora, "%Y-%m-%d %H:%M:%S")
             diasParaCaducar = (datetimeobj - timezone_now.replace(tzinfo=None)).days
         else:
-            diasParaCaducar = (ahora - timezone_now).days
+            diasParaCaducar = (ahora - datetime.datetime.now().date()).days
     else:
         diasParaCaducar = 0
     # CREAR REPORTE CADUCIDAD
