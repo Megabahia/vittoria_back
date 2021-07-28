@@ -242,9 +242,9 @@ def createTablesReport(sender, instance, **kwargs):
     # CREAR REPORTE ABASTECIMIENTO
     ReporteAbastecimiento.objects.create(cantidadSugeridaStock=0,state=1,producto=instance)
     # CREAR REPORTE ROTACION PRODUCTOS
-    # diasPeriodo = 7
-    # fechaFin = timezone_now + datetime.timedelta(days=diasPeriodo)
-    # ReporteRotacion.objects.create(fechaInicio=str(timezone_now),fechaFin=str(fechaFin),diasPeriodo=diasPeriodo,productosVendidos=0,tipoRotacion="Bajo",montoVenta=0,producto=instance)
+    diasPeriodo = 7
+    fechaFin = timezone_now + datetime.timedelta(days=diasPeriodo)
+    ReporteRotacion.objects.create(fechaInicio=str(timezone_now),fechaFin=str(fechaFin),diasPeriodo=diasPeriodo,productosVendidos=0,tipoRotacion="Bajo",montoVenta=0,producto=instance)
     ingresoProducto = IngresoProductos.objects.filter(fechaCaducidad__lte=str(timezone_now), state=1,producto=instance.id).aggregate(productosCaducados=Sum("cantidad"))        
     if instance.fechaCaducidad != None:
         ahora = instance.fechaCaducidad
