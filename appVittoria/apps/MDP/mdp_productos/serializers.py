@@ -108,8 +108,7 @@ class AbastecimientoListSerializer(serializers.ModelSerializer):
         if producto['stock']:
             data['stock'] = producto['stock']
         if producto['parametrizacion']:
-            query = Parametrizaciones.objects.get(id=producto['parametrizacion'])
-            data['alertaAbastecimiento'] = query.nombre
+            data['alertaAbastecimiento'] = Parametrizaciones.objects.get(id=producto['parametrizacion']).nombre
         return data
 
 # HISTORIAL ABASTECIMIENTO
