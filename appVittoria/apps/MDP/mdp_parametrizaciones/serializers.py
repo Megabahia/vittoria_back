@@ -16,7 +16,7 @@ class ParametrizacionesHijoSerializer(serializers.ModelSerializer):
 class ParametrizacionesListaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Parametrizaciones
-       	fields = ['id','nombre','tipo','tipoVariable','valor','descripcion']
+       	fields = ['id','nombre','tipo','tipoVariable','valor','descripcion','maximo','minimo']
 
 
 class ParametrizacionesFiltroSerializer(serializers.ModelSerializer):
