@@ -179,6 +179,10 @@ class HistorialAvisos(models.Model):
         rotacion = ReporteRotacion.objects.filter(producto=product).order_by('-created_at')[:1].get()
         rotacion.productosVendidos += self.productosVendidos
         rotacion.montoVenta += self.precioVenta
+        consulta = IngresoProductos.objects.filter(created_at__gte=str(rotacion.fechaInicio),created_at__lte=str(rotacion.fechaFin)).aggregate(promedioInventario=Avg('cantidad'))        
+        resultadoRotacion = rotacion.montoVenta / consulta["promedioInventario"]        
+        tipoRotacion = Parametrizaciones.objects.filter(tipo="TIPO_ROTACION",maximo__gte=int(resultadoRotacion))[:1].get()        
+        rotacion.tipoRotacion = tipoRotacion.nombre
         rotacion.save()
         # FIN TRIGGER ACTUALIZAR STOCK
         return super(HistorialAvisos, self).save(*args, **kwargs)
