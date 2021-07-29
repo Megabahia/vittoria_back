@@ -6,8 +6,7 @@ from apps.MDP.mdp_productos.models import (
     HistorialAvisos
 )
 
-from apps.MDP.mdp_parametrizaciones.models import Parametrizaciones
-
+import datetime
 from django.utils import timezone
 
 class ProductosSerializer(serializers.ModelSerializer):
@@ -108,7 +107,7 @@ class AbastecimientoListSerializer(serializers.ModelSerializer):
         if producto['stock']:
             data['stock'] = producto['stock']
         if producto['parametrizacion']:
-            data['alertaAbastecimiento'] = Parametrizaciones.objects.get(id=producto['parametrizacion']).nombre
+            data['alertaAbastecimiento'] = instance.producto.parametrizacion.nombre
         return data
 
 # HISTORIAL ABASTECIMIENTO
@@ -145,7 +144,9 @@ class CaducidadListSerializer(serializers.ModelSerializer):
         model = ReporteCaducidad
        	fields = '__all__'
     def to_representation(self, instance):
-        data = super(CaducidadListSerializer, self).to_representation(instance)
+        instance.diasParaCaducar = (instance.producto.fechaCaducidad - datetime.datetime.now().date()).days
+        instance.save()
+        data = super(CaducidadListSerializer, self).to_representation(instance)        
         producto = data.pop('producto')
         if producto['codigoBarras']:
             data['codigoBarras'] = producto['codigoBarras']
