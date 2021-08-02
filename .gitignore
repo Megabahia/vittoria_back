@@ -33,4 +33,8 @@ appVittoria/apps/MDM/mdm_facturas/__pycache__/
 appVittoria/apps/MDM/mdm_negocios/__pycache__/
 appVittoria/apps/MDM/mdm_parametrizaciones/__pycache__/
 appVittoria/apps/MDM/mdm_prospectosClientes/__pycache__/
+appVittoria/apps/MDO/mdo_parametrizaciones/__pycache__/
+appVittoria/apps/MDO/mdo_generarOferta/__pycache__/
+appVittoria/apps/MDO/mdo_prediccionCrosseling/__pycache__/
+appVittoria/apps/MDO/mdo_prediccionRefil/__pycache__/
 appVittoria/apps/config/__pycache__/
