@@ -2,7 +2,7 @@ from apps.MDO.mdo_prediccionCrosseling.models import (
     PrediccionCrosseling, Detalles
 )
 from apps.MDO.mdo_prediccionCrosseling.serializers import (
-    PrediccionCrosselingSerializer
+    PrediccionCrosselingListSerializer, PrediccionCrosselingSerializer
 )
 from rest_framework import status
 from rest_framework.response import Response
@@ -64,7 +64,7 @@ def prediccionCrosseling_list(request):
 
             #Serializar los datos
             query = PrediccionCrosseling.objects.filter(**filters).order_by('-created_at')
-            serializer = PrediccionCrosselingSerializer(query[offset:limit], many=True)
+            serializer = PrediccionCrosselingListSerializer(query[offset:limit], many=True)
             new_serializer_data={'cont': query.count(),
             'info':serializer.data}
             #envio de datos

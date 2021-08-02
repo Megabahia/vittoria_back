@@ -4,6 +4,12 @@ from apps.MDO.mdo_prediccionCrosseling.models import PrediccionCrosseling, Detal
 
 import datetime
 
+# Listar predicciones crosseling
+class PrediccionCrosselingListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PrediccionCrosseling
+       	fields = '__all__'
+
 # Guardar Factura
 class DetallesSerializer(serializers.ModelSerializer):
     class Meta:
