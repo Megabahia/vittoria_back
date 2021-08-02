@@ -151,3 +151,19 @@ def datosFichaTecnicaProductosMDP():
         'api':'fichaTecnicaProductos/'
     }
     return data  
+
+#MODULO MDO-PARAMETRIZACIONES
+def datosParametrizacionesMDO():
+    data={
+        'modulo':'MDO',
+        'api':'parametrizaciones/'
+    }
+    return data  
+
+#MODULO MDO-PARAMETRIZACIONES
+def datosPrediccionCrosselingMDO():
+    data={
+        'modulo':'MDO',
+        'api':'prediccionCrosseling/'
+    }
+    return data  

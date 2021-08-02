@@ -1,4 +1,4 @@
-PRODUCTION=True
+PRODUCTION=False
 
 #VARIABLES GLOBALES
 endpointEmailAsignacionPassword="/usuario/asignacionPassword/"
@@ -47,6 +47,14 @@ if PRODUCTION:
             'PASSWORD': 'Tc2;1EE{DBE^oN',
             'HOST': '209.145.61.41',
             'PORT': 3306
+        },
+        'vittoria_mdo_db': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'vittoria_mdo',
+            'USER': 'usr_maintainer',
+            'PASSWORD': 'Tc2;1EE{DBE^oN',
+            'HOST': '209.145.61.41',
+            'PORT': 3306
         }
     }
 else:
@@ -87,6 +95,14 @@ else:
         'vittoria_mdp_db': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'vittoria_mdp',
+            'USER': 'root',
+            'PASSWORD': '',
+            'HOST': 'localhost',
+            'PORT': 3307
+        },
+        'vittoria_mdo_db': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'vittoria_mdo',
             'USER': 'root',
             'PASSWORD': '',
             'HOST': 'localhost',

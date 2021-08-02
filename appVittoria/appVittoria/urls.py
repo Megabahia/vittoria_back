@@ -40,6 +40,9 @@ urlpatterns = [
     path('mdp/subCategorias/', include(('apps.MDP.mdp_subCategorias.urls', 'subCategorias'), namespace='subCategorias')),
     path('mdp/productos/', include(('apps.MDP.mdp_productos.urls', 'productos'), namespace='productos')),
     path('mdp/fichaTecnicaProductos/', include(('apps.MDP.mdp_fichaTecnicaProductos.urls', 'fichaTecnicaProductos'), namespace='fichaTecnicaProductos')),
+    # Modulo MDO
+    path('mdo/param/', include(('apps.MDO.mdo_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizaciones')),
+    path('mdo/prediccionCrosseling/', include(('apps.MDO.mdo_prediccionCrosseling.urls', 'prediccionCrosseling'), namespace='prediccionCrosseling')),
 
 ]
 

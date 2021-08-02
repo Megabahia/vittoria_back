@@ -27,7 +27,7 @@ CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = ')+^!3q$nko9e_n0(x!qo24xbh8m%k#0&&r6^%4!4_bp+m%=9!v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', '209.145.61.41', 'web.vittoria_app.com']
 
@@ -54,6 +54,9 @@ INSTALLED_APPS = [
     'apps.MDP.mdp_subCategorias',
     'apps.MDP.mdp_productos',
     'apps.MDP.mdp_fichaTecnicaProductos',    
+    # apps Vittoria MDO
+    'apps.MDO.mdo_parametrizaciones',
+    'apps.MDO.mdo_prediccionCrosseling',
     #CONFIG
     'apps.config',
     #Django external apps
@@ -120,7 +123,8 @@ DATABASES =config.DATABASES
 #AGREGO LAS RUTAS DE LAS DIFERENTES BASES DE DATOS
 DATABASE_ROUTERS = [
     'apps.config.routersDB.MDMRouter',
-    'apps.config.routersDB.MDPRouter'
+    'apps.config.routersDB.MDPRouter',
+    'apps.config.routersDB.MDORouter'
 ]
 
 # Password validation
