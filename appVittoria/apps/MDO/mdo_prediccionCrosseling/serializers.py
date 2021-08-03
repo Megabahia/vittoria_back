@@ -4,6 +4,7 @@ from apps.MDO.mdo_prediccionCrosseling.models import PrediccionCrosseling, Detal
 
 import requests
 import datetime
+from apps.config import config
 
 # Listar predicciones crosseling
 class PrediccionCrosselingListSerializer(serializers.ModelSerializer):
@@ -36,12 +37,12 @@ class PrediccionCrosselingSerializer(serializers.ModelSerializer):
 class DetallesImagenesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Detalles
-       	fields = '__all__'
+       	fields = ['id','articulo','codigo','cantidad','precio']
 
     def to_representation(self, instance):
         print(instance)
         auth_data = {'codigo': str(instance.codigo)}
-        resp = requests.post('http://127.0.0.1:8000/mdp/productos/producto/image/', data=auth_data)
+        resp = requests.post(config.API_BACK_END+'mdp/productos/producto/image/', data=auth_data)
         data = super(DetallesImagenesSerializer, self).to_representation(instance)
         if resp.json()['imagen']:
             data['imagen'] = resp.json()['imagen']
