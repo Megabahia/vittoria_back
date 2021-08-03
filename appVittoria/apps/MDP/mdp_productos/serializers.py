@@ -26,6 +26,12 @@ class DetallesSerializer(serializers.ModelSerializer):
         model = ProductoImagen
        	fields = '__all__'
 
+# IMAGEN URL
+class ImagenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductoImagen
+       	fields = ['imagen',]
+
 # CREAR PRODUCTO
 class ProductoCreateSerializer(serializers.ModelSerializer):
     imagenes = DetallesSerializer(many=True)

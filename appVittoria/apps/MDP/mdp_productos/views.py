@@ -8,7 +8,7 @@ from apps.MDP.mdp_productos.serializers import (
     ProductosSerializer, ProductosListSerializer,
     AbastecimientoListSerializer,
     StockListSerializer, CaducidadListSerializer, RotacionListSerializer, RefilListSerializer,
-    HistorialAvisosSerializer
+    HistorialAvisosSerializer, ImagenSerializer
 )
 from rest_framework import status
 from rest_framework.response import Response
@@ -637,6 +637,37 @@ def abastecimiento_create(request):
             createLog(logModel,serializer.errors,logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+# OBTENER URL IMAGEN
+@api_view(['POST'])
+def productoImagen_list(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'producto/image/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'CREAR',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            query = ProductoImagen.objects.filter(producto__codigoBarras=str(request.data['codigo']), producto__state=1).first()            
+        except ProductoImagen.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'POST':
+            serializer = ImagenSerializer(query)
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)

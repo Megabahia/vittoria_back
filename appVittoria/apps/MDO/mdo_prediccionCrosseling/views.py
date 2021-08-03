@@ -2,7 +2,7 @@ from apps.MDO.mdo_prediccionCrosseling.models import (
     PrediccionCrosseling, Detalles
 )
 from apps.MDO.mdo_prediccionCrosseling.serializers import (
-    PrediccionCrosselingListSerializer, PrediccionCrosselingSerializer
+    PrediccionCrosselingListSerializer, PrediccionCrosselingSerializer, DetallesImagenesSerializer
 )
 from rest_framework import status
 from rest_framework.response import Response
@@ -75,36 +75,36 @@ def prediccionCrosseling_list(request):
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
 #ENCONTRAR UNO
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
-# def productos_findOne(request, pk):
-#     timezone_now = timezone.localtime(timezone.now())
-#     logModel = {
-#         'endPoint': logApi+'listOne/',
-#         'modulo':logModulo,
-#         'tipo' : logExcepcion,
-#         'accion' : 'LEER',
-#         'fechaInicio' : str(timezone_now),
-#         'dataEnviada' : '{}',
-#         'fechaFin': str(timezone_now),
-#         'dataRecibida' : '{}'
-#     }
-#     try:
-#         try:
-#             query = Productos.objects.get(pk=pk, state=1)
-#         except Productos.DoesNotExist:
-#             err={"error":"No existe"}  
-#             createLog(logModel,err,logExcepcion)
-#             return Response(err,status=status.HTTP_404_NOT_FOUND)
-#         #tomar el dato
-#         if request.method == 'GET':
-#             serializer = PrediccionCrosselingSerializer(query)
-#             createLog(logModel,serializer.data,logTransaccion)
-#             return Response(serializer.data,status=status.HTTP_200_OK)
-#     except Exception as e: 
-#             err={"error":'Un error ha ocurrido: {}'.format(e)}  
-#             createLog(logModel,err,logExcepcion)
-#             return Response(err, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def detalles_list(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'productosImagenes/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            query = Detalles.objects.filter(prediccionCrosseling=pk, state=1)
+        except Detalles.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'GET':            
+            serializer = DetallesImagenesSerializer(query, many=True)
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 #CREAR
 @api_view(['POST'])
