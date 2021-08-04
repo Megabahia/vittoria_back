@@ -1,5 +1,6 @@
 from apps.MDM.mdm_clientes.models import Clientes
-from apps.MDM.mdm_clientes.serializers import ClientesSerializer, ClientesListarSerializer, ClienteImagenSerializer, ClientesUpdateSerializer
+from apps.MDM.mdm_facturas.models import FacturasEncabezados
+from apps.MDM.mdm_clientes.serializers import ClientesSerializer, ClientesListarSerializer, ClienteImagenSerializer, ClientesUpdateSerializer, ClientePrediccionSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -417,3 +418,37 @@ def insertarDato_cliente(dato):
         return 'Dato insertado correctamente'
     except Exception as e:
         return str(e)
+
+#ENCONTRAR CLIENTE POR FACTURA
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def cliente_by_factura_findOne(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'cliente/factura/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            query = FacturasEncabezados.objects.get(pk=pk, state=1)
+        except FacturasEncabezados.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'GET':            
+            serializer = ClientePrediccionSerializer(query.cliente)
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+

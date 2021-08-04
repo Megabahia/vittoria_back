@@ -5,7 +5,7 @@ from apps.MDP.mdp_productos.views import (
 	producto_images_findOne,
 	search_producto_list, abastecimiento_list, stock_list, caducidad_list, rotacion_list, refil_list,
 	abastecimiento_create,
-	uploadEXCEL_crearProductos, productoImagen_list
+	uploadEXCEL_crearProductos, productoImagen_list, prediccion_crosseling_list
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -36,4 +36,6 @@ urlpatterns = [
 	path('refil/list/', refil_list, name="refil_list"),
 	# OBTENER URL IMAGEN
 	path('producto/image/', productoImagen_list, name="productoImagen_list"),
+	# OBTENER PREDICCION CROSSELING
+	path('prediccionCrosseling/', prediccion_crosseling_list, name="prediccion_crosseling_list"),
 ]

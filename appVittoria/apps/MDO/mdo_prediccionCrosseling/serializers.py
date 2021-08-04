@@ -40,12 +40,26 @@ class DetallesImagenesSerializer(serializers.ModelSerializer):
        	fields = ['id','articulo','codigo','cantidad','precio']
 
     def to_representation(self, instance):
-        print(instance)
         auth_data = {'codigo': str(instance.codigo)}
         resp = requests.post(config.API_BACK_END+'mdp/productos/producto/image/', data=auth_data)
         data = super(DetallesImagenesSerializer, self).to_representation(instance)
         if resp.json()['imagen']:
             data['imagen'] = resp.json()['imagen']
+        return data
+
+# PREDICCION CROSSELING 
+class PrediccionCrosselingProductosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Detalles
+       	fields = ['id','articulo','codigo','cantidad','precio']
+
+    def to_representation(self, instance):
+        auth_data = {'codigo': str(instance.codigo)}
+        resp = requests.post(config.API_BACK_END+'mdp/productos/prediccionCrosseling/', data=auth_data)
+        data = super(PrediccionCrosselingProductosSerializer, self).to_representation(instance)
+        
+        data['predicciones'] = resp.json()
+
         return data
 
 

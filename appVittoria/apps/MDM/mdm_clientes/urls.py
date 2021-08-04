@@ -2,7 +2,8 @@ from django.urls import path,include
 from apps.MDM.mdm_clientes.views.cliente_views import(
 	cliente_list, cliente_findOne, cliente_create,
 	cliente_update, cliente_delete, clienteImagen_update,
-	uploadCSV_crearClientes, uploadEXCEL_crearClientes, cliente_findOne_cedula
+	uploadCSV_crearClientes, uploadEXCEL_crearClientes, cliente_findOne_cedula,
+	cliente_by_factura_findOne
 )
 
 from apps.MDM.mdm_clientes.views.datos_fisicos_views import(
@@ -35,6 +36,7 @@ urlpatterns = [
 	path('update/imagen/<int:pk>', clienteImagen_update, name="clienteImagen_update"),	
 	path('upload/csv/', uploadCSV_crearClientes, name="uploadCSV_crearClientes"),
 	path('upload/excel/', uploadEXCEL_crearClientes, name="uploadEXCEL_crearClientes"),		
+	path('cliente/factura/<int:pk>', cliente_by_factura_findOne, name="cliente_by_factura_findOne"),		
 	# DATOS FISICOS CLIENTE
 	path('datos-fisicos-cliente/list/<int:pk>', datosFisicos_list, name="datosFisicos_list"),
 	path('datos-fisicos-cliente/create/', datosFisicos_create, name="datosFisicos_create"),

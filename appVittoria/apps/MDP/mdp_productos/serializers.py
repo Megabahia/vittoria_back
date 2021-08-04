@@ -189,3 +189,30 @@ class RefilListSerializer(serializers.ModelSerializer):
         model = Productos
        	fields = ['id','codigoBarras','nombre','categoria','subCategoria','refil','variableRefil']
 
+# PREDICCION PRODUCTOS CROSSELING
+class PrediccionCrosselingSerializer(serializers.ModelSerializer):
+    producto = ProductosSerializer(many=False, read_only=True)    
+    class Meta:
+        model = ReporteRotacion
+       	fields = ['producto']
+    def to_representation(self, instance):
+        data = super(PrediccionCrosselingSerializer, self).to_representation(instance)
+        producto = data.pop('producto')
+        if producto['codigoBarras']:
+            data['codigoBarras'] = producto['codigoBarras']
+        if producto['nombre']:
+            data['nombre'] = producto['nombre']
+        if producto['precioVentaA']:
+            data['precioVentaA'] = producto['precioVentaA']
+        if producto['precioVentaB']:
+            data['precioVentaB'] = producto['precioVentaB']
+        if producto['precioVentaC']:
+            data['precioVentaC'] = producto['precioVentaC']
+        if producto['precioVentaD']:
+            data['precioVentaD'] = producto['precioVentaD']
+        if producto['precioVentaE']:
+            data['precioVentaE'] = producto['precioVentaE']
+        if instance.producto.imagenes.first():
+            data['imagen'] = str(instance.producto.imagenes.first().imagen)
+        return data
+
