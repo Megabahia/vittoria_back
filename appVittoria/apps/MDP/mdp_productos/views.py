@@ -8,7 +8,8 @@ from apps.MDP.mdp_productos.serializers import (
     ProductosSerializer, ProductosListSerializer,
     AbastecimientoListSerializer,
     StockListSerializer, CaducidadListSerializer, RotacionListSerializer, RefilListSerializer,
-    HistorialAvisosSerializer, ImagenSerializer, PrediccionCrosselingSerializer
+    HistorialAvisosSerializer, ImagenSerializer, PrediccionCrosselingSerializer,
+    PrediccionRefilSerializer, PrediccionRefilOneSerializer
 )
 from rest_framework import status
 from rest_framework.response import Response
@@ -184,7 +185,6 @@ def productos_update(request, pk):
     try:
         logModel['dataEnviada'] = str(request.data)
         query = Productos.objects.get(pk=pk, state=1)
-        # print(query.detalles.count())
     except Productos.DoesNotExist:
         errorNoExiste={'error':'No existe'}
         createLog(logModel,errorNoExiste,logExcepcion)
@@ -697,6 +697,68 @@ def prediccion_crosseling_list(request):
         if request.method == 'POST':
             query = ReporteRotacion.objects.filter(producto__subCategoria = query.subCategoria,tipoRotacion = 'Bajo',state = 1).order_by('-created_at','-producto__stock')
             serializer = PrediccionCrosselingSerializer(query[0:3], many = True)
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+# OBTENER PRODUCTO REFIL
+@api_view(['POST'])
+def producto_refil_list(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'prediccionCrosseling/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'CREAR',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:                 
+            query = Productos.objects.filter(codigoBarras=request.data['producto'], state=1)
+        except Productos.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'POST':            
+            serializer = PrediccionRefilSerializer(query, many = True)
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+# OBTENER PREDICCION REFIL
+@api_view(['POST'])
+def prediccion_refil_list(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'prediccionRefil/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'CREAR',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:                 
+            query = ProductoImagen.objects.filter(producto__codigoBarras=request.data['producto'], state=1).first()      
+        except ProductoImagen.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'POST':
+            serializer = PrediccionRefilOneSerializer(query)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
     except Exception as e: 

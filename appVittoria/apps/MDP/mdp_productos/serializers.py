@@ -216,3 +216,36 @@ class PrediccionCrosselingSerializer(serializers.ModelSerializer):
             data['imagen'] = str(instance.producto.imagenes.first().imagen)
         return data
 
+# OBTENER PRODUCTOS REFIL
+class PrediccionRefilSerializer(serializers.ModelSerializer): 
+    class Meta:
+        model = Productos
+       	fields = ['codigoBarras','refil']
+
+
+# PREDICCION PRODUCTOS CROSSELING
+class PrediccionRefilOneSerializer(serializers.ModelSerializer):  
+    producto = ProductosSerializer(many=False, read_only=True)    
+    class Meta:
+        model = ProductoImagen
+       	fields = ['producto']
+    def to_representation(self, instance):
+        data = super(PrediccionRefilOneSerializer, self).to_representation(instance)
+        producto = data.pop('producto')
+        if producto['codigoBarras']:
+            data['codigoBarras'] = producto['codigoBarras']
+        if producto['nombre']:
+            data['nombre'] = producto['nombre']
+        if producto['precioVentaA']:
+            data['precioVentaA'] = producto['precioVentaA']
+        if producto['precioVentaB']:
+            data['precioVentaB'] = producto['precioVentaB']
+        if producto['precioVentaC']:
+            data['precioVentaC'] = producto['precioVentaC']
+        if producto['precioVentaD']:
+            data['precioVentaD'] = producto['precioVentaD']
+        if producto['precioVentaE']:
+            data['precioVentaE'] = producto['precioVentaE']
+        if instance.producto.imagenes.first():
+            data['imagen'] = str(instance.producto.imagenes.first().imagen)
+        return data

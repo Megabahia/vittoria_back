@@ -57,6 +57,9 @@ INSTALLED_APPS = [
     # apps Vittoria MDO
     'apps.MDO.mdo_parametrizaciones',
     'apps.MDO.mdo_prediccionCrosseling',
+    'apps.MDO.mdo_prediccionRefil',
+    'apps.MDO.mdo_prediccionProductosNuevos',
+    'apps.MDO.mdo_generarOferta',
     #CONFIG
     'apps.config',
     #Django external apps

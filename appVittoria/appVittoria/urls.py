@@ -43,6 +43,9 @@ urlpatterns = [
     # Modulo MDO
     path('mdo/param/', include(('apps.MDO.mdo_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizaciones')),
     path('mdo/prediccionCrosseling/', include(('apps.MDO.mdo_prediccionCrosseling.urls', 'prediccionCrosseling'), namespace='prediccionCrosseling')),
+    path('mdo/prediccionRefil/', include(('apps.MDO.mdo_prediccionRefil.urls', 'prediccionRefil'), namespace='prediccionRefil')),
+    # path('mdo/prediccionProductosNuevos/', include(('apps.MDO.mdo_prediccionProductosNuevos.urls', 'prediccionProductosNuevos'), namespace='prediccionProductosNuevos')),
+    # path('mdo/generarOferta/', include(('apps.MDO.mdo_prediccionCrosseling.urls', 'generarOferta'), namespace='generarOferta')),
 
 ]
 

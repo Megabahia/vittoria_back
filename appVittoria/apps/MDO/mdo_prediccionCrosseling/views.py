@@ -58,10 +58,10 @@ def prediccionCrosseling_list(request):
                 filters['fechaPredicciones__lte'] = str(request.data['fin'])              
             if 'cliente' in request.data:
                 if request.data['cliente']!='':
-                    filters['cliente'] = str(request.data['cliente'])     
+                    filters['cliente__isnull'] = False        
             if 'negocio' in request.data:
                 if request.data['negocio']!='':
-                    filters['negocio'] = str(request.data['negocio'])     
+                    filters['negocio__isnull'] = False 
             if 'identificacion' in request.data:
                 if request.data['identificacion']!='':
                     filters['identificacion__icontains'] = str(request.data['identificacion'])     

@@ -3,6 +3,7 @@ from django.db import models
 # Create your models here.
 class PrediccionCrosseling(models.Model):
     factura_id = models.PositiveIntegerField(null=False)
+    # codigo = models.AutoField(null=False)
     fechaPredicciones = models.DateField(null=True)
     nombres = models.CharField(max_length=150,null=False)
     apellidos = models.CharField(max_length=150,null=False)

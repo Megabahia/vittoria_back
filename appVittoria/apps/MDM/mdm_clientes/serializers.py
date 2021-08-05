@@ -46,6 +46,6 @@ class TablaParientesSerializer(serializers.ModelSerializer):
 class ClientePrediccionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clientes
-       	fields = ['id','nombreCompleto','correo','cedula','estado','paisNacimiento']
+       	fields = ['id','nombreCompleto','correo','cedula','estado','paisNacimiento','imagen']
 
 
