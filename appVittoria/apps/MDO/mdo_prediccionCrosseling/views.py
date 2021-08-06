@@ -171,7 +171,11 @@ def prediccion_crosseling_listOne(request, pk):
             serializer = PrediccionCrosselingProductosSerializer(query, many=True)
             auth_token=request.META['HTTP_AUTHORIZATION']
             hed = {'Authorization': auth_token}
-            r = requests.get(config.API_BACK_END+'mdm/clientes/cliente/factura/'+str(query[0].prediccionCrosseling.factura_id),headers=hed)            
+            if query[0].prediccionCrosseling.cliente is not None:
+                r = requests.get(config.API_BACK_END+'mdm/clientes/cliente/factura/'+str(query[0].prediccionCrosseling.factura_id),headers=hed)            
+            else:
+                r = requests.get(config.API_BACK_END+'mdm/negocios/negocio/factura/'+str(query[0].prediccionCrosseling.factura_id),headers=hed)            
+            
             data = {'cliente': r.json(), 'productos': serializer.data}
             createLog(logModel,serializer.data,logTransaccion)
             return Response(data,status=status.HTTP_200_OK)

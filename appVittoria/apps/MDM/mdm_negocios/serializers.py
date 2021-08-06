@@ -33,7 +33,10 @@ class PersonalNegociosSerializer(serializers.ModelSerializer):
         model = PersonalNegocios
        	fields = '__all__'
 
-
+class NegocioPrediccionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Negocios
+       	fields = ['id','nombreComercial','correoPersonal','ruc','estado','paisOrigen','imagen']
     
 
     

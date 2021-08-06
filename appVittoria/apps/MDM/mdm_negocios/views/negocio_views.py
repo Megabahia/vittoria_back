@@ -1,5 +1,6 @@
 from apps.MDM.mdm_negocios.models import Negocios
-from apps.MDM.mdm_negocios.serializers import NegociosSerializer, NegociosListarSerializer, NegociosImagenSerializer
+from apps.MDM.mdm_facturas.models import FacturasEncabezados
+from apps.MDM.mdm_negocios.serializers import NegociosSerializer, NegociosListarSerializer, NegociosImagenSerializer, NegocioPrediccionSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -288,3 +289,38 @@ def negociosImagen_update(request, pk):
         err={"error":'Un error ha ocurrido: {}'.format(e)}  
         createLog(logModel,err,logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+#ENCONTRAR NEGOCIO POR FACTURA
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def negocio_by_factura_findOne(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'cliente/factura/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            query = FacturasEncabezados.objects.get(pk=pk, state=1)
+        except FacturasEncabezados.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'GET':            
+            serializer = NegocioPrediccionSerializer(query.negocio)
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+
