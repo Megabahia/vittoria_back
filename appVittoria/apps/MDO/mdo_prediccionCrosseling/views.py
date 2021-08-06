@@ -172,11 +172,12 @@ def prediccion_crosseling_listOne(request, pk):
             auth_token=request.META['HTTP_AUTHORIZATION']
             hed = {'Authorization': auth_token}
             if query[0].prediccionCrosseling.cliente is not None:
-                r = requests.get(config.API_BACK_END+'mdm/clientes/cliente/factura/'+str(query[0].prediccionCrosseling.factura_id),headers=hed)            
+                r = requests.get(config.API_BACK_END+'mdm/clientes/cliente/factura/'+str(query[0].prediccionCrosseling.factura_id),headers=hed)
+                data = {'cliente': r.json(), 'productos': serializer.data}
             else:
-                r = requests.get(config.API_BACK_END+'mdm/negocios/negocio/factura/'+str(query[0].prediccionCrosseling.factura_id),headers=hed)            
+                r = requests.get(config.API_BACK_END+'mdm/negocios/negocio/factura/'+str(query[0].prediccionCrosseling.factura_id),headers=hed)
+                data = {'negocio': r.json(), 'productos': serializer.data}
             
-            data = {'cliente': r.json(), 'productos': serializer.data}
             createLog(logModel,serializer.data,logTransaccion)
             return Response(data,status=status.HTTP_200_OK)
     except Exception as e: 

@@ -191,8 +191,12 @@ def prediccion_refil_listOne(request, pk):
             serializer = PrediccionRefilProductosSerializer(query, many=True)
             auth_token=request.META['HTTP_AUTHORIZATION']
             hed = {'Authorization': auth_token}
-            r = requests.get(config.API_BACK_END+'mdm/clientes/listOne/'+str(query[0].prediccionRefil.cliente),headers=hed)                      
-            data = {'cliente': r.json(), 'productos': serializer.data}
+            if query[0].prediccionRefil.cliente is not None:
+                r = requests.get(config.API_BACK_END+'mdm/clientes/listOne/'+str(query[0].prediccionRefil.cliente),headers=hed) 
+                data = {'cliente': r.json(), 'productos': serializer.data}                     
+            else:
+                r = requests.get(config.API_BACK_END+'mdm/negocios/listOne/'+str(query[0].prediccionRefil.negocio),headers=hed) 
+                data = {'negocio': r.json(), 'productos': serializer.data}
             createLog(logModel,serializer.data,logTransaccion)
             return Response(data,status=status.HTTP_200_OK)
     except Exception as e: 
