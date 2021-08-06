@@ -85,8 +85,8 @@ class DatosVirtualesClientes(models.Model):
         # self.tipo = self.tipo.upper()
         return super(DatosVirtualesClientes, self).save(*args, **kwargs)
 
-    def __str__(self):
-        return '{}'.format(self.nombres)
+    # def __str__(self):
+    #     return '{}'.format(self.nombres)
 
 class Parientes(models.Model):
     cliente= models.ForeignKey(Clientes, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con el cliente

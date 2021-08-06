@@ -1,5 +1,7 @@
 from apps.MDM.mdm_clientes.models import Clientes
 from apps.MDM.mdm_facturas.models import FacturasEncabezados
+from apps.MDM.mdm_clientes.models import DatosVirtualesClientes
+from apps.MDM.mdm_clientes.serializers import DatosVirtualesClientesSerializer
 from apps.MDM.mdm_clientes.serializers import ClientesSerializer, ClientesListarSerializer, ClienteImagenSerializer, ClientesUpdateSerializer, ClientePrediccionSerializer
 from rest_framework import status
 from rest_framework.response import Response
@@ -446,6 +448,42 @@ def cliente_by_factura_findOne(request, pk):
             serializer = ClientePrediccionSerializer(query.cliente)
             createLog(logModel,serializer.data,logTransaccion)
             return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+#ENCONTRAR CLIENTE POR PK
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def cliente_prediccionRefil_findOne(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'prediccionRefil/listOne/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            query = Clientes.objects.get(pk=pk, state=1)
+        except Clientes.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'GET':            
+            serializer = ClientePrediccionSerializer(query)
+            query = DatosVirtualesClientes.objects.filter(cliente=query)
+            datosVirtuales = DatosVirtualesClientesSerializer(query, many=True)
+            print(datosVirtuales.data)
+            data = {**serializer.data,'datosVirtuales':datosVirtuales.data}
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(data,status=status.HTTP_200_OK)
     except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             createLog(logModel,err,logExcepcion)
