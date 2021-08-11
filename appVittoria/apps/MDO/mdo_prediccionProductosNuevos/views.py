@@ -113,7 +113,7 @@ def detalles_list(request, pk):
 #CREAR
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def prediccionCrosseling_create(request):
+def prediccionProductosNuevos_create(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'create/',
@@ -132,7 +132,7 @@ def prediccionCrosseling_create(request):
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
         
-            serializer = PrediccionCrosselingSerializer(data=request.data)
+            serializer = PrediccionProductosSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -147,7 +147,7 @@ def prediccionCrosseling_create(request):
 #ENCONTRAR UNA PREDICCION CROSSELING
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def prediccion_crosseling_listOne(request, pk):
+def prediccion_productosNuevos_listOne(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'prediccionProductosNuevos/',

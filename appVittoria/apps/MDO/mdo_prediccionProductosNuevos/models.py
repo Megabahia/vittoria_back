@@ -18,7 +18,7 @@ class PrediccionProductosNuevos(models.Model):
     state = models.SmallIntegerField(default=1)
 
     def save(self, *args, **kwargs):
-        return super(ProductosNuevos, self).save(*args, **kwargs)
+        return super(PrediccionProductosNuevos, self).save(*args, **kwargs)
 
 class Detalles(models.Model):
     prediccionProductosNuevos = models.ForeignKey(PrediccionProductosNuevos, related_name='detalles', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Factura

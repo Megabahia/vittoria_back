@@ -446,8 +446,11 @@ def cliente_by_factura_findOne(request, pk):
         #tomar el dato
         if request.method == 'GET':            
             serializer = ClientePrediccionSerializer(query.cliente)
-            createLog(logModel,serializer.data,logTransaccion)
-            return Response(serializer.data,status=status.HTTP_200_OK)
+            query = DatosVirtualesClientes.objects.filter(cliente=query.cliente)
+            datosVirtuales = DatosVirtualesClientesSerializer(query, many=True)
+            data = {**serializer.data,'datosVirtuales':datosVirtuales.data}
+            createLog(logModel,data,logTransaccion)
+            return Response(data,status=status.HTTP_200_OK)
     except Exception as e: 
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             createLog(logModel,err,logExcepcion)
