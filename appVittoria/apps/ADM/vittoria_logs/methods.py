@@ -167,3 +167,11 @@ def datosPrediccionCrosselingMDO():
         'api':'prediccionCrosseling/'
     }
     return data  
+
+#MODULO MDO-PARAMETRIZACIONES
+def datosPrediccionProductosNuevosMDO():
+    data={
+        'modulo':'MDO',
+        'api':'prediccionProductosNuevos/'
+    }
+    return data  
