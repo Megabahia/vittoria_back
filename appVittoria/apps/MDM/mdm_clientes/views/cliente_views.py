@@ -480,7 +480,6 @@ def cliente_prediccionRefil_findOne(request, pk):
             serializer = ClientePrediccionSerializer(query)
             query = DatosVirtualesClientes.objects.filter(cliente=query)
             datosVirtuales = DatosVirtualesClientesSerializer(query, many=True)
-            print(datosVirtuales.data)
             data = {**serializer.data,'datosVirtuales':datosVirtuales.data}
             createLog(logModel,serializer.data,logTransaccion)
             return Response(data,status=status.HTTP_200_OK)
