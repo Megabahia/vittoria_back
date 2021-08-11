@@ -41,4 +41,6 @@ appVittoria/apps/MDO/mdo_prediccionCrosseling/__pycache__/
 appVittoria/apps/MDO/mdo_prediccionCrosseling/migrations/__pycache__/
 appVittoria/apps/MDO/mdo_prediccionRefil/__pycache__/
 appVittoria/apps/MDO/mdo_prediccionRefil/migrations/__pycache__/
+appVittoria/apps/MDO/mdo_prediccionProductosNuevos/__pycache__/
+appVittoria/apps/MDO/mdo_prediccionProductosNuevos/migrations/__pycache__/
 appVittoria/apps/config/__pycache__/
