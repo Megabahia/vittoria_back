@@ -11,6 +11,7 @@ class PrediccionProductosNuevos(models.Model):
     correo = models.CharField(max_length=250,null=True)
     cliente = models.SmallIntegerField(null=True)
     negocio = models.SmallIntegerField(null=True)
+    total = models.FloatField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

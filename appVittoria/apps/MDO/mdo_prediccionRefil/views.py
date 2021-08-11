@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from apps.MDO.mdo_prediccionRefil.models import (
     PrediccionRefil, Detalles
 )
@@ -11,6 +12,7 @@ from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from datetime import datetime, timedelta
+import datetime
 # Request
 import requests
 from apps.config import config
@@ -187,16 +189,26 @@ def prediccion_refil_listOne(request, pk):
             createLog(logModel,err,logExcepcion)
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
-        if request.method == 'GET':            
+        if request.method == 'GET':
+            today = datetime.date.today()
+            prediccionUltimoTotal = PrediccionRefil.objects.filter(pk=pk).aggregate(ultimoTotal=Avg('total'))
+            prediccionTotalAnio = PrediccionRefil.objects.filter(created_at__year=today.year).aggregate(ultimoTotal=Avg('total'))
+            prediccionTotalMes = PrediccionRefil.objects.filter(created_at__month=today.month).aggregate(ultimoTotal=Avg('total'))         
             serializer = PrediccionRefilProductosSerializer(query, many=True)
             auth_token=request.META['HTTP_AUTHORIZATION']
             hed = {'Authorization': auth_token}
             if query[0].prediccionRefil.cliente is not None:
                 r = requests.get(config.API_BACK_END+'mdm/clientes/prediccionRefil/listOne/'+str(query[0].prediccionRefil.cliente),headers=hed) 
-                data = {'cliente': r.json(), 'productos': serializer.data}                     
+                data = {'cliente': r.json(), 'productos': serializer.data
+                , 'comprasMensuales': prediccionTotalMes['ultimoTotal']
+                , 'comprasAnuales': prediccionTotalAnio['ultimoTotal']
+                , 'ultimoTotal': prediccionUltimoTotal['ultimoTotal']}
             else:
                 r = requests.get(config.API_BACK_END+'mdm/negocios/prediccionRefil/listOne/'+str(query[0].prediccionRefil.negocio),headers=hed) 
-                data = {'negocio': r.json(), 'productos': serializer.data}
+                data = {'negocio': r.json(), 'productos': serializer.data
+                , 'comprasMensuales': prediccionTotalMes['ultimoTotal']
+                , 'comprasAnuales': prediccionTotalAnio['ultimoTotal']
+                , 'ultimoTotal': prediccionUltimoTotal['ultimoTotal']}
             createLog(logModel,serializer.data,logTransaccion)
             return Response(data,status=status.HTTP_200_OK)
     except Exception as e: 

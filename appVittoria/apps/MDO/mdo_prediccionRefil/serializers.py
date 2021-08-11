@@ -53,7 +53,7 @@ class DetallesImagenesSerializer(serializers.ModelSerializer):
 class PrediccionRefilProductosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Detalles
-       	fields = ['id','articulo','codigo','cantidad','precio']
+       	fields = ['id','articulo','codigo','cantidad','precio','informacionAdicional']
 
     def to_representation(self, instance):
         auth_data = {'producto': str(instance.codigo)}
