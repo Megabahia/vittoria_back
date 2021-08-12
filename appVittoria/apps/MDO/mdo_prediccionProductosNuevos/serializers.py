@@ -54,8 +54,9 @@ class PrediccionNuevosProductosSerializer(serializers.ModelSerializer):
        	fields = ['id','articulo','codigo','cantidad','precio','informacionAdicional']
 
     def to_representation(self, instance):
-        auth_data = {'codigo': str(instance.codigo)}
+        auth_data = {'producto': str(instance.codigo)}
         resp = requests.post(config.API_BACK_END+'mdp/productos/prediccionProductosNuevos/', data=auth_data)
+        print(resp)
         data = super(PrediccionNuevosProductosSerializer, self).to_representation(instance)
         
         data['predicciones'] = resp.json()

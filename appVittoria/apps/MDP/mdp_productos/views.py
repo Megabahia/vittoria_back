@@ -766,3 +766,37 @@ def prediccion_refil_list(request):
             createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+# OBTENER PREDICCION PRODUCTOS NUEVOS
+@api_view(['POST'])
+def prediccion_productosNuevos_list(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'prediccionProductosNuevos/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'CREAR',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:                 
+            query = ProductoImagen.objects.filter(producto__codigoBarras=request.data['producto'], state=1).first()  
+            print(query.producto)    
+        except ProductoImagen.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'POST':
+            
+            query = ReporteRotacion.objects.filter(producto__categoria = query.producto.categoria,tipoRotacion = 'Bajo',state = 1).order_by('-created_at','-producto__stock')
+            serializer = PrediccionCrosselingSerializer(query[0:3], many = True)
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+

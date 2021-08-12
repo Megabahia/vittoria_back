@@ -12,5 +12,5 @@ urlpatterns = [
 	path('list/', prediccionProductosNuevos_list, name="prediccionProductosNuevos_list"),
 	path('create/', prediccionProductosNuevos_create, name="prediccionProductosNuevos_create"),
 	path('productosImagenes/<int:pk>', detalles_list, name="detalles_list"),
-	path('prediccionCrosseling/<int:pk>', prediccion_productosNuevos_listOne, name="prediccion_productosNuevos_listOne"),
+	path('prediccionProductosNuevos/<int:pk>', prediccion_productosNuevos_listOne, name="prediccion_productosNuevos_listOne"),
 ]
