@@ -58,6 +58,7 @@ class PrediccionCrosselingProductosSerializer(serializers.ModelSerializer):
         resp = requests.post(config.API_BACK_END+'mdp/productos/prediccionCrosseling/', data=auth_data)
         data = super(PrediccionCrosselingProductosSerializer, self).to_representation(instance)
         
+        data['fechaCompra'] = instance.prediccionCrosseling.created_at
         data['predicciones'] = resp.json()
 
         return data
