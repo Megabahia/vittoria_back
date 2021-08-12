@@ -98,9 +98,7 @@ def detalles_list(request, pk):
     }
     try:
         try:
-            print('holaaa')
             query = Detalles.objects.filter(prediccionRefil=pk, state=1)
-            print(query)
         except Detalles.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)

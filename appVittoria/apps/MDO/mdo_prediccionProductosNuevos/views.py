@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from apps.MDO.mdo_prediccionProductosNuevos.models import (
     PrediccionProductosNuevos, Detalles
 )
@@ -10,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+import datetime
 # Request
 import requests
 from apps.config import config
@@ -159,31 +161,40 @@ def prediccion_productosNuevos_listOne(request, pk):
         'fechaFin': str(timezone_now),
         'dataRecibida' : '{}'
     }
-    # try:
     try:
-        query = Detalles.objects.filter(prediccionProductosNuevos=pk, state=1)            
-    except Detalles.DoesNotExist:
-        err={"error":"No existe"}  
-        createLog(logModel,err,logExcepcion)
-        return Response(err,status=status.HTTP_404_NOT_FOUND)
-    #tomar el dato
-    if request.method == 'GET':            
-        serializer = PrediccionNuevosProductosSerializer(query, many=True)            
-        auth_token=request.META['HTTP_AUTHORIZATION']
-        hed = {'Authorization': auth_token}
-        if query[0].prediccionProductosNuevos.cliente is not None:
-            r = requests.get(config.API_BACK_END+'mdm/clientes/cliente/factura/'+str(query[0].prediccionProductosNuevos.factura_id),headers=hed)
-            print(serializer.data)
-            data = {'cliente': r.json(), 'productos': serializer.data}
-        else:
-            r = requests.get(config.API_BACK_END+'mdm/negocios/negocio/factura/'+str(query[0].prediccionProductosNuevos.factura_id),headers=hed)
-            data = {'negocio': r.json(), 'productos': serializer.data}
-        
-        createLog(logModel,serializer.data,logTransaccion)
-        return Response(data,status=status.HTTP_200_OK)
-    # except Exception as e: 
-    #         err={"error":'Un error ha ocurrido: {}'.format(e)}  
-    #         createLog(logModel,err,logExcepcion)
-    #         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            query = Detalles.objects.filter(prediccionProductosNuevos=pk, state=1)            
+        except Detalles.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'GET':
+            today = datetime.date.today()
+            prediccionUltimoTotal = PrediccionProductosNuevos.objects.filter(pk=pk).aggregate(ultimoTotal=Avg('total'))
+            prediccionTotalAnio = PrediccionProductosNuevos.objects.filter(created_at__year=today.year).aggregate(ultimoTotal=Avg('total'))
+            prediccionTotalMes = PrediccionProductosNuevos.objects.filter(created_at__month=today.month).aggregate(ultimoTotal=Avg('total'))
+            serializer = PrediccionNuevosProductosSerializer(query, many=True)            
+            auth_token=request.META['HTTP_AUTHORIZATION']
+            hed = {'Authorization': auth_token}
+            if query[0].prediccionProductosNuevos.cliente is not None:
+                r = requests.get(config.API_BACK_END+'mdm/clientes/cliente/factura/'+str(query[0].prediccionProductosNuevos.factura_id),headers=hed)
+                data = {'cliente': r.json(), 'productos': serializer.data
+                , 'comprasMensuales': prediccionTotalMes['ultimoTotal']
+                , 'comprasAnuales': prediccionTotalAnio['ultimoTotal']
+                , 'ultimoTotal': prediccionUltimoTotal['ultimoTotal']}
+            else:
+                r = requests.get(config.API_BACK_END+'mdm/negocios/negocio/factura/'+str(query[0].prediccionProductosNuevos.factura_id),headers=hed)
+                data = {'negocio': r.json(), 'productos': serializer.data
+                , 'comprasMensuales': prediccionTotalMes['ultimoTotal']
+                , 'comprasAnuales': prediccionTotalAnio['ultimoTotal']
+                , 'ultimoTotal': prediccionUltimoTotal['ultimoTotal']}
+            
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(data,status=status.HTTP_200_OK)
+    except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 

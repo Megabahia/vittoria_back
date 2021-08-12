@@ -782,8 +782,7 @@ def prediccion_productosNuevos_list(request):
     }
     try:
         try:                 
-            query = ProductoImagen.objects.filter(producto__codigoBarras=request.data['producto'], state=1).first()  
-            print(query.producto)    
+            query = ProductoImagen.objects.filter(producto__codigoBarras=request.data['producto'], state=1).first()
         except ProductoImagen.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)

@@ -60,6 +60,7 @@ class PrediccionRefilProductosSerializer(serializers.ModelSerializer):
         resp = requests.post(config.API_BACK_END+'mdp/productos/prediccionRefil/', data=auth_data)
         data = super(PrediccionRefilProductosSerializer, self).to_representation(instance)
         
+        data['fechaCompra'] = instance.prediccionRefil.created_at
         data['predicciones'] = resp.json()
 
         return data
