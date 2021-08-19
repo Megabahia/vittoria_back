@@ -62,7 +62,7 @@ class OfertasListarSerializer(serializers.ModelSerializer):
 class OfertasListarTablaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Oferta
-       	fields = '__all__'
+       	fields = ['id','codigoOferta','fechaOferta','nombres','apellidos','telefono','correo','indicadorCliente','calificacionCliente','vigenciaOferta','canalVentas','total']
 
 # Crear factura
 class DetallesSerializer(serializers.ModelSerializer):

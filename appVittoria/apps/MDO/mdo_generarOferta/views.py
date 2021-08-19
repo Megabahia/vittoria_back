@@ -63,7 +63,7 @@ def generarOferta_list(request):
           
             #Serializar los datos
             query = Oferta.objects.filter(**filters).order_by('-created_at')
-            serializer = OfertasSerializer(query[offset:limit], many=True)
+            serializer = OfertasListarTablaSerializer(query[offset:limit], many=True)
             new_serializer_data={'cont': query.count(),
             'info':serializer.data}
             #envio de datos
