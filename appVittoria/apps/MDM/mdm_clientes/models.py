@@ -34,6 +34,7 @@ class Clientes(models.Model):
     imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
     estado=models.CharField(max_length=200,default="Inactivo")
     correo= models.CharField(max_length=150,null=True)
+    telefono= models.CharField(max_length=20,null=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
