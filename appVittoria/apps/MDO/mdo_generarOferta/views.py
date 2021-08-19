@@ -45,13 +45,13 @@ def generarOferta_list(request):
             offset = page_size* page
             limit = offset + page_size
             #Filtros
-            filters={"state":"1"}            
+            filters={"state":"1"}     
             if 'negocio' in request.data:
                 if request.data['negocio']!='':
-                    filters['negocio'] = request.data['negocio']
+                    filters['negocio__isnull'] = False   
             if 'cliente' in request.data:
                 if request.data['cliente']!='':
-                    filters['cliente'] = request.data['cliente']
+                    filters['cliente__isnull'] = False   
             # if 'cedula' in request.data:
             #     if request.data['cedula']!='':
             #         filters['cedula'] = str(request.data['cedula'])
@@ -63,7 +63,7 @@ def generarOferta_list(request):
           
             #Serializar los datos
             query = Oferta.objects.filter(**filters).order_by('-created_at')
-            serializer = OfertasListarTablaSerializer(query[offset:limit], many=True)
+            serializer = OfertasSerializer(query[offset:limit], many=True)
             new_serializer_data={'cont': query.count(),
             'info':serializer.data}
             #envio de datos
