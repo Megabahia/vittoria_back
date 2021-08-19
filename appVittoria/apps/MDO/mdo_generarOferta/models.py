@@ -34,6 +34,7 @@ class OfertaDetalles(models.Model):
     # NOMBRAMOS A LA RELACION DETALLES
     oferta = models.ForeignKey(Oferta, related_name='detalles', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Oferta
     codigo = models.CharField(max_length=150,null=True)
+    cantidad = models.SmallIntegerField(null=True)
     producto = models.CharField(max_length=150,null=True)
     precio = models.FloatField(null=True)
     descuento = models.FloatField(null=True)

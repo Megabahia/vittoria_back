@@ -2,6 +2,8 @@ from rest_framework import serializers
 
 from apps.MDO.mdo_generarOferta.models import Oferta, OfertaDetalles
 
+import requests
+from apps.config import config
 from django.utils import timezone
 
 # Actualizar factura
@@ -82,3 +84,17 @@ class OfertaSerializer(serializers.ModelSerializer):
         for detalle_data in detalles_data:
             OfertaDetalles.objects.create(oferta=oferta, **detalle_data)
         return oferta
+
+# Detalles con imagenes
+class DetallesImagenesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OfertaDetalles
+       	fields = ['id','producto','codigo','cantidad','precio']
+
+    def to_representation(self, instance):
+        auth_data = {'codigo': str(instance.codigo)}
+        resp = requests.post(config.API_BACK_END+'mdp/productos/producto/image/', data=auth_data)
+        data = super(DetallesImagenesSerializer, self).to_representation(instance)
+        if resp.json()['imagen']:
+            data['imagen'] = resp.json()['imagen']
+        return data

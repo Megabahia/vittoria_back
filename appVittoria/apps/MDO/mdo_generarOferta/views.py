@@ -1,5 +1,5 @@
 from apps.MDO.mdo_generarOferta.models import Oferta, OfertaDetalles
-from apps.MDO.mdo_generarOferta.serializers import OfertasSerializer, OfertasListarSerializer, OfertaSerializer, OfertasListarTablaSerializer
+from apps.MDO.mdo_generarOferta.serializers import OfertasSerializer, OfertasListarSerializer, OfertaSerializer, OfertasListarTablaSerializer, DetallesImagenesSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -216,3 +216,35 @@ def generarOferta_delete(request, pk):
         err={"error":'Un error ha ocurrido: {}'.format(e)}  
         createLog(logModel,err,logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+#ENCONTRAR DETALLES DE OFERTA GENERADA
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def detalles_list(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'productosImagenes/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            query = OfertaDetalles.objects.filter(oferta=pk, state=1)
+        except OfertaDetalles.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'GET':            
+            serializer = DetallesImagenesSerializer(query, many=True)
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
