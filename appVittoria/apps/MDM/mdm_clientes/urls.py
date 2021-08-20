@@ -3,7 +3,8 @@ from apps.MDM.mdm_clientes.views.cliente_views import(
 	cliente_list, cliente_findOne, cliente_create,
 	cliente_update, cliente_delete, clienteImagen_update,
 	uploadCSV_crearClientes, uploadEXCEL_crearClientes, cliente_findOne_cedula,
-	cliente_by_factura_findOne, cliente_prediccionRefil_findOne
+	cliente_by_factura_findOne, cliente_prediccionRefil_findOne,
+	cliente_findOne_telefono
 )
 
 from apps.MDM.mdm_clientes.views.datos_fisicos_views import(
@@ -31,6 +32,7 @@ urlpatterns = [
 	path('create/', cliente_create, name="cliente_create"),
 	path('listOne/<int:pk>', cliente_findOne, name="cliente_findOne"), 
 	path('listOne/cedula/', cliente_findOne_cedula, name="cliente_findOne_cedula"), 
+	path('listOne/telefono/', cliente_findOne_telefono, name="cliente_findOne_telefono"), 
 	path('update/<int:pk>', cliente_update, name="cliente_update"), 
 	path('delete/<int:pk>', cliente_delete, name="cliente_delete"),	
 	path('update/imagen/<int:pk>', clienteImagen_update, name="clienteImagen_update"),	
