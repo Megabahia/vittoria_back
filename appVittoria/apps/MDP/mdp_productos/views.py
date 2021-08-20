@@ -9,7 +9,7 @@ from apps.MDP.mdp_productos.serializers import (
     AbastecimientoListSerializer,
     StockListSerializer, CaducidadListSerializer, RotacionListSerializer, RefilListSerializer,
     HistorialAvisosSerializer, ImagenSerializer, PrediccionCrosselingSerializer,
-    PrediccionRefilSerializer, PrediccionRefilOneSerializer
+    PrediccionRefilSerializer, PrediccionRefilOneSerializer, ProductoSearchSerializer
 )
 from rest_framework import status
 from rest_framework.response import Response
@@ -286,6 +286,38 @@ def search_producto_list(request):
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+
+# SEARCH PRODUCTO
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def search_producto_codigo_list(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'search/producto/codigo/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            query = ProductoImagen.objects.filter(producto__codigoBarras=request.data['codigoBarras'], state=1).first()
+        except ProductoImagen.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'POST':
+            serializer = ProductoSearchSerializer(query)
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 # ABASTECIMIENTO
 @api_view(['POST'])

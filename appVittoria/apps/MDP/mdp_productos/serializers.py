@@ -249,3 +249,30 @@ class PrediccionRefilOneSerializer(serializers.ModelSerializer):
         if instance.producto.imagenes.first():
             data['imagen'] = str(instance.producto.imagenes.first().imagen)
         return data
+
+# BUSQUEDA POR CODIGO
+class ProductoSearchSerializer(serializers.ModelSerializer):
+    producto = ProductosSerializer(many=False, read_only=True)    
+    class Meta:
+        model = ProductoImagen
+       	fields = ['producto','imagen']
+    def to_representation(self, instance):
+        data = super(ProductoSearchSerializer, self).to_representation(instance)
+        producto = data.pop('producto')
+        if producto['codigoBarras']:
+            data['codigoBarras'] = producto['codigoBarras']
+        if producto['nombre']:
+            data['nombre'] = producto['nombre']
+        if producto['precioVentaA']:
+            data['precioVentaA'] = producto['precioVentaA']
+        if producto['precioVentaB']:
+            data['precioVentaB'] = producto['precioVentaB']
+        if producto['precioVentaC']:
+            data['precioVentaC'] = producto['precioVentaC']
+        if producto['precioVentaD']:
+            data['precioVentaD'] = producto['precioVentaD']
+        if producto['precioVentaE']:
+            data['precioVentaE'] = producto['precioVentaE']
+        if producto['id']:
+            data['id'] = producto['id']
+        return data
