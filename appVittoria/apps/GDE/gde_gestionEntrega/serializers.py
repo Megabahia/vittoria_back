@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.GDO.gdo_gestionOferta.models import Oferta, OfertaDetalles
+from apps.GDE.gde_gestionEntrega.models import Oferta, OfertaDetalles
 
 import requests
 from apps.config import config
@@ -44,7 +44,7 @@ class OfertasListarSerializer(serializers.ModelSerializer):
 class OfertasListarTablaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Oferta
-       	fields = ['id','codigoOferta','fechaOferta','nombres','apellidos','telefono','correo','indicadorCliente','fechaCompra','comunicoOferta','fechaComunicacion','aceptoOferta','fechaAceptacion','calificacionOferta','vigenciaOferta','canalVentas','total','estado']
+       	fields = ['id','codigoOferta','fechaOferta','nombres','apellidos','telefono','correo','indicadorCliente','fechaCompra','entregoProducto','fechaEntrega','canalVentas','calificacion','total','estado']
 
 # Crear factura
 class DetallesSerializer(serializers.ModelSerializer):
