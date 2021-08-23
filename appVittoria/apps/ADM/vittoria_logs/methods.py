@@ -175,3 +175,35 @@ def datosPrediccionProductosNuevosMDO():
         'api':'prediccionProductosNuevos/'
     }
     return data  
+
+#MODULO MDO-PARAMETRIZACIONES
+def datosParametrizacionesGDO():
+    data={
+        'modulo':'GDO',
+        'api':'parametrizaciones/'
+    }
+    return data  
+
+#MODULO MDO-PARAMETRIZACIONES
+def datosGestionOfertaGDO():
+    data={
+        'modulo':'GDO',
+        'api':'gestionOferta/'
+    }
+    return data  
+
+#MODULO MDO-PARAMETRIZACIONES
+def datosParametrizacionesGDE():
+    data={
+        'modulo':'GDE',
+        'api':'parametrizaciones/'
+    }
+    return data  
+
+#MODULO MDO-PARAMETRIZACIONES
+def datosGestionEntregaGDE():
+    data={
+        'modulo':'GDE',
+        'api':'gestionEntrega/'
+    }
+    return data  

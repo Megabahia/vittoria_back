@@ -46,6 +46,12 @@ urlpatterns = [
     path('mdo/prediccionRefil/', include(('apps.MDO.mdo_prediccionRefil.urls', 'prediccionRefil'), namespace='prediccionRefil')),
     path('mdo/prediccionProductosNuevos/', include(('apps.MDO.mdo_prediccionProductosNuevos.urls', 'prediccionProductosNuevos'), namespace='prediccionProductosNuevos')),
     path('mdo/generarOferta/', include(('apps.MDO.mdo_generarOferta.urls', 'generarOferta'), namespace='generarOferta')),
+    # Modulo GDO
+    path('gdo/param/', include(('apps.GDO.gdo_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizaciones')),
+    # path('gdo/gestionOferta/', include(('apps.GDO.gdo_gestionOferta.urls', 'gestionOferta'), namespace='gestionOferta')),
+    # Modulo GDE
+    path('gde/param/', include(('apps.GDE.gde_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizaciones')),
+    # path('gde/gestionEntrega/', include(('apps.GDE.gde_gestionEntrega.urls', 'gestionEntrega'), namespace='gestionEntrega')),
 
 ]
 

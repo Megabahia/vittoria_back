@@ -60,6 +60,12 @@ INSTALLED_APPS = [
     'apps.MDO.mdo_prediccionRefil',
     'apps.MDO.mdo_prediccionProductosNuevos',
     'apps.MDO.mdo_generarOferta',
+    # apss Vittoria GDO
+    'apps.GDO.gdo_parametrizaciones',
+    'apps.GDO.gdo_gestionOferta',
+    # apps vittoria GDE
+    'apps.GDE.gde_parametrizaciones',
+    'apps.GDE.gde_gestionEntrega',
     #CONFIG
     'apps.config',
     #Django external apps
@@ -127,7 +133,9 @@ DATABASES =config.DATABASES
 DATABASE_ROUTERS = [
     'apps.config.routersDB.MDMRouter',
     'apps.config.routersDB.MDPRouter',
-    'apps.config.routersDB.MDORouter'
+    'apps.config.routersDB.MDORouter',
+    'apps.config.routersDB.GDORouter',
+    'apps.config.routersDB.GDERouter'
 ]
 
 # Password validation
