@@ -43,4 +43,12 @@ appVittoria/apps/MDO/mdo_prediccionRefil/__pycache__/
 appVittoria/apps/MDO/mdo_prediccionRefil/migrations/__pycache__/
 appVittoria/apps/MDO/mdo_prediccionProductosNuevos/__pycache__/
 appVittoria/apps/MDO/mdo_prediccionProductosNuevos/migrations/__pycache__/
+appVittoria/apps/GDO/gdo_parametrizaciones/__pycache__/
+appVittoria/apps/GDO/gdo_parametrizaciones/migrations/__pycache__/
+appVittoria/apps/GDO/gdo_gestionOferta/__pycache__/
+appVittoria/apps/GDO/gdo_gestionOferta/migrations/__pycache__/
+appVittoria/apps/GDE/gde_parametrizaciones/__pycache__/
+appVittoria/apps/GDE/gde_parametrizaciones/migrations/__pycache__/
+appVittoria/apps/GDE/gde_gestionEntrega/__pycache__/
+appVittoria/apps/GDE/gde_gestionEntrega/migrations/__pycache__/
 appVittoria/apps/config/__pycache__/
