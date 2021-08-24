@@ -23,7 +23,7 @@ class FacturasEncabezados(models.Model):
     descuento = models.FloatField(null=True)
     iva = models.FloatField(null=True)
     total = models.FloatField(null=True)
-    canalCompra = models.CharField(max_length=150,null=True)
+    canal = models.CharField(max_length=150,null=True)
     numeroProductosComprados = models.IntegerField(null=True)
         
     created_at = models.DateTimeField(auto_now_add=True)
