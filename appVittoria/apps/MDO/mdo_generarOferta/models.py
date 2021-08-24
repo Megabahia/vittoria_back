@@ -42,6 +42,7 @@ class OfertaDetalles(models.Model):
     precio = models.FloatField(null=True)
     descuento = models.FloatField(null=True)
     total = models.FloatField(null=True)
+    valorDescuento = models.FloatField(null=True)
         
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
