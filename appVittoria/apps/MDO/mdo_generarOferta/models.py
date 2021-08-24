@@ -21,6 +21,9 @@ class Oferta(models.Model):
     indicadorCliente = models.CharField(max_length=150,null=True)
     personaGenera = models.CharField(max_length=150,null=True)
     descripcion = models.CharField(max_length=150,null=True)
+    subTotal = models.FloatField(null=True)
+    descuento = models.FloatField(null=True)
+    iva = models.FloatField(null=True)
     total = models.FloatField(null=True)
         
     created_at = models.DateTimeField(auto_now_add=True)
