@@ -92,8 +92,12 @@ class FacturaSerializer(serializers.ModelSerializer):
         detalles_data = validated_data.pop('detalles')
         # facturaEncabezado = FacturasEncabezados.objects.create(**validated_data,content_object=content)
         facturaEncabezado = FacturasEncabezados.objects.create(**validated_data)
-        facturaEncabezado.numeroFactura = facturaEncabezado.id + 1
-        facturaEncabezado.save()
+        if facturaEncabezado.numeroFactura is '':
+            facturaEncabezado.numeroFactura = facturaEncabezado.id + 1
+            facturaEncabezado.save()
+        else:
+            facturaEncabezado.numeroFactura = 1
+            facturaEncabezado.save()
         for detalle_data in detalles_data:
             FacturasDetalles.objects.create(facturaEncabezado=facturaEncabezado, **detalle_data)
         return facturaEncabezado
