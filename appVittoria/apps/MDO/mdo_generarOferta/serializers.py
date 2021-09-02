@@ -89,7 +89,7 @@ class OfertaSerializer(serializers.ModelSerializer):
 class DetallesImagenesSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfertaDetalles
-       	fields = ['id','producto','codigo','cantidad','precio']
+       	fields = ['id','articulo','codigo','cantidad','precio']
 
     def to_representation(self, instance):
         auth_data = {'codigo': str(instance.codigo)}
