@@ -1,8 +1,8 @@
 PRODUCTION=False
 
 #VARIABLES GLOBALES
-endpointEmailAsignacionPassword="/usuario/asignacionPassword/"
-endpointEmailReseteoPassword="/usuario/reseteoPassword/"
+endpointEmailAsignacionPassword="/auth/usuario/asignacionPassword/"
+endpointEmailReseteoPassword="/auth/usuario/reseteoPassword/"
 
 #VARIABLES VARIAN DE ACUERDO A PRODUCCION O DESARROLLO
 if PRODUCTION:
@@ -85,10 +85,10 @@ else:
     #NOMBRE KEYWORK TOKEN
     TOKEN_KEYWORD= 'Bearer'
     # This will display email in Console.
-    EMAIL_HOST = ''
-    EMAIL_HOST_USER = ''
-    EMAIL_HOST_PASSWORD = ''
-    EMAIL_PORT = ''
+    EMAIL_HOST = 'smtp.mailtrap.io'
+    EMAIL_HOST_USER = 'f464f6bf1e30a6'
+    EMAIL_HOST_PASSWORD = '1f662090e649b0'
+    EMAIL_PORT = '2525'
     #CORS
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:4200",
