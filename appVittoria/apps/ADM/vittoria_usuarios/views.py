@@ -145,7 +145,39 @@ def usuario_findOne(request, pk):
         createLog(logModel,err,logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST) 
     
-    
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+def usuario_findOne_image(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'listOne/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            usuario = Usuarios.objects.get(pk=pk, state=1)
+        except Usuarios.DoesNotExist:
+            errorNoExiste={'error':'No existe'}
+            logModel['dataRecibida']=str(errorNoExiste)
+            createLog(logModel,errorNoExiste,logExcepcion)
+            return Response(errorNoExiste,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'GET':
+            serializer = UsuarioImagenSerializer(usuario)
+            createLog(logModel,serializer.data,logTransaccion)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    except Exception as e: 
+        err={"error":'Un error ha ocurrido: {}'.format(e)}  
+        createLog(logModel,err,logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+        
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
