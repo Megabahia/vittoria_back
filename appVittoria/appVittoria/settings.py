@@ -173,7 +173,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
-STATIC_URL = '/var/www/web.app_vittoria.com/vittoria_back/appVittoria/'
+STATIC_URL = '/var/www/web.app_vittoria.com/vittoria_back/appVittoria/static/'
 AUTH_USER_MODEL = "vittoria_usuarios.Usuarios" 
 #TIEMPO DE EXPIRACION DE TOKEN (EN SEGUNDOS)
 TOKEN_EXPIRED_AFTER_SECONDS = config.TOKEN_EXPIRED_AFTER_SECONDS
