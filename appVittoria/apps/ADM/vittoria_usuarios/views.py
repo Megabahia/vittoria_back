@@ -258,6 +258,7 @@ def usuario_create(request):
             else:
                 data = serializer.errors
                 createLog(logModel,data,logExcepcion)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             return Response(data)           
     except Exception as e: 
         err={"error":'Un error ha ocurrido: {}'.format(e)}  
