@@ -1,6 +1,7 @@
 aes==1.0.0
 asgiref==3.3.1
 autopep8==1.5.6
+boto3==1.18.45
 certifi==2020.12.5
 chardet==4.0.0
 crypto==1.4.1
