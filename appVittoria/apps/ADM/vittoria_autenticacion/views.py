@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
 from apps.ADM.vittoria_usuarios.models import Usuarios
-from apps.ADM.vittoria_usuarios.serializers import UsuarioSerializer
+from apps.ADM.vittoria_usuarios.serializers import UsuarioSerializer, UsuarioCrearSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import login,logout,authenticate
 #token login
@@ -61,10 +61,12 @@ class login(ObtainAuthToken):
                             'vittoria_acciones_accionesporrol.idRol_id='+str(user.idRol.id)
                     ],
                     select={'url': 'vittoria_acciones_accionespermitidas.url'})
+                    userSerializer = UsuarioCrearSerializer(user)
                     data={
                         'token': token.key,
                         'id': user.pk,
                         'full_name': user.nombres+" "+user.apellidos,
+                        'usuario': userSerializer.data,
                         'email': user.email,
                         'tokenExpiracion': expires_in(token),
                         'permisos':[]
