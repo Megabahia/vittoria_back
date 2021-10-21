@@ -20,9 +20,9 @@ class Productos(models.Model):
     nombre = models.CharField(max_length=150,null=True)
     descripcion = models.CharField(max_length=150,null=True)
     codigoBarras = models.CharField(max_length=150,null=True)
-    refil = models.IntegerField(max_length=150,null=True)
-    stock = models.IntegerField(max_length=150,null=True)
-    caducidad = models.IntegerField(max_length=150,null=True)
+    refil = models.IntegerField(null=True)
+    stock = models.IntegerField(null=True)
+    caducidad = models.IntegerField(null=True)
     costoCompra = models.FloatField(null=True)
     precioVentaA = models.FloatField(null=True)
     precioVentaB = models.FloatField(null=True)
@@ -95,8 +95,8 @@ class ReporteStock(models.Model):
 class ReporteCaducidad(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
     fechaCaducidad = models.DateTimeField(null=True)
-    productosCaducados = models.IntegerField(max_length=150,null=True)
-    diasParaCaducar = models.IntegerField(max_length=150,null=True)
+    productosCaducados = models.IntegerField(null=True)
+    diasParaCaducar = models.IntegerField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -110,8 +110,8 @@ class ReporteRotacion(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
     fechaInicio = models.DateTimeField(null=True)
     fechaFin = models.DateTimeField(null=True)
-    diasPeriodo = models.IntegerField(max_length=150,null=True)
-    productosVendidos = models.IntegerField(max_length=150,null=True)
+    diasPeriodo = models.IntegerField(null=True)
+    productosVendidos = models.IntegerField(null=True)
     tipoRotacion = models.CharField(max_length=150,null=True)
     montoVenta = models.FloatField(null=True)
 
@@ -126,7 +126,7 @@ class ReporteRotacion(models.Model):
 class HistorialAvisos(models.Model):
     codigoBarras = models.CharField(max_length=150,null=True)
     fechaCompra = models.DateTimeField(null=True)
-    productosVendidos = models.IntegerField(max_length=150,null=True)
+    productosVendidos = models.IntegerField(null=True)
     precioVenta = models.FloatField(null=True)
     alerta = models.SmallIntegerField(default=0)
 
@@ -190,7 +190,7 @@ class HistorialAvisos(models.Model):
 # Create your models here.
 class IngresoProductos(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
-    cantidad = models.IntegerField(max_length=150,null=True)
+    cantidad = models.IntegerField(null=True)
     fechaElaboracion = models.DateField(null=True)
     fechaCaducidad = models.DateField(null=True)
     precioCompra = models.FloatField(null=True)

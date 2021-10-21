@@ -7,7 +7,7 @@ class FichaTecnicaProductos(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
     codigo = models.CharField(max_length=150,null=False)
     nombreAtributo = models.CharField(max_length=150,null=False)
-    valor = models.IntegerField(max_length=150,null=False)
+    valor = models.IntegerField(null=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

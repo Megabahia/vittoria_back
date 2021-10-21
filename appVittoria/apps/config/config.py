@@ -1,4 +1,4 @@
-PRODUCTION=True
+PRODUCTION=False
 
 #VARIABLES GLOBALES
 endpointEmailAsignacionPassword="/auth/usuario/asignacionPassword/"

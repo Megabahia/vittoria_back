@@ -15,7 +15,7 @@ class Oferta(models.Model):
     identificacion = models.CharField(max_length=150,null=True)    
     telefono = models.CharField(max_length=150,null=True)
     correo = models.EmailField(max_length=150,null=True)
-    vigenciaOferta = models.IntegerField(max_length=150,null=True)
+    vigenciaOferta = models.IntegerField(null=True)
     canalVentas = models.CharField(max_length=150,null=True)
     calificacionCliente = models.CharField(max_length=150,null=True)
     indicadorCliente = models.CharField(max_length=150,null=True)

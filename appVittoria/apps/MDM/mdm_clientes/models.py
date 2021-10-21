@@ -7,7 +7,7 @@ def upload_path(instance, filname):
 class Clientes(models.Model):
     tipoCliente = models.CharField(max_length=150,null=True)
     cedula = models.CharField(max_length=10,null=True,unique=True)
-    nombreCompleto = models.CharField(max_length=150,null=True)
+    nombreCompleto = models.CharField(max_length=255,null=True)
     nombres = models.CharField(max_length=150,null=True)
     apellidos = models.CharField(max_length=150,null=True)
     genero= models.CharField(max_length=150,null=True)
@@ -33,7 +33,7 @@ class Clientes(models.Model):
     gastosPromedioMensual = models.FloatField(null=True)
     imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
     estado=models.CharField(max_length=200,default="Inactivo")
-    correo= models.CharField(max_length=150,null=True)
+    correo= models.EmailField(max_length=150,null=True)
     telefono= models.CharField(max_length=20,null=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -57,7 +57,7 @@ class DatosFisicosClientes(models.Model):
     numero = models.CharField(max_length=20,null=True,blank=True)
     calleSecundaria = models.CharField(max_length=150,null=True,blank=True)
     edificio = models.CharField(max_length=150,null=True,blank=True)
-    piso = models.CharField(max_length=150,null=True,blank=True)
+    piso = models.SmallIntegerField(null=True,blank=True)
     oficina = models.CharField(max_length=150,null=True,blank=True)
     referencia = models.CharField(max_length=150,null=True,blank=True)
     
@@ -75,7 +75,7 @@ class DatosFisicosClientes(models.Model):
 class DatosVirtualesClientes(models.Model):
     cliente= models.ForeignKey(Clientes, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con el cliente
     tipoContacto= models.CharField(max_length=150,null=True,blank=True)
-    informacion = models.CharField(max_length=150,null=True,blank=True)
+    informacion = models.TextField(max_length=150,null=True,blank=True)
     icono = models.CharField(max_length=150,null=True,blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
