@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class MdpFichatecnicaproductosConfig(AppConfig):
-    name = 'mdp_fichatecnicaproductos'
+    name = 'mdp_fichaTecnicaProductos'
