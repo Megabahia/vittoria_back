@@ -109,6 +109,10 @@ def parientes_create(request):
             request.data['created_at'] = str(timezone_now)
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
+
+            if 'fechaMatrimonio' in request.data:
+                if request.data['fechaMatrimonio'] == '':
+                    request.data['fechaMatrimonio'] = None
         
             serializer = ParientesSerializer(data=request.data)
             if serializer.is_valid():
@@ -150,6 +154,11 @@ def parientes_update(request, pk):
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
+
+            if 'fechaMatrimonio' in request.data:
+                if request.data['fechaMatrimonio'] == '':
+                    request.data['fechaMatrimonio'] = None
+
             serializer = ParientesSerializer(parientes, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
