@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class MdmProspectosclientesConfig(AppConfig):
-    name = 'mdm_prospectosclientes'
+    name = 'mdm_prospectosClientes'
