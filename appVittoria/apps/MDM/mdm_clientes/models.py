@@ -57,7 +57,7 @@ class DatosFisicosClientes(models.Model):
     numero = models.CharField(max_length=20,null=True,blank=True)
     calleSecundaria = models.CharField(max_length=150,null=True,blank=True)
     edificio = models.CharField(max_length=150,null=True,blank=True)
-    piso = models.SmallIntegerField(null=True,blank=True)
+    piso = models.CharField(max_length=150,null=True,blank=True)
     oficina = models.CharField(max_length=150,null=True,blank=True)
     referencia = models.CharField(max_length=150,null=True,blank=True)
     
