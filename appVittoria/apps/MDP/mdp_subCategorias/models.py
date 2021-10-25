@@ -7,9 +7,9 @@ class SubCategorias(models.Model):
     categoria= models.ForeignKey(Categorias, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
     # categoriaPadre = models.CharField(max_length=150,null=False)
     nombre = models.CharField(max_length=150,null=False)
-    codigoSubCategoria = models.CharField(max_length=150,null=False)
-    descripcion = models.CharField(max_length=150,null=True)
-    estado = models.CharField(max_length=150,null=False)
+    codigoSubCategoria = models.CharField(max_length=255,null=False)
+    descripcion = models.TextField(null=True)
+    estado = models.CharField(max_length=150,null=False,default="Inactivo")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
