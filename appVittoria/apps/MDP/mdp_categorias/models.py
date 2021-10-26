@@ -2,9 +2,9 @@ from django.db import models
 
 # Create your models here.
 class Categorias(models.Model):
-    nombre = models.CharField(max_length=150,null=False)
+    nombre = models.CharField(max_length=255,null=False)
     codigoCategoria = models.CharField(max_length=150,null=False)
-    descripcion = models.CharField(max_length=150,null=True)
+    descripcion = models.TextField(null=True)
     estado = models.CharField(max_length=150,null=False)
 
     created_at = models.DateTimeField(auto_now_add=True)

@@ -6,7 +6,7 @@ from apps.MDP.mdp_productos.models import Productos
 class FichaTecnicaProductos(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
     codigo = models.CharField(max_length=150,null=False)
-    nombreAtributo = models.CharField(max_length=150,null=False)
+    nombreAtributo = models.CharField(max_length=255,null=False)
     valor = models.IntegerField(null=False)
 
     created_at = models.DateTimeField(auto_now_add=True)

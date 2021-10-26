@@ -18,7 +18,7 @@ class Productos(models.Model):
     categoria = models.CharField(max_length=150,null=True)
     subCategoria = models.CharField(max_length=150,null=True)
     nombre = models.CharField(max_length=150,null=True)
-    descripcion = models.CharField(max_length=150,null=True)
+    descripcion = models.TextField(null=True)
     codigoBarras = models.CharField(max_length=150,null=True)
     refil = models.IntegerField(null=True)
     stock = models.IntegerField(null=True)
