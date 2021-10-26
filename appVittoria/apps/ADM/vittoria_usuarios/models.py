@@ -12,7 +12,7 @@ class Usuarios(AbstractBaseUser):
     imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
     nombres = models.CharField(max_length=150)
     apellidos = models.CharField(max_length=250)
-    email = models.CharField(max_length=250,unique=True)
+    email = models.EmailField(max_length=255,unique=True)
     estado=models.CharField(max_length=200)
     idRol = models.ForeignKey(Roles, null=False, on_delete=models.CASCADE)  # Relacion Rol
     pais=models.CharField(max_length=200)
