@@ -15,7 +15,7 @@ class FacturasDetallesSerializer(serializers.ModelSerializer):
 
 class FacturasSerializer(serializers.ModelSerializer):
     # id = serializers.IntegerField()
-    detalles = FacturasDetallesSerializer(many=True)
+    detalles = FacturasDetallesSerializer(many=True,allow_empty=False)
     class Meta:
         model = FacturasEncabezados
        	fields = '__all__'
@@ -74,7 +74,7 @@ class DetallesSerializer(serializers.ModelSerializer):
 
 class FacturaSerializer(serializers.ModelSerializer):
     # id = serializers.IntegerField()
-    detalles = DetallesSerializer(many=True)
+    detalles = DetallesSerializer(many=True,allow_empty=False)
     # content_type = serializers.CharField()
     # object_id = serializers.IntegerField()
     class Meta:
