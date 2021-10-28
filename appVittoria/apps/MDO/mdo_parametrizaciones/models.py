@@ -7,7 +7,7 @@ class Parametrizaciones(models.Model):
     tipo = models.CharField(max_length=150,null=False)
     tipoVariable = models.CharField(max_length=150,null=False)
     valor = models.CharField(max_length=150,null=False)
-    descripcion = models.CharField(max_length=250,null=True)
+    descripcion = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)
