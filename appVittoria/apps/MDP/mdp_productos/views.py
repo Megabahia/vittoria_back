@@ -132,6 +132,43 @@ def producto_images_findOne(request, pk):
             createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+# BORRAR IMAGENES
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def producto_images_delete(request, pk):
+    nowDate = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'delete/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'BORRAR',
+        'fechaInicio' : str(nowDate),
+        'dataEnviada' : '{}',
+        'fechaFin': str(nowDate),
+        'dataRecibida' : '{}'
+    }
+    try:
+        try:
+            query = ProductoImagen.objects.get(pk=pk, state=1).delete()
+            print(query)
+        except ProductoImagen.DoesNotExist:
+            err={"error":"No existe"}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err,status=status.HTTP_404_NOT_FOUND)
+        #tomar el dato
+        if request.method == 'DELETE':
+            data={'message':'Se elimino correctamente.'}            
+            if data:
+                createLog(logModel,data,logTransaccion)
+                return Response(data,status=status.HTTP_200_OK)
+            errors={'message':'No se elimino la imagen.'}
+            createLog(logModel,errors,logExcepcion)
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e: 
+        err={"error":'Un error ha ocurrido: {}'.format(e)}  
+        createLog(logModel,err,logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 #CREAR
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -181,30 +218,30 @@ def productos_update(request, pk):
         'fechaFin': str(timezone_now),
         'dataRecibida' : '{}'
     }
-    # try:
     try:
-        logModel['dataEnviada'] = str(request.data)
-        query = Productos.objects.get(pk=pk, state=1)
-    except Productos.DoesNotExist:
-        errorNoExiste={'error':'No existe'}
-        createLog(logModel,errorNoExiste,logExcepcion)
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'POST':
-        now = timezone.localtime(timezone.now())
-        request.data['updated_at'] = str(now)
-        if 'created_at' in request.data:
-            request.data.pop('created_at')
-        serializer = ProductosActualizarSerializer(query, data=request.data,partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            createLog(logModel,serializer.data,logTransaccion)
-            return Response(serializer.data)
-        createLog(logModel,serializer.errors,logExcepcion)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    # except Exception as e: 
-    #     err={"error":'Un error ha ocurrido: {}'.format(e)}  
-    #     createLog(logModel,err,logExcepcion)
-    #     return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            query = Productos.objects.get(pk=pk, state=1)
+        except Productos.DoesNotExist:
+            errorNoExiste={'error':'No existe'}
+            createLog(logModel,errorNoExiste,logExcepcion)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'POST':
+            now = timezone.localtime(timezone.now())
+            request.data['updated_at'] = str(now)
+            if 'created_at' in request.data:
+                request.data.pop('created_at')
+            serializer = ProductosActualizarSerializer(query, data=request.data,partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                createLog(logModel,serializer.data,logTransaccion)
+                return Response(serializer.data)
+            createLog(logModel,serializer.errors,logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e: 
+        err={"error":'Un error ha ocurrido: {}'.format(e)}  
+        createLog(logModel,err,logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
 #ELIMINAR
 @api_view(['DELETE'])

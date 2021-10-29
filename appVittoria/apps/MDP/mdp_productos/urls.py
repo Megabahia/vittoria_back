@@ -7,7 +7,7 @@ from apps.MDP.mdp_productos.views import (
 	abastecimiento_create,
 	uploadEXCEL_crearProductos, productoImagen_list, prediccion_crosseling_list,
 	producto_refil_list, prediccion_refil_list, prediccion_productosNuevos_list,
-	search_producto_codigo_list
+	search_producto_codigo_list, producto_images_delete
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -26,6 +26,7 @@ urlpatterns = [
 	path('upload/excel/', uploadEXCEL_crearProductos, name="uploadEXCEL_crearProductos"),
 	# IMAGENES PRODUCTOS
 	path('imagen/<int:pk>', producto_images_findOne, name="producto_images_findOne"), 
+	path('imagen/delete/<int:pk>', producto_images_delete, name="producto_images_delete"), 
 	# REPORTE ABASTECIMIENTO
 	path('abastecimiento/create/', abastecimiento_create, name="abastecimiento_create"),
 	path('abastecimiento/list/', abastecimiento_list, name="abastecimiento_list"),
