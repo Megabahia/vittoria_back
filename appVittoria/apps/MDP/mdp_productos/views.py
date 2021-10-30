@@ -185,6 +185,13 @@ def productos_create(request):
         'dataRecibida' : '{}'
     }
     if request.method == 'POST':
+        
+        logModel['dataEnviada'] = str(request.data)
+        query = Productos.objects.get(codigoBarras=request.data['codigoBarras'], state=1)
+        if query:
+            errorNoExiste={'error':'Ya existe el producto'}
+            createLog(logModel,errorNoExiste,logExcepcion)
+            return Response(errorNoExiste,status=status.HTTP_404_NOT_FOUND)
         try:
             logModel['dataEnviada'] = str(request.data)
             request.data['created_at'] = str(timezone_now)
@@ -219,6 +226,12 @@ def productos_update(request, pk):
         'dataRecibida' : '{}'
     }
     try:
+        logModel['dataEnviada'] = str(request.data)
+        query = Productos.objects.get(codigoBarras=request.data['codigoBarras'], state=1)
+        if query:
+            errorNoExiste={'error':'Ya existe el producto'}
+            createLog(logModel,errorNoExiste,logExcepcion)
+            return Response(errorNoExiste,status=status.HTTP_404_NOT_FOUND)
         try:
             logModel['dataEnviada'] = str(request.data)
             query = Productos.objects.get(pk=pk, state=1)

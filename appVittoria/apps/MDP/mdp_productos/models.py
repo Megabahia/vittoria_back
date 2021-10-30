@@ -31,7 +31,7 @@ class Productos(models.Model):
     precioVentaE = models.FloatField(null=True)
     precioVentaBultos = models.FloatField(null=True)
     parametrizacion= models.ForeignKey(Parametrizaciones, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
-    estado = models.CharField(max_length=150,null=True)
+    estado = models.CharField(max_length=150,null=True,default="Inactivo")
     variableRefil = models.CharField(max_length=150,null=True)
     lote = models.CharField(max_length=150,null=True)
     fechaElaboracion = models.DateField(null=True)
