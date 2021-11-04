@@ -26,7 +26,7 @@ class Oferta(models.Model):
 
     nombres = models.CharField(max_length=255,null=True)
     apellidos = models.CharField(max_length=255,null=True)
-    vigenciaOferta = models.IntegerField(null=True)
+    vigenciaOferta = models.PositiveIntegerField(null=True)
     calificacionCliente = models.CharField(max_length=150,null=True)
     indicadorCliente = models.CharField(max_length=150,null=True)
     descripcion = models.TextField(null=True)
