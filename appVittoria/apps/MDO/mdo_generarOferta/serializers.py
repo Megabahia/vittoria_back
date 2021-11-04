@@ -15,7 +15,7 @@ class OfertasDetallesSerializer(serializers.ModelSerializer):
 
 class OfertasSerializer(serializers.ModelSerializer):
     # id = serializers.IntegerField()
-    detalles = OfertasDetallesSerializer(many=True)
+    detalles = OfertasDetallesSerializer(many=True,allow_empty=False)
     class Meta:
         model = Oferta
        	fields = '__all__'
@@ -73,7 +73,7 @@ class DetallesSerializer(serializers.ModelSerializer):
        	fields = '__all__'
 
 class OfertaSerializer(serializers.ModelSerializer):
-    detalles = DetallesSerializer(many=True)
+    detalles = DetallesSerializer(many=True,allow_empty=False)
     class Meta:
         model = Oferta
        	fields = '__all__'
