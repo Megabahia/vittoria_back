@@ -187,8 +187,8 @@ def productos_create(request):
     if request.method == 'POST':
         
         logModel['dataEnviada'] = str(request.data)
-        query = Productos.objects.get(codigoBarras=request.data['codigoBarras'], state=1)
-        if query:
+        query = Productos.objects.filter(codigoBarras=request.data['codigoBarras'], state=1).first()
+        if query is not None:
             errorNoExiste={'error':'Ya existe el producto'}
             createLog(logModel,errorNoExiste,logExcepcion)
             return Response(errorNoExiste,status=status.HTTP_404_NOT_FOUND)
@@ -227,8 +227,8 @@ def productos_update(request, pk):
     }
     try:
         logModel['dataEnviada'] = str(request.data)
-        query = Productos.objects.get(codigoBarras=request.data['codigoBarras'], state=1)
-        if query:
+        query = Productos.objects.filter(codigoBarras=request.data['codigoBarras'], state=1).first()
+        if query is not None:
             errorNoExiste={'error':'Ya existe el producto'}
             createLog(logModel,errorNoExiste,logExcepcion)
             return Response(errorNoExiste,status=status.HTTP_404_NOT_FOUND)

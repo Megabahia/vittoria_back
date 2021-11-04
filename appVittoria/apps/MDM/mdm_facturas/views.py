@@ -1,5 +1,6 @@
 from apps.MDM.mdm_facturas.models import FacturasEncabezados, FacturasDetalles
 from apps.MDM.mdm_facturas.serializers import FacturasSerializer, FacturasDetallesSerializer, FacturasListarSerializer, FacturaSerializer, FacturasListarTablaSerializer
+from apps.MDP.mdp_productos.models import Productos
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -495,6 +496,19 @@ def factura_create(request):
             request.data['created_at'] = str(timezone_now)
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
+
+            detalles = request.data['detalles']
+            productosSinStock = []
+            for detalle in detalles:
+                producto = Productos.objects.filter(codigoBarras=detalle['codigo'],state=1).values('stock').first()
+                if int(detalle['cantidad']) > int(producto['stock']):
+                    productoSinStock={}
+                    productoSinStock['codigo']=detalle['codigo']
+                    productoSinStock['stock']=producto['stock']
+                    productosSinStock.append(productoSinStock)
+
+            if len(productosSinStock) >0:
+                return Response(productosSinStock,status=status.HTTP_404_NOT_FOUND)
         
             serializer = FacturaSerializer(data=request.data)
             if serializer.is_valid():
