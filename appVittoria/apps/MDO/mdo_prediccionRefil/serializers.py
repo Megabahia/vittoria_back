@@ -26,7 +26,7 @@ class PrediccionRefilSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         detalles_data = validated_data.pop('detalles')
-        
+        validated_data["fechaPredicciones"] = datetime.datetime.now().date()
         prediccionRefil = PrediccionRefil.objects.filter(fechaPredicciones=validated_data['fechaPredicciones'],cliente=validated_data['cliente'],state=1).first()
         if prediccionRefil is None:        
             prediccionRefil = PrediccionRefil.objects.create(**validated_data)

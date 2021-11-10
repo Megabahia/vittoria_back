@@ -4,6 +4,8 @@ from apps.MDP.mdp_productos.models import Productos
 from apps.MDM.mdm_clientes.models import Clientes
 from apps.MDM.mdm_negocios.models import Negocios
 from apps.MDO.mdo_prediccionCrosseling.serializers import PrediccionCrosselingSerializer
+from apps.MDO.mdo_prediccionProductosNuevos.serializers import PrediccionProductosSerializer
+from apps.MDO.mdo_prediccionRefil.serializers import PrediccionRefilSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -527,8 +529,12 @@ def factura_create(request):
                     request.data["apellidos"]= negocio.nombreComercial
 
                 prediccionCrosselingSerializer = PrediccionCrosselingSerializer(data=request.data)
-                if prediccionCrosselingSerializer.is_valid():
+                prediccionProductosSerializer = PrediccionProductosSerializer(data=request.data)
+                prediccionRefilSerializer = PrediccionRefilSerializer(data=request.data)
+                if prediccionCrosselingSerializer.is_valid() and prediccionRefilSerializer.is_valid() and prediccionProductosSerializer.is_valid():
                     prediccionCrosselingSerializer.save()
+                    prediccionProductosSerializer.save()
+                    prediccionRefilSerializer.save()
                     createLog(logModel,serializer.data,logTransaccion)
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 createLog(logModel,serializer.errors,logExcepcion)
