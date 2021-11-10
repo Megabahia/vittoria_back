@@ -1,6 +1,6 @@
 from apps.MDP.mdp_productos.models import (
     ProductoImagen,
-    Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion
+    Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion, IngresoProductos
 )
 from apps.MDP.mdp_productos.serializers import (
     DetallesSerializer, ProductosActualizarSerializer,
@@ -16,6 +16,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+from datetime import datetime
 #excel
 import openpyxl
 #logs
@@ -227,7 +228,7 @@ def productos_update(request, pk):
     }
     try:
         logModel['dataEnviada'] = str(request.data)
-        query = Productos.objects.filter(codigoBarras=request.data['codigoBarras'], state=1).first()
+        query = Productos.objects.filter(codigoBarras=request.data['codigoBarras'], state=1).exclude(pk=pk).first()
         if query is not None:
             errorNoExiste={'error':'Ya existe el producto'}
             createLog(logModel,errorNoExiste,logExcepcion)
@@ -677,6 +678,7 @@ def insertarDato_Producto(dato):
         data['lote'] = dato[3].replace('"', "") if dato[3] != "NULL" else None
         data['fechaElaboracion'] = str(dato[4].replace('"', "")[:10]) if dato[4] != "NULL" else None   
         data['fechaCaducidad'] = str(dato[5].replace('"', "")[:10]) if dato[5] != "NULL" else None
+        data['costoCompra'] = str(dato[6].replace('"', "")) if dato[6] != "NULL" else None
         data['updated_at'] = str(timezone_now)
         #inserto el dato con los campos requeridos
         query = Productos.objects.get(codigoBarras=data['codigoBarras'])
@@ -685,6 +687,10 @@ def insertarDato_Producto(dato):
         query.save()
         if query == 0:
             return 'Codigo producto %(code)s no existe' % {"code": data['codigoBarras']}
+        # CREAR INGRESO PRODUCTOS
+        IngresoProductos.objects.create(cantidad = data['stock'], fechaElaboracion = str(data['fechaElaboracion']), fechaCaducidad = str(data['fechaCaducidad']), precioCompra = data['costoCompra'], producto = query)
+        # CREAR REPORTE STOCK
+        ReporteStock.objects.create(fechaUltimaStock = datetime.today().strftime('%Y-%m-%d'), montoCompra = data['costoCompra'], producto = query)
         return 'Dato insertado correctamente'
     except Exception as e:
         return str(e)

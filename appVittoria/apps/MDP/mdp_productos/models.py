@@ -66,8 +66,8 @@ class ProductoImagen(models.Model):
 # Create your models here.
 class ReporteAbastecimiento(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
-    cantidadSugeridaStock = models.CharField(max_length=150,null=True)
-    fechaMaximaStock = models.DateTimeField(null=True)
+    cantidadSugeridaStock = models.IntegerField(null=True)
+    fechaMaximaStock = models.DateField(null=True)
     mostrarAviso = models.SmallIntegerField(default=0)
     notificacionEnviada = models.SmallIntegerField(default=0)
 
@@ -81,7 +81,7 @@ class ReporteAbastecimiento(models.Model):
 # Create your models here.
 class ReporteStock(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
-    fechaUltimaStock = models.DateTimeField(null=True)
+    fechaUltimaStock = models.DateField(null=True)
     montoCompra = models.FloatField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -94,9 +94,9 @@ class ReporteStock(models.Model):
 # Create your models here.
 class ReporteCaducidad(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
-    fechaCaducidad = models.DateTimeField(null=True)
+    fechaCaducidad = models.DateField(null=True)
     productosCaducados = models.IntegerField(null=True)
-    diasParaCaducar = models.IntegerField(null=True)
+    diasParaCaducar = models.PositiveIntegerField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -108,8 +108,8 @@ class ReporteCaducidad(models.Model):
 # Create your models here.
 class ReporteRotacion(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
-    fechaInicio = models.DateTimeField(null=True)
-    fechaFin = models.DateTimeField(null=True)
+    fechaInicio = models.DateField(null=True)
+    fechaFin = models.DateField(null=True)
     diasPeriodo = models.IntegerField(null=True)
     productosVendidos = models.IntegerField(null=True)
     tipoRotacion = models.CharField(max_length=150,null=True)
@@ -159,9 +159,9 @@ class HistorialAvisos(models.Model):
                     HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).update(alerta=1)
                     enviarEmailAvisoAbastecimiento(product, maxDate)
         else:
-            diasAlerta = (product.fechaCaducidad - timezone_now ).days
+            diasAlerta = (product.fechaCaducidad - datetime.datetime.now().date() ).days
             if diasAlerta <= product.parametrizacion.maximo:
-                datos = HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).aggregate(promedioProductos=Avg('productosVendidos'),fechaMinima=Min('fechaCompra'),fechaMaxima=Max('fechaCompra'),totalRegistros=Count('alerta'))                
+                datos = HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).aggregate(promedioProductos=Avg('productosVendidos'),fechaMinima=Min('fechaCompra'),fechaMaxima=Max('fechaCompra'),totalRegistros=Count('alerta'))
                 if datos['totalRegistros'] != 0:
                     supplyReport = ReporteAbastecimiento.objects.filter(producto=product).order_by('-created_at')[:1].get()
                     supplyReport.producto = product
@@ -170,7 +170,7 @@ class HistorialAvisos(models.Model):
                     supplyReport.notificacionEnviada = 1
                     daysAvg = ((datos['fechaMaxima'] - datos['fechaMinima']).days) / datos['totalRegistros']
                     maxDate = timezone_now + datetime.timedelta(days=daysAvg)
-                    supplyReport.fechaMaximaStock = str(maxDate)
+                    supplyReport.fechaMaximaStock = str(maxDate)[0:10]
                     supplyReport.save()
                     self.alerta = 1
                     HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras,alerta=0).update(alerta=1)
@@ -180,7 +180,7 @@ class HistorialAvisos(models.Model):
         rotacion.productosVendidos += self.productosVendidos
         rotacion.montoVenta += self.precioVenta
         consulta = IngresoProductos.objects.filter(created_at__gte=str(rotacion.fechaInicio),created_at__lte=str(rotacion.fechaFin)).aggregate(promedioInventario=Avg('cantidad'))        
-        resultadoRotacion = rotacion.montoVenta / consulta["promedioInventario"] 
+        resultadoRotacion = rotacion.montoVenta / consulta["promedioInventario"] if consulta["promedioInventario"] != None else 0
         tipoRotacion = Parametrizaciones.objects.filter(tipo="TIPO_ROTACION",maximo__lte=int(resultadoRotacion)).order_by('-maximo')[:1].get()        
         rotacion.tipoRotacion = tipoRotacion.nombre
         rotacion.save()
@@ -236,15 +236,23 @@ def enviarEmailAvisoAbastecimiento(product, maxDate):
 def createTablesReport(sender, instance, **kwargs):    
     timezone_now = timezone.localtime(timezone.now())
     # CREAR INGRESO PRODUCTOS
-    IngresoProductos.objects.create(cantidad = instance.stock, fechaElaboracion = str(instance.fechaElaboracion), fechaCaducidad = str(instance.fechaCaducidad), precioCompra = instance.costoCompra, producto = instance)
+    ingresoProductos = IngresoProductos.objects.filter(producto=instance, state=1).first()
+    if ingresoProductos is None:
+        IngresoProductos.objects.create(cantidad = instance.stock, fechaElaboracion = str(instance.fechaElaboracion), fechaCaducidad = str(instance.fechaCaducidad), precioCompra = instance.costoCompra, producto = instance)
     # CREAR REPORTE STOCK
-    ReporteStock.objects.create(fechaUltimaStock = str(timezone_now), montoCompra = instance.costoCompra, producto = instance)
+    reporteStock = ReporteStock.objects.filter(producto=instance, state=1).first()
+    if reporteStock is None:
+        ReporteStock.objects.create(fechaUltimaStock = str(datetime.datetime.now().date()), montoCompra = instance.costoCompra, producto = instance)
     # CREAR REPORTE ABASTECIMIENTO
-    ReporteAbastecimiento.objects.create(cantidadSugeridaStock=0,state=1,producto=instance)
+    reporteAbastecimiento = ReporteAbastecimiento.objects.filter(producto=instance, state=1).first()
+    if reporteAbastecimiento is None:
+        ReporteAbastecimiento.objects.create(cantidadSugeridaStock=0,state=1,producto=instance)
     # CREAR REPORTE ROTACION PRODUCTOS
     diasPeriodo = 7
     fechaFin = timezone_now + datetime.timedelta(days=diasPeriodo)
-    ReporteRotacion.objects.create(fechaInicio=str(timezone_now),fechaFin=str(fechaFin),diasPeriodo=diasPeriodo,productosVendidos=0,tipoRotacion="Bajo",montoVenta=0,producto=instance)
+    reporteRotacion = ReporteRotacion.objects.filter(producto=instance,fechaFin__lte=fechaFin).first()
+    if reporteRotacion is None:
+        ReporteRotacion.objects.create(fechaInicio=str(timezone_now)[0:10],fechaFin=str(fechaFin)[0:10],diasPeriodo=diasPeriodo,productosVendidos=0,tipoRotacion="Bajo",montoVenta=0,producto=instance)
     ingresoProducto = IngresoProductos.objects.filter(fechaCaducidad__lte=str(datetime.datetime.now().date()), state=1,producto=instance.id).aggregate(productosCaducados=Sum("cantidad"))        
     if instance.fechaCaducidad != None:
         ahora = instance.fechaCaducidad
@@ -256,5 +264,7 @@ def createTablesReport(sender, instance, **kwargs):
     else:
         diasParaCaducar = 0
     # CREAR REPORTE CADUCIDAD
-    reporte = ReporteCaducidad.objects.create(fechaCaducidad = instance.fechaCaducidad, productosCaducados = ingresoProducto["productosCaducados"], diasParaCaducar = diasParaCaducar , producto = instance)    
+    reporteCaducidad = ReporteCaducidad.objects.filter(producto = instance, state=1).first()
+    if reporteCaducidad is None:
+        ReporteCaducidad.objects.create(fechaCaducidad = instance.fechaCaducidad, productosCaducados = ingresoProducto["productosCaducados"], diasParaCaducar = diasParaCaducar , producto = instance)
     return

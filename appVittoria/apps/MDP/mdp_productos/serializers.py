@@ -150,7 +150,13 @@ class CaducidadListSerializer(serializers.ModelSerializer):
         model = ReporteCaducidad
        	fields = '__all__'
     def to_representation(self, instance):
-        instance.diasParaCaducar = (instance.producto.fechaCaducidad - datetime.datetime.now().date()).days
+        diasParaCaducar = (instance.producto.fechaCaducidad - datetime.datetime.now().date()).days
+        if int(diasParaCaducar) > 0:
+            instance.diasParaCaducar = diasParaCaducar
+            instance.productosCaducados = 0
+        else:
+            instance.diasParaCaducar = 0
+            instance.productosCaducados = instance.producto.stock
         instance.save()
         data = super(CaducidadListSerializer, self).to_representation(instance)        
         producto = data.pop('producto')
