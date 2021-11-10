@@ -1,6 +1,9 @@
 from apps.MDM.mdm_facturas.models import FacturasEncabezados, FacturasDetalles
 from apps.MDM.mdm_facturas.serializers import FacturasSerializer, FacturasDetallesSerializer, FacturasListarSerializer, FacturaSerializer, FacturasListarTablaSerializer
 from apps.MDP.mdp_productos.models import Productos
+from apps.MDM.mdm_clientes.models import Clientes
+from apps.MDM.mdm_negocios.models import Negocios
+from apps.MDO.mdo_prediccionCrosseling.serializers import PrediccionCrosselingSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -511,10 +514,25 @@ def factura_create(request):
                 return Response(productosSinStock,status=status.HTTP_404_NOT_FOUND)
         
             serializer = FacturaSerializer(data=request.data)
-            if serializer.is_valid():
+            if serializer.is_valid():                
                 serializer.save()
-                createLog(logModel,serializer.data,logTransaccion)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                request.data["factura_id"]= int(serializer.data['id'])
+                if serializer.data['negocio'] is None:
+                    cliente = Clientes.objects.filter(id=serializer.data['cliente'],state=1).first()
+                    request.data["nombres"]= cliente.nombres
+                    request.data["apellidos"]= cliente.apellidos
+                else:
+                    negocio = Negocios.objects.filter(id=serializer.data['negocio'],state=1).first()
+                    request.data["nombres"]= negocio.razonSocial
+                    request.data["apellidos"]= negocio.nombreComercial
+
+                prediccionCrosselingSerializer = PrediccionCrosselingSerializer(data=request.data)
+                if prediccionCrosselingSerializer.is_valid():
+                    prediccionCrosselingSerializer.save()
+                    createLog(logModel,serializer.data,logTransaccion)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                createLog(logModel,serializer.errors,logExcepcion)
+                return Response(prediccionCrosselingSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
             createLog(logModel,serializer.errors,logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e: 
