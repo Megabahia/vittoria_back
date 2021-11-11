@@ -5,7 +5,7 @@ from apps.MDM.mdm_negocios.models import Negocios
 from apps.MDM.mdm_clientes.models import Clientes
 from apps.MDP.mdp_productos.models import Productos, HistorialAvisos
 
-import datetime
+from datetime import datetime
 from django.utils import timezone
 
 # Actualizar factura
@@ -102,5 +102,5 @@ class FacturaSerializer(serializers.ModelSerializer):
             facturaEncabezado.save()
         for detalle_data in detalles_data:
             FacturasDetalles.objects.create(facturaEncabezado=facturaEncabezado, **detalle_data)
-            HistorialAvisos.objects.create(codigoBarras=detalle_data['codigo'],fechaCompra="2021-11-09",productosVendidos=detalle_data['cantidad'],precioVenta=0)
+            HistorialAvisos.objects.create(codigoBarras=detalle_data['codigo'],fechaCompra=datetime.today().strftime('%Y-%m-%d'),productosVendidos=detalle_data['cantidad'],precioVenta=0)
         return facturaEncabezado

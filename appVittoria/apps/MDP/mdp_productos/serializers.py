@@ -34,16 +34,19 @@ class ImagenSerializer(serializers.ModelSerializer):
 
 # CREAR PRODUCTO
 class ProductoCreateSerializer(serializers.ModelSerializer):
-    imagenes = DetallesSerializer(many=True)
+    imagenes = DetallesSerializer(many=True,required=False,allow_null=True,allow_empty=True)
     class Meta:
         model = Productos
        	fields = '__all__'
 
-    def create(self, validated_data):        
-        detalles_data = validated_data.pop('imagenes')
-        producto = Productos.objects.create(**validated_data)
-        for detalle_data in detalles_data:
-            ProductoImagen.objects.create(producto=producto, **detalle_data)
+    def create(self, validated_data):
+        if "imagenes" in validated_data:
+            detalles_data = validated_data.pop('imagenes')
+            producto = Productos.objects.create(**validated_data)
+            for detalle_data in detalles_data:
+                ProductoImagen.objects.create(producto=producto, **detalle_data)
+        else:
+            producto = Productos.objects.create(**validated_data)
         return producto
 
 # ACTUALIZAR PRODUCTO
