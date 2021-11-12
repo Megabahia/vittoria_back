@@ -102,5 +102,5 @@ class FacturaSerializer(serializers.ModelSerializer):
             facturaEncabezado.save()
         for detalle_data in detalles_data:
             FacturasDetalles.objects.create(facturaEncabezado=facturaEncabezado, **detalle_data)
-            HistorialAvisos.objects.create(codigoBarras=detalle_data['codigo'],fechaCompra=datetime.today().strftime('%Y-%m-%d'),productosVendidos=detalle_data['cantidad'],precioVenta=0)
+            HistorialAvisos.objects.create(codigoBarras=detalle_data['codigo'],fechaCompra=datetime.today().strftime('%Y-%m-%d'),productosVendidos=detalle_data['cantidad'],precioVenta=detalle_data['total'])
         return facturaEncabezado
