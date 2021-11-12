@@ -12,7 +12,7 @@ class Oferta(models.Model):
     fechaOferta = models.DateField(null=True)
     nombres = models.CharField(max_length=150,null=True)
     apellidos = models.CharField(max_length=150,null=True)
-    identificacion = models.CharField(max_length=150,null=True)    
+    identificacion = models.CharField(max_length=13,null=True)    
     telefono = models.CharField(max_length=150,null=True)
     correo = models.EmailField(max_length=150,null=True)
     vigenciaOferta = models.IntegerField(null=True)
@@ -20,7 +20,7 @@ class Oferta(models.Model):
     calificacionCliente = models.CharField(max_length=150,null=True)
     indicadorCliente = models.CharField(max_length=150,null=True)
     personaGenera = models.CharField(max_length=150,null=True)
-    descripcion = models.CharField(max_length=150,null=True)
+    descripcion = models.TextField(null=True)
     total = models.FloatField(null=True)
 
     fechaCompra = models.DateField(null=True)
@@ -42,7 +42,7 @@ class OfertaDetalles(models.Model):
     # NOMBRAMOS A LA RELACION DETALLES
     oferta = models.ForeignKey(Oferta, related_name='detalles', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Oferta
     codigo = models.CharField(max_length=150,null=True)
-    cantidad = models.SmallIntegerField(null=True)
+    cantidad = models.PositiveSmallIntegerField(null=True)
     producto = models.CharField(max_length=150,null=True)
     precio = models.FloatField(null=True)
     descuento = models.FloatField(null=True)
