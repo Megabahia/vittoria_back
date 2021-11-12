@@ -61,6 +61,7 @@ class FacturasDetalles(models.Model):
     descuento = models.FloatField(null=True)
     impuesto = models.FloatField(null=True)
     valorDescuento = models.FloatField(null=True)
+    total = models.FloatField(null=True)
         
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
