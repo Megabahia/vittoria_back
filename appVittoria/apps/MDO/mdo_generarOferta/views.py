@@ -1,4 +1,5 @@
 from apps.MDO.mdo_generarOferta.models import Oferta, OfertaDetalles
+from apps.GDO.gdo_gestionOferta.serializers import OfertaSerializer
 from apps.MDO.mdo_generarOferta.serializers import OfertasSerializer, OfertasListarSerializer, OfertaSerializer, OfertasListarTablaSerializer, DetallesImagenesSerializer
 from rest_framework import status
 from rest_framework.response import Response
@@ -128,10 +129,15 @@ def generarOferta_create(request):
                 request.data.pop('updated_at')
         
             serializer = OfertaSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                createLog(logModel,serializer.data,logTransaccion)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if serializer.is_valid():                
+                gestionOfertaSerializer = OfertaSerializer(data=request.data)
+                if gestionOfertaSerializer.is_valid():
+                    gestionOfertaSerializer.save()
+                    serializer.save()
+                    createLog(logModel,serializer.data,logTransaccion)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                createLog(logModel,gestionOfertaSerializer.errors,logExcepcion)
+                return Response(gestionOfertaSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
             createLog(logModel,serializer.errors,logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e: 
