@@ -1,4 +1,5 @@
 from apps.GDO.gdo_gestionOferta.models import Oferta, OfertaDetalles
+from apps.GDE.gde_gestionEntrega.serializers import GestionOfertaSerializer
 from apps.GDO.gdo_gestionOferta.serializers import OfertasSerializer, OfertasListarSerializer, OfertaSerializer, OfertasListarTablaSerializer, DetallesImagenesSerializer
 from rest_framework import status
 from rest_framework.response import Response
@@ -163,8 +164,13 @@ def generarOferta_update(request, pk):
             serializer = OfertasSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
-                createLog(logModel,serializer.data,logTransaccion)
-                return Response(serializer.data)
+                gestionEntregaSerializer = GestionOfertaSerializer(data=request.data)
+                if gestionEntregaSerializer.is_valid():
+                    gestionEntregaSerializer.save()
+                    createLog(logModel,serializer.data,logTransaccion)
+                    return Response(serializer.data)
+                createLog(logModel,gestionEntregaSerializer.data,logTransaccion)
+                return Response(gestionEntregaSerializer.data)
             createLog(logModel,serializer.errors,logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e: 

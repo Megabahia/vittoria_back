@@ -1,5 +1,5 @@
 from apps.GDE.gde_gestionEntrega.models import Oferta, OfertaDetalles
-from apps.GDE.gde_gestionEntrega.serializers import OfertasSerializer, OfertasListarSerializer, OfertaSerializer, OfertasListarTablaSerializer, DetallesImagenesSerializer
+from apps.GDE.gde_gestionEntrega.serializers import OfertasSerializer, OfertasListarSerializer, GestionOfertaSerializer, OfertasListarTablaSerializer, DetallesImagenesSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -119,7 +119,7 @@ def generarOferta_create(request):
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
         
-            serializer = OfertaSerializer(data=request.data)
+            serializer = GestionOfertaSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -197,7 +197,7 @@ def generarOferta_delete(request, pk):
             return Response(status=status.HTTP_404_NOT_FOUND)
         #tomar el dato
         if request.method == 'DELETE':
-            serializer = OfertaSerializer(query, data={'state': '0','updated_at':str(nowDate)},partial=True)
+            serializer = GestionOfertaSerializer(query, data={'state': '0','updated_at':str(nowDate)},partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)

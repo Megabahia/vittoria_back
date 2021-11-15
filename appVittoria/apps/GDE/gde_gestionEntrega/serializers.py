@@ -52,7 +52,7 @@ class DetallesSerializer(serializers.ModelSerializer):
         model = OfertaDetalles
        	fields = '__all__'
 
-class OfertaSerializer(serializers.ModelSerializer):
+class GestionOfertaSerializer(serializers.ModelSerializer):
     detalles = DetallesSerializer(many=True)
     class Meta:
         model = Oferta
