@@ -22,7 +22,7 @@ class Productos(models.Model):
     codigoBarras = models.CharField(max_length=150,null=True)
     refil = models.PositiveIntegerField(null=True)
     stock = models.PositiveIntegerField(null=True)
-    caducidad = models.IntegerField(null=True,blank=True)
+    caducidad = models.IntegerField(default=0,null=True,blank=True)
     costoCompra = models.FloatField(null=True)
     precioVentaA = models.FloatField(null=True)
     precioVentaB = models.FloatField(null=True)
