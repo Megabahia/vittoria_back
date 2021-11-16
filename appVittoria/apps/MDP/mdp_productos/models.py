@@ -96,7 +96,7 @@ class ReporteCaducidad(models.Model):
     producto= models.ForeignKey(Productos, null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con la categoria
     fechaCaducidad = models.DateField(null=True)
     productosCaducados = models.IntegerField(null=True)
-    diasParaCaducar = models.PositiveIntegerField(null=True)
+    diasParaCaducar = models.IntegerField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
