@@ -57,7 +57,7 @@ class DetallesImagenesSerializer(serializers.ModelSerializer):
        	fields = '__all__'
 
 class ProductosActualizarSerializer(serializers.ModelSerializer):
-    imagenes = DetallesImagenesSerializer(many=True)
+    imagenes = DetallesImagenesSerializer(many=True,required=False,allow_null=True,allow_empty=True)
     class Meta:
         model = Productos
        	fields = '__all__'
@@ -70,29 +70,34 @@ class ProductosActualizarSerializer(serializers.ModelSerializer):
         return producto
     
     def update(self, instance, validated_data):
-        detalles_database = {detalle.id: detalle for detalle in instance.imagenes.all()}
-        detalles_actualizar = {item['id']: item for item in validated_data['imagenes']}
+        if "imagenes" in validated_data:
+            detalles_database = {detalle.id: detalle for detalle in instance.imagenes.all()}
+            detalles_actualizar = {item['id']: item for item in validated_data['imagenes']}
 
-        # Actualiza el producto
-        instance.__dict__.update(validated_data) 
-        instance.save()
+            # Actualiza el producto
+            instance.__dict__.update(validated_data) 
+            instance.save()
 
-        # Eliminar los imagenes que no esté incluida en la solicitud de la productos imagenes
-        for detalle in instance.imagenes.all():
-            if detalle.id not in detalles_actualizar:
-                detalle.imagen.delete()
-                detalle.delete()
+            # Eliminar los imagenes que no esté incluida en la solicitud de la productos imagenes
+            for detalle in instance.imagenes.all():
+                if detalle.id not in detalles_actualizar:
+                    detalle.imagen.delete()
+                    detalle.delete()
 
-        # Crear o actualizar instancias de imagenes que se encuentran en la solicitud de producto imagenes
-        for detalle_id, data in detalles_actualizar.items():
-            detalle = detalles_database.get(detalle_id, None)
-            if detalle is None:
-                data.pop('id')
-                ProductoImagen.objects.create(**data)
-            # else:
-            #     now = timezone.localtime(timezone.now())
-            #     data['updated_at'] = str(now)
-            #     ProductoImagen.objects.filter(id=detalle.id).update(**data)
+            # Crear o actualizar instancias de imagenes que se encuentran en la solicitud de producto imagenes
+            for detalle_id, data in detalles_actualizar.items():
+                detalle = detalles_database.get(detalle_id, None)
+                if detalle is None:
+                    data.pop('id')
+                    ProductoImagen.objects.create(**data)
+                # else:
+                #     now = timezone.localtime(timezone.now())
+                #     data['updated_at'] = str(now)
+                #     ProductoImagen.objects.filter(id=detalle.id).update(**data)
+        else:
+            # Actualiza el producto
+            instance.__dict__.update(validated_data) 
+            instance.save()
 
         return instance
 

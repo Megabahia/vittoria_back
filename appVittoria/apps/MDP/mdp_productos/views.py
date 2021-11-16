@@ -216,6 +216,7 @@ def productos_create(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def productos_update(request, pk):
+    request.POST._mutable = True
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'update/',
