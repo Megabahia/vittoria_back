@@ -4,7 +4,7 @@ from django.db import models
 class Oferta(models.Model):
     negocio= models.SmallIntegerField(null=True)
     cliente= models.SmallIntegerField(null=True)
-    codigoOferta = models.CharField(max_length=150,null=True, blank=True)
+    # codigoOferta = models.CharField(max_length=150,null=True, blank=True)
     fechaOferta = models.DateField(null=True)
     nombres = models.CharField(max_length=150,null=True)
     apellidos = models.CharField(max_length=150,null=True)

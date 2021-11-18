@@ -132,7 +132,7 @@ def generarOferta_create(request):
             serializer = OfertaSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                request.data['fechaCompra'] = request.data['fecha']
+                request.data['fechaOferta'] = request.data['fecha']
                 request.data['codigo'] = serializer.data['id']
                 gestionOfertaSerializer = GestionOfertaCreateSerializer(data=request.data)
                 if gestionOfertaSerializer.is_valid():
