@@ -1,5 +1,5 @@
 from apps.MDO.mdo_generarOferta.models import Oferta, OfertaDetalles
-from apps.GDO.gdo_gestionOferta.serializers import OfertaSerializer
+from apps.GDO.gdo_gestionOferta.serializers import GestionOfertaCreateSerializer
 from apps.MDO.mdo_generarOferta.serializers import OfertasSerializer, OfertasListarSerializer, OfertaSerializer, OfertasListarTablaSerializer, DetallesImagenesSerializer
 from rest_framework import status
 from rest_framework.response import Response
@@ -130,7 +130,7 @@ def generarOferta_create(request):
         
             serializer = OfertaSerializer(data=request.data)
             if serializer.is_valid():                
-                gestionOfertaSerializer = OfertaSerializer(data=request.data)
+                gestionOfertaSerializer = GestionOfertaCreateSerializer(data=request.data)
                 if gestionOfertaSerializer.is_valid():
                     gestionOfertaSerializer.save()
                     serializer.save()
