@@ -357,8 +357,8 @@ def search_producto_codigo_list(request):
     }
     try:
         try:
-            query = ProductoImagen.objects.filter(producto__codigoBarras=request.data['codigoBarras'], state=1).first()
-        except ProductoImagen.DoesNotExist:
+            query = Productos.objects.filter(codigoBarras=request.data['codigoBarras'], state=1).first()
+        except Productos.DoesNotExist:
             err={"error":"No existe"}  
             createLog(logModel,err,logExcepcion)
             return Response(err,status=status.HTTP_404_NOT_FOUND)
