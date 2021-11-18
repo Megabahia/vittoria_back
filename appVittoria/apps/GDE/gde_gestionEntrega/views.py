@@ -1,4 +1,6 @@
 from apps.GDE.gde_gestionEntrega.models import Oferta, OfertaDetalles
+from apps.MDO.mdo_generarOferta.models import Oferta as MDO_Oferta
+from apps.GDO.gdo_gestionOferta.models import Oferta as GDO_Oferta
 from apps.GDE.gde_gestionEntrega.serializers import OfertasSerializer, OfertasListarSerializer, GestionOfertaSerializer, OfertasListarTablaSerializer, DetallesImagenesSerializer
 from rest_framework import status
 from rest_framework.response import Response
@@ -163,6 +165,9 @@ def generarOferta_update(request, pk):
             serializer = OfertasSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
+                if serializer.data['estado'] in 'Entregado':
+                    MDO_Oferta.objects.filter(pk=serializer.data['codigo'],state=1).update(state=0,updated_at=timezone_now)
+                    GDO_Oferta.objects.filter(pk=serializer.data['codigo'],state=1).update(state=0,updated_at=timezone_now)
                 createLog(logModel,serializer.data,logTransaccion)
                 return Response(serializer.data)
             createLog(logModel,serializer.errors,logExcepcion)

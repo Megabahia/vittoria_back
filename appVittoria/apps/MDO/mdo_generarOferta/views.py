@@ -1,5 +1,6 @@
 from apps.MDO.mdo_generarOferta.models import Oferta, OfertaDetalles
 from apps.GDO.gdo_gestionOferta.serializers import GestionOfertaCreateSerializer
+from apps.GDO.gdo_gestionOferta.models import Oferta as GDO_Oferta
 from apps.MDO.mdo_generarOferta.serializers import OfertasSerializer, OfertasListarSerializer, OfertaSerializer, OfertasListarTablaSerializer, DetallesImagenesSerializer
 from rest_framework import status
 from rest_framework.response import Response
@@ -129,11 +130,13 @@ def generarOferta_create(request):
                 request.data.pop('updated_at')
         
             serializer = OfertaSerializer(data=request.data)
-            if serializer.is_valid():                
+            if serializer.is_valid():
+                serializer.save()
+                request.data['fechaCompra'] = request.data['fecha']
+                request.data['codigo'] = serializer.data['id']
                 gestionOfertaSerializer = GestionOfertaCreateSerializer(data=request.data)
                 if gestionOfertaSerializer.is_valid():
-                    gestionOfertaSerializer.save()
-                    serializer.save()
+                    gestionOfertaSerializer.save()                    
                     createLog(logModel,serializer.data,logTransaccion)
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 createLog(logModel,gestionOfertaSerializer.errors,logExcepcion)
@@ -164,7 +167,6 @@ def generarOferta_update(request, pk):
         try:
             logModel['dataEnviada'] = str(request.data)
             query = Oferta.objects.get(pk=pk, state=1)
-            # print(query.detalles.count())
         except Oferta.DoesNotExist:
             errorNoExiste={'error':'No existe'}
             createLog(logModel,errorNoExiste,logExcepcion)
@@ -213,6 +215,7 @@ def generarOferta_delete(request, pk):
         if request.method == 'DELETE':
             serializer = OfertaSerializer(query, data={'state': '0','updated_at':str(nowDate)},partial=True)
             if serializer.is_valid():
+                GDO_Oferta.objects.filter(codigo=query.id,state=1).update(state=0,updated_at=str(nowDate))
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
                 return Response(serializer.data,status=status.HTTP_200_OK)

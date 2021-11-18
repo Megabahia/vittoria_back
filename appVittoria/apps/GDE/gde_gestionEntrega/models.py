@@ -24,6 +24,7 @@ class Oferta(models.Model):
     fechaEntrega = models.DateField(null=True)    
     calificacion = models.CharField(max_length=150,null=True, blank=True)
     estado = models.CharField(max_length=150,null=True, blank=True)
+    codigo = models.CharField(max_length=150,null=True)
         
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
