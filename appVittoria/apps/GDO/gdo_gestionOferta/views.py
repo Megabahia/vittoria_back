@@ -1,4 +1,5 @@
 from apps.GDO.gdo_gestionOferta.models import Oferta, OfertaDetalles
+from apps.GDE.gde_gestionEntrega.models import Oferta as GDE_Oferta
 from apps.GDE.gde_gestionEntrega.serializers import GestionOfertaSerializer
 from apps.GDO.gdo_gestionOferta.serializers import OfertasSerializer, OfertasListarSerializer, GestionOfertaCreateSerializer, OfertasListarTablaSerializer, DetallesImagenesSerializer
 from rest_framework import status
@@ -164,17 +165,18 @@ def generarOferta_update(request, pk):
             serializer = OfertasSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
-                if 'venta concretada' in serializer.data['estado'].lower():
-                    for detalles in request.data['detalles']:
-                        detalles.pop('oferta')
-                    gestionEntregaSerializer = GestionOfertaSerializer(data=request.data)
-                    if gestionEntregaSerializer.is_valid():
-                        gestionEntregaSerializer.save()
-                    else:
-                        createLog(logModel,gestionEntregaSerializer.errors,logExcepcion)
-                        return Response(gestionEntregaSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                    createLog(logModel,serializer.data,logTransaccion)
-                    return Response(serializer.data)
+                if GDE_Oferta.objects.filter(codigo=request.data['codigo'],state=1).first() is None:
+                    if 'venta concretada' in serializer.data['estado'].lower():
+                        for detalles in request.data['detalles']:
+                            detalles.pop('oferta')
+                        gestionEntregaSerializer = GestionOfertaSerializer(data=request.data)
+                        if gestionEntregaSerializer.is_valid():
+                            gestionEntregaSerializer.save()
+                        else:
+                            createLog(logModel,gestionEntregaSerializer.errors,logExcepcion)
+                            return Response(gestionEntregaSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                createLog(logModel,serializer.data,logTransaccion)
+                return Response(serializer.data)
             createLog(logModel,serializer.errors,logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e: 
