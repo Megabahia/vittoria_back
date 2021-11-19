@@ -165,12 +165,14 @@ def generarOferta_update(request, pk):
             if serializer.is_valid():
                 serializer.save()
                 if 'venta concretada' in serializer.data['estado'].lower():
+                    for detalles in request.data['detalles']:
+                        detalles.pop('oferta')
                     gestionEntregaSerializer = GestionOfertaSerializer(data=request.data)
                     if gestionEntregaSerializer.is_valid():
                         gestionEntregaSerializer.save()
                     else:
-                        createLog(logModel,gestionEntregaSerializer.data,logTransaccion)
-                        return Response(gestionEntregaSerializer.data)
+                        createLog(logModel,gestionEntregaSerializer.errors,logExcepcion)
+                        return Response(gestionEntregaSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
                     createLog(logModel,serializer.data,logTransaccion)
                     return Response(serializer.data)
             createLog(logModel,serializer.errors,logExcepcion)
