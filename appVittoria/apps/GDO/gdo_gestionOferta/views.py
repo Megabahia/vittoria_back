@@ -164,7 +164,7 @@ def generarOferta_update(request, pk):
             serializer = OfertasSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
-                if serializer.data['estado'] == 'Venta concretada':
+                if 'venta concretada' in serializer.data['estado'].lower():
                     gestionEntregaSerializer = GestionOfertaSerializer(data=request.data)
                     if gestionEntregaSerializer.is_valid():
                         gestionEntregaSerializer.save()
