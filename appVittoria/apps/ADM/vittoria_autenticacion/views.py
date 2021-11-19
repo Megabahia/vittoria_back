@@ -71,8 +71,17 @@ class login(ObtainAuthToken):
                         'tokenExpiracion': expires_in(token),
                         'permisos':[]
                     }
-                    for accion in acciones:
-                        data['permisos'].append({'url':str(accion)})
+                    # for accion in acciones:
+                    #     data['permisos'].append({'url':str(accion)})
+                    accionesList={}
+                    for accionPadre in Acciones.objects.filter(idAccionPadre__isnull=True):
+                        accionesCrud={} #guardo las acciones leer,escribir,editar,borrar
+                        #recorro las acciones de cada padre y las almaceno 
+                        for accionHijo in AccionesPorRol.objects.filter(idRol_id=user.idRol.id, idAccion__idAccionPadre__nombre=str(accionPadre.nombre)).order_by('id'):
+                            accionesCrud[str(accionHijo.idAccion.nombre)]=int(accionHijo.state)
+                        #asigno el crud a la lista
+                        accionesList[str(accionPadre.nombre)]=accionesCrud
+                    data['acciones']= accionesList
                     createLog(logModel,data,logTransaccion)
                     return Response(data,status=status.HTTP_200_OK)        
                 else:
