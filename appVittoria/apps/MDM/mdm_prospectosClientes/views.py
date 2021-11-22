@@ -88,6 +88,11 @@ def prospecto_cliente_search(request):
     if request.method == 'POST':
         try:
             logModel['dataEnviada'] = str(request.data)
+            #paginacion
+            page_size=20
+            page=0
+            offset = page_size* page
+            limit = offset + page_size
             #Filtros
             filters={"state":"1"}
             if 'nombreCompleto' in request.data:
@@ -102,7 +107,7 @@ def prospecto_cliente_search(request):
           
             #Serializar los datos
             query = ProspectosClientes.objects.filter(**filters).order_by('-created_at')
-            serializer = ProspectosClientesSearchSerializer(query, many=True)
+            serializer = ProspectosClientesSearchSerializer(query[offset:limit], many=True)
             new_serializer_data={'cont': query.count(),
             'info':serializer.data}
             #envio de datos
