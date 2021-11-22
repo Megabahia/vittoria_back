@@ -102,7 +102,7 @@ def prospecto_cliente_search(request):
           
             #Serializar los datos
             query = ProspectosClientes.objects.filter(**filters).order_by('-created_at')
-            serializer = ProspectosClientesListarSerializer(query, many=True)
+            serializer = ProspectosClientesSearchSerializer(query, many=True)
             new_serializer_data={'cont': query.count(),
             'info':serializer.data}
             #envio de datos
@@ -169,7 +169,7 @@ def prospecto_cliente_create(request):
             
             request.data['nombreCompleto'] = request.data['nombres'] + ' ' + request.data['apellidos']
         
-            serializer = ProspectosClientesSearchSerializer(data=request.data)
+            serializer = ProspectosClientesSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
