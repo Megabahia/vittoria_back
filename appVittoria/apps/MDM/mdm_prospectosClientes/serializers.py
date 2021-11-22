@@ -11,7 +11,7 @@ class ProspectosClientesSerializer(serializers.ModelSerializer):
 class ProspectosClientesSearchSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProspectosClientes
-       	fields = ['id','nombres','apellidos','telefono']
+       	fields = ['id','nombres','apellidos','telefono','identificacion']
 
 class ProspectosClientesListarSerializer(serializers.ModelSerializer):
     class Meta:
