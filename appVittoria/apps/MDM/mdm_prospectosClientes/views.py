@@ -107,6 +107,7 @@ def prospecto_cliente_findOne(request, pk):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def prospecto_cliente_create(request):
+    request.POST._mutable = True
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'create/',
@@ -140,6 +141,7 @@ def prospecto_cliente_create(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def prospecto_cliente_update(request, pk):
+    request.POST._mutable = True
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'update/',
