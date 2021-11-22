@@ -8,11 +8,11 @@ def upload_path(instance, filname):
 
 # Create your models here.
 class Usuarios(AbstractBaseUser):
-    username = models.CharField(max_length=150,unique=True)
+    username = models.CharField(max_length=150,unique=False)
     imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
     nombres = models.CharField(max_length=150)
     apellidos = models.CharField(max_length=250)
-    email = models.EmailField(max_length=255,unique=True)
+    email = models.EmailField(max_length=255,unique=False)
     estado=models.CharField(max_length=200)
     idRol = models.ForeignKey(Roles, null=False, on_delete=models.CASCADE)  # Relacion Rol
     pais=models.CharField(max_length=200)

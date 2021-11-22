@@ -186,7 +186,7 @@ def usuario_update(request, pk):
         createLog(logModel,err,logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
-@api_view(['DELETE'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def usuario_delete(request, pk):
     timezone_now = timezone.localtime(timezone.now())
@@ -208,9 +208,9 @@ def usuario_delete(request, pk):
             errorNoExiste={'error':'No existe'}
             createLog(logModel,errorNoExiste,logExcepcion)
             return Response(status=status.HTTP_404_NOT_FOUND)
-        if request.method == 'DELETE':
+        if request.method == 'POST':
             now = timezone.localtime(timezone.now())
-            serializer = UsuarioSerializer(usuario, data={'state': '0','updated_at':str(now)},partial=True)
+            serializer = UsuarioSerializer(usuario, data={'estado': request.data['estado'],'state': '0','updated_at':str(now)},partial=True)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -238,6 +238,10 @@ def usuario_create(request):
 
     try:
         if request.method == 'POST':
+            user = Usuarios.objects.filter(email=request.data['email'], state=1).first()
+            if user is not None:
+                data = {'error':'Email ya existe.'}
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             request.data['created_at'] = str(timezone_now)
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
