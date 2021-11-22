@@ -54,7 +54,7 @@ def usuario_list(request):
             offset = page_size* page
             limit = offset + page_size
             #Filtros
-            filters={"state":"1"}
+            filters={}
             if 'idRol' in request.data:
                 if request.data['idRol']!=0:
                     filters['idRol'] = int(request.data['idRol'])

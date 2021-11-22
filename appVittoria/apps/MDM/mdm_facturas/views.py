@@ -484,6 +484,7 @@ def factura_list_latest(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def factura_create(request):
+    request.POST._mutable = True
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi+'create/',
