@@ -24,6 +24,8 @@ class ProspectosClientes(models.Model):
     nombreVendedor = models.CharField(max_length=250,null=True,blank=True)
     confirmacionProspecto = models.CharField(max_length=250,null=True,blank=True)
     imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
+    identificacion = models.CharField(max_length=13,null=True,blank=True)
+    nombreCompleto = models.CharField(max_length=255,null=True,blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

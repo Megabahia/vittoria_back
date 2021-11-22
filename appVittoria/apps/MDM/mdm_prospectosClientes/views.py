@@ -1,5 +1,5 @@
 from apps.MDM.mdm_prospectosClientes.models import ProspectosClientes
-from apps.MDM.mdm_prospectosClientes.serializers import ProspectosClientesSerializer, ProspectosClientesListarSerializer, ProspectosClienteImagenSerializer
+from apps.MDM.mdm_prospectosClientes.serializers import ProspectosClientesSerializer, ProspectosClientesListarSerializer, ProspectosClienteImagenSerializer, ProspectosClientesSearchSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
@@ -70,6 +70,47 @@ def prospecto_cliente_list(request):
             err={"error":'Un error ha ocurrido: {}'.format(e)}  
             createLog(logModel,err,logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+#Buscar prospecto
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def prospecto_cliente_search(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi+'list/',
+        'modulo':logModulo,
+        'tipo' : logExcepcion,
+        'accion' : 'LEER',
+        'fechaInicio' : str(timezone_now),
+        'dataEnviada' : '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida' : '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            #Filtros
+            filters={"state":"1"}
+            if 'nombreCompleto' in request.data:
+                if request.data['nombreCompleto']!='':
+                    filters['nombreCompleto__icontains'] = str(request.data['nombreCompleto'])
+            if 'identificacion' in request.data:
+                if request.data['identificacion']!='':
+                    filters['identificacion'] = str(request.data['identificacion'])
+            if 'telefono' in request.data:
+                if request.data['telefono']!='':
+                    filters['telefono'] = str(request.data['telefono'])
+          
+            #Serializar los datos
+            query = ProspectosClientes.objects.filter(**filters).order_by('-created_at')
+            serializer = ProspectosClientesListarSerializer(query, many=True)
+            new_serializer_data={'cont': query.count(),
+            'info':serializer.data}
+            #envio de datos
+            return Response(new_serializer_data,status=status.HTTP_200_OK)
+        except Exception as e: 
+            err={"error":'Un error ha ocurrido: {}'.format(e)}  
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
 
 #ENCONTRAR UNO
 @api_view(['GET'])
@@ -125,8 +166,10 @@ def prospecto_cliente_create(request):
             request.data['created_at'] = str(timezone_now)
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
+            
+            request.data['nombreCompleto'] = request.data['nombres'] + ' ' + request.data['apellidos']
         
-            serializer = ProspectosClientesSerializer(data=request.data)
+            serializer = ProspectosClientesSearchSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel,serializer.data,logTransaccion)
@@ -166,6 +209,7 @@ def prospecto_cliente_update(request, pk):
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
+            request.data['nombreCompleto'] = request.data['nombres'] + ' ' + request.data['apellidos']
             serializer = ProspectosClientesSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()

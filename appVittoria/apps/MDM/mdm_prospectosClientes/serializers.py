@@ -8,6 +8,11 @@ class ProspectosClientesSerializer(serializers.ModelSerializer):
         model = ProspectosClientes
        	fields = '__all__'
 
+class ProspectosClientesSearchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProspectosClientes
+       	fields = ['id','nombres','apellidos','telefono']
+
 class ProspectosClientesListarSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProspectosClientes
