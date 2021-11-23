@@ -15,6 +15,8 @@ class ProspectosClientes(models.Model):
     instagram = models.CharField(max_length=150,null=True,blank=True)
     correo1 = models.EmailField(max_length=150,null=True,blank=True)
     correo2 = models.EmailField(max_length=150,null=True,blank=True)
+    pais = models.CharField(max_length=255,null=True,blank=True)
+    provincia = models.CharField(max_length=255,null=True,blank=True)
     ciudad = models.CharField(max_length=150,null=True,blank=True)
     canal = models.CharField(max_length=150,null=True,blank=True)
     codigoProducto = models.CharField(max_length=150,null=True,blank=True)
