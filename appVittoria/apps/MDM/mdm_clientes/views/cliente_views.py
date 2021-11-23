@@ -1,4 +1,5 @@
 from apps.MDM.mdm_clientes.models import Clientes
+from apps.MDM.mdm_prospectosClientes.models import ProspectosClientes
 from apps.MDM.mdm_facturas.models import FacturasEncabezados
 from apps.MDM.mdm_clientes.models import DatosVirtualesClientes
 from apps.MDM.mdm_clientes.serializers import DatosVirtualesClientesSerializer
@@ -196,6 +197,10 @@ def cliente_create(request):
             serializer = ClientesSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
+                prospectoCliente = ProspectosClientes.objects.filter(identificacion=request.data['cedula'],state=1).first()
+                if prospectoCliente is not None:
+                    prospectoCliente.state = 0
+                    prospectoCliente.save()
                 createLog(logModel,serializer.data,logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel,serializer.errors,logExcepcion)
@@ -236,6 +241,10 @@ def cliente_update(request, pk):
             serializer = ClientesUpdateSerializer(query, data=request.data,partial=True)
             if serializer.is_valid():
                 serializer.save()
+                prospectoCliente = ProspectosClientes.objects.filter(identificacion=request.data['cedula'],state=1).first()
+                if prospectoCliente is not None:
+                    prospectoCliente.state = 0
+                    prospectoCliente.save()
                 createLog(logModel,serializer.data,logTransaccion)
                 return Response(serializer.data)
             createLog(logModel,serializer.errors,logExcepcion)

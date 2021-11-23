@@ -167,6 +167,10 @@ def prospecto_cliente_create(request):
     }
     if request.method == 'POST':
         try:
+            prospectoCliente = ProspectosClientes.objects.filter(identificacion=request.data['identificacion']).first()
+            if prospectoCliente is not None:
+                data={'error':'Ya existe un prospecto cliente con esa identificación.'}
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             logModel['dataEnviada'] = str(request.data)
             request.data['created_at'] = str(timezone_now)
             if 'updated_at' in request.data:
@@ -202,6 +206,10 @@ def prospecto_cliente_update(request, pk):
         'dataRecibida' : '{}'
     }
     try:
+        prospectoCliente = ProspectosClientes.objects.filter(identificacion=request.data['identificacion']).first()
+        if prospectoCliente is not None:
+            data={'error':'Ya existe un prospecto cliente con esa identificación.'}
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
         try:
             logModel['dataEnviada'] = str(request.data)
             query = ProspectosClientes.objects.get(pk=pk, state=1)
