@@ -1,4 +1,4 @@
-from apps.MDM.mdm_clientes.models import Clientes
+from apps.MDM.mdm_clientes.models import Clientes, DatosVirtualesClientes
 from apps.MDM.mdm_prospectosClientes.models import ProspectosClientes
 from apps.MDM.mdm_facturas.models import FacturasEncabezados
 from apps.MDM.mdm_clientes.models import DatosVirtualesClientes
@@ -201,6 +201,10 @@ def cliente_create(request):
                 if prospectoCliente is not None:
                     prospectoCliente.state = 0
                     prospectoCliente.save()
+                    DatosVirtualesClientes.objects.create(cliente_id=serializer.data['id'],tipoContacto="Whatsapp personal",informacion=prospectoCliente.whatsapp,icono='phone')
+                    DatosVirtualesClientes.objects.create(cliente_id=serializer.data['id'],tipoContacto="Facebook personal",informacion=prospectoCliente.facebook,icono='facebook')
+                    DatosVirtualesClientes.objects.create(cliente_id=serializer.data['id'],tipoContacto="Instagram personal",informacion=prospectoCliente.twitter,icono='instagram')
+                    DatosVirtualesClientes.objects.create(cliente_id=serializer.data['id'],tipoContacto="Twitter personal",informacion=prospectoCliente.instagram,icono='twitter')
                 createLog(logModel,serializer.data,logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel,serializer.errors,logExcepcion)
@@ -245,6 +249,7 @@ def cliente_update(request, pk):
                 if prospectoCliente is not None:
                     prospectoCliente.state = 0
                     prospectoCliente.save()
+
                 createLog(logModel,serializer.data,logTransaccion)
                 return Response(serializer.data)
             createLog(logModel,serializer.errors,logExcepcion)
