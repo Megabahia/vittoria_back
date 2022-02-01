@@ -89,6 +89,7 @@ class ProductosActualizarSerializer(serializers.ModelSerializer):
                 detalle = detalles_database.get(detalle_id, None)
                 if detalle is None:
                     data.pop('id')
+                    data['producto_id']=instance.id
                     ProductoImagen.objects.create(**data)
                 # else:
                 #     now = timezone.localtime(timezone.now())
