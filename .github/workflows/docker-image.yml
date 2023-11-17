@@ -31,3 +31,17 @@ jobs:
           push: true
           tags: james46007/vittoria:dev
           labels: james46007/vittoria:dev
+
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            docker pull james46007/vittoria:dev
+            docker stop vittoria
+            docker rm vittoria
+            docker run -d -p 8003:8003 -it --log-opt max-size=10m --log-opt max-file=3 --name vittoria --restart always james46007/vittoria:dev
+            exit
