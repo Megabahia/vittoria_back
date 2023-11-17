@@ -36,7 +36,7 @@ SECRET_KEY = ')+^!3q$nko9e_n0(x!qo24xbh8m%k#0&&r6^%4!4_bp+m%=9!v'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', '209.145.61.41', 'web.vittoria_app.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -142,7 +142,8 @@ DATABASE_ROUTERS = [
     'apps.config.routersDB.MDPRouter',
     'apps.config.routersDB.MDORouter',
     'apps.config.routersDB.GDORouter',
-    'apps.config.routersDB.GDERouter'
+    'apps.config.routersDB.GDERouter',
+    'apps.config.routersDB.USERRouter'
 ]
 
 # Password validation

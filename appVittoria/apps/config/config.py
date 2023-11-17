@@ -1,3 +1,15 @@
+# ESte archivo sirve para colocar las variables del entorno
+# environ init
+import os
+import environ
+
+env = environ.Env()
+
+# Establecer el directorio base del proyecto
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Tomar variables de entorno del archivo .env
+environ.Env.read_env(os.path.join(BASE_DIR, '../appVittoria/.env'))
+
 PRODUCTION=True
 
 #VARIABLES GLOBALES
@@ -73,7 +85,24 @@ if PRODUCTION:
             'PASSWORD': 'Tc2;1EE{DBE^oN',
             'HOST': '209.145.61.41',
             'PORT': 3306
-        }
+        },
+        'vittoria_users_db': {
+            'ENGINE': 'djongo',
+            'NAME': 'vittoria_users',
+            'ENFORCE_SCHEMA': False,
+            'CLIENT': {
+                'host': env.str('MONGODB_ATLAS'),
+            },
+            'LOGGING': {
+                'version': 1,
+                'loggers': {
+                    'djongo': {
+                        'level': 'DEBUG',
+                        'propagate': False,
+                    }
+                },
+            },
+        },
     }
 else:
     # URL BACK END
