@@ -17,7 +17,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      
+
+      - name: Load environment variables from secret
+        run: |
+          echo "${{ secrets.ENV_FILE_CONTENTS }}" > .env
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
