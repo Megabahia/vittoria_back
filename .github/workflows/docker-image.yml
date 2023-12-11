@@ -11,7 +11,10 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-      
+
+      - name: Convertir saltos de línea a UNIX
+        run: dos2unix .env
+
       - name: Log in to Docker Hub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
@@ -22,19 +25,24 @@ jobs:
         run: |
           echo "${{ secrets.ENV_FILE_CONTENTS }}" > .env
 
+      - name: Imprimir variables de entorno
+        run: |
+          echo "DOCKER_TAG: $DOCKER_TAG"
+          cat .env
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: james46007/vittoria:dev
-      
+          images: james46007/vittoria:${{ env.DOCKER_TAG }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
           push: true
-          tags: james46007/vittoria:dev
-          labels: james46007/vittoria:dev
+          tags: james46007/vittoria:${{ env.DOCKER_TAG }}
+          labels: james46007/vittoria:${{ env.DOCKER_TAG }}
 
       - name: executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@v1.0.0
@@ -44,8 +52,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            docker pull james46007/vittoria:dev
+            docker pull james46007/vittoria:${{ env.DOCKER_TAG }}
             docker stop vittoria
             docker rm vittoria
-            docker run -d -p 8003:8003 -it --log-opt max-size=10m --log-opt max-file=3 --name vittoria --restart always james46007/vittoria:dev
+            docker run -d -p 8003:8003 -it --log-opt max-size=10m --log-opt max-file=3 --name vittoria --restart always james46007/vittoria:${{ env.DOCKER_TAG }}
             exit
