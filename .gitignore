@@ -55,3 +55,4 @@ appVittoria/apps/config/__pycache__/
 .env
 appVittoria/apps/USER/usuarios/__pycache__/
 appVittoria/apps/USER/usuarios/migrations/__pycache__/
+.idea
