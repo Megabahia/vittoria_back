@@ -53,3 +53,5 @@ appVittoria/apps/GDE/gde_gestionEntrega/__pycache__/
 appVittoria/apps/GDE/gde_gestionEntrega/migrations/__pycache__/
 appVittoria/apps/config/__pycache__/
 .env
+appVittoria/apps/USER/usuarios/__pycache__/
+appVittoria/apps/USER/usuarios/migrations/__pycache__/

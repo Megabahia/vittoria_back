@@ -19,9 +19,9 @@ endpointEmailReseteoPassword="/auth/usuario/reseteoPassword/"
 #VARIABLES VARIAN DE ACUERDO A PRODUCCION O DESARROLLO
 if PRODUCTION:
     # URL BACK END
-    API_BACK_END = '209.145.61.41:8000/'
+    API_BACK_END = 'https://ventas-vittoria-api-prod.crediventa.com/'
     #URL FRONT END
-    API_FRONT_END="http://209.145.61.41:4200"
+    API_FRONT_END="https://ventas-vittoria.crediventa.com/#"
     #TIEMPO DE EXPIRACION DE TOKEN (EN SEGUNDOS)
     TOKEN_EXPIRED_AFTER_SECONDS = 86400
     #NOMBRE KEYWORK TOKEN
@@ -34,7 +34,9 @@ if PRODUCTION:
     #CORS
     CORS_ALLOWED_ORIGINS = [
         "http://209.145.61.41:4200",
-        "http://127.0.0.1:4200"
+        "http://127.0.0.1:4200",
+        "http://localhost:4200",
+        "https://ventas-vittoria.crediventa.com"
     ]
     #databases
     DATABASES = {
@@ -108,7 +110,7 @@ else:
     # URL BACK END
     API_BACK_END = 'http://127.0.0.1:8000/'
     #URL FRONT END
-    API_FRONT_END="localhost:4200"
+    API_FRONT_END="localhost:4200/#"
     #TIEMPO DE EXPIRACION DE TOKEN (EN SEGUNDOS)
     TOKEN_EXPIRED_AFTER_SECONDS = 86400
     #NOMBRE KEYWORK TOKEN
