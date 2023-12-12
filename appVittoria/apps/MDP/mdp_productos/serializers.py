@@ -320,5 +320,6 @@ class ProductoSearchSerializer(serializers.ModelSerializer):
         data = super(ProductoSearchSerializer, self).to_representation(instance)
         imagen = ProductoImagen.objects.filter(producto=instance).first()
         if imagen is not None:
+            print('entro al if', imagen['imagen'])
             data['imagen'] = imagen['imagen']
         return data
