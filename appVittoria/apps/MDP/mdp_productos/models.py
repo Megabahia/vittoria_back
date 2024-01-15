@@ -51,7 +51,7 @@ class Productos(models.Model):
 class ProductoImagen(models.Model):
     # NOMBRAMOS A LA RELACION DETALLATES    
     producto= models.ForeignKey(Productos, related_name='imagenes', null=True, blank=True, on_delete=models.DO_NOTHING)  # Relacion Con producto
-    imagen=models.ImageField(blank=True,null=True,upload_to=upload_path)
+    imagen=models.FileField(blank=True, null=True, upload_to=upload_path)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

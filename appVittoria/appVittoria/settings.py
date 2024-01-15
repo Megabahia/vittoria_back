@@ -34,7 +34,7 @@ environ.Env.read_env() # LEE ARCHIVO .ENV
 SECRET_KEY = ')+^!3q$nko9e_n0(x!qo24xbh8m%k#0&&r6^%4!4_bp+m%=9!v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
