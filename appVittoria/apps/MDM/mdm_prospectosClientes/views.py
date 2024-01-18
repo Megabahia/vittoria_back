@@ -163,7 +163,6 @@ def prospecto_cliente_findOne(request, pk):
 
 # CREAR
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def prospecto_cliente_create(request):
     request.POST._mutable = True
     timezone_now = timezone.localtime(timezone.now())

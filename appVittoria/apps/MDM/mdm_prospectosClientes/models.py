@@ -30,6 +30,11 @@ class ProspectosClientes(models.Model):
     imagen = models.ImageField(blank=True, null=True, upload_to=upload_path)
     identificacion = models.CharField(max_length=13, null=True, blank=True)
     nombreCompleto = models.CharField(max_length=255, null=True, blank=True)
+    callePrincipal = models.CharField(max_length=255, null=True, blank=True)
+    numeroCasa = models.CharField(max_length=255, null=True, blank=True)
+    calleSecundaria = models.CharField(max_length=255, null=True, blank=True)
+    referencia = models.CharField(max_length=255, null=True, blank=True)
+    comentarios = models.CharField(max_length=255, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

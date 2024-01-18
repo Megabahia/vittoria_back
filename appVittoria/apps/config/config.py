@@ -86,6 +86,14 @@ DATABASES = {
         'HOST': env.str('MYSQL_HOST'),
         'PORT': 3306
     },
+    'vittoria_gdp_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'vittoria_gdp' + env.str('MYSQL_BUILD'),
+        'USER': env.str('MYSQL_USER'),
+        'PASSWORD': env.str('MYSQL_PASSWORD'),
+        'HOST': env.str('MYSQL_HOST'),
+        'PORT': 3306
+    },
     'vittoria_users_db': {
         'ENGINE': 'djongo',
         'NAME': 'vittoria_users',

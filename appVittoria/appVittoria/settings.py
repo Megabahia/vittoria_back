@@ -73,6 +73,8 @@ INSTALLED_APPS = [
     # apps vittoria GDE
     'apps.GDE.gde_parametrizaciones',
     'apps.GDE.gde_gestionEntrega',
+    # apps vittoria GDP
+    'apps.GDP.gdp_productos',
     #CONFIG
     'apps.config',
     #Django external apps
@@ -143,7 +145,8 @@ DATABASE_ROUTERS = [
     'apps.config.routersDB.MDORouter',
     'apps.config.routersDB.GDORouter',
     'apps.config.routersDB.GDERouter',
-    'apps.config.routersDB.USERRouter'
+    'apps.config.routersDB.USERRouter',
+    'apps.config.routersDB.GDPRouter'
 ]
 
 # Password validation

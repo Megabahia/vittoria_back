@@ -52,7 +52,8 @@ urlpatterns = [
     # Modulo GDE
     path('gde/param/', include(('apps.GDE.gde_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizacionesGDE')),
     path('gde/gestionEntrega/', include(('apps.GDE.gde_gestionEntrega.urls', 'gestionEntrega'), namespace='gestionEntrega')),
-
+    # Modulo GDP
+    path('gdp/productos/', include(('apps.GDP.gdp_productos.urls', 'gdp_productos'), namespace='gdp_productos')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

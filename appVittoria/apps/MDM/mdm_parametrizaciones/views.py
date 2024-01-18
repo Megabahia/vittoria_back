@@ -346,7 +346,6 @@ def tipoCliente_list(request):
 
 #TODAS LAS PARAMETRIZACIONES DE ACUERDO AL TIPO
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def parametrosTipo_list(request):
 
     if request.method == 'POST':
@@ -542,7 +541,6 @@ def llevarContabilidad_list(request):
 
 #POST FILTRO Y NOMBRE
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def parametrizaciones_filter_name(request):
 
     if request.method == 'POST':
