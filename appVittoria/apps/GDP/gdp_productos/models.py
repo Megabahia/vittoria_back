@@ -6,9 +6,11 @@ def upload_path(instance, filname):
 
 
 class Productos(models.Model):
-    titulo = models.CharField(max_length=150, null=True)
-    subtitulo = models.CharField(max_length=150, null=True)
+    titulo = models.TextField(null=True)
+    subtitulo = models.TextField(null=True)
     precio = models.FloatField(null=True)
+    codigo = models.CharField(max_length=150, null=True)
+    stock = models.IntegerField(null=True)
     precioOferta = models.FloatField(null=True)
     descripcion = models.TextField(null=True)
     caracteristicas = models.TextField(null=True)
