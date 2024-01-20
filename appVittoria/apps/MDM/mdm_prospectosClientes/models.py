@@ -36,6 +36,7 @@ class ProspectosClientes(models.Model):
     calleSecundaria = models.CharField(max_length=255, null=True, blank=True)
     referencia = models.CharField(max_length=255, null=True, blank=True)
     comentarios = models.CharField(max_length=255, null=True, blank=True)
+    comentariosVendedor = models.CharField(max_length=255, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

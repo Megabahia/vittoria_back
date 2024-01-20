@@ -3,7 +3,7 @@ from .views import (
     prospecto_cliente_list, prospecto_cliente_findOne, prospecto_cliente_create,
     prospecto_cliente_update, prospecto_cliente_delete, prospectosclientesImagen_update,
     uploadCSV_crearProspectosClientes, uploadEXCEL_crearProspectosClientes, prospecto_cliente_search,
-    prospecto_cliente_exportar
+    prospecto_cliente_exportar,
 )
 
 app_name = 'prospectos_clientes'

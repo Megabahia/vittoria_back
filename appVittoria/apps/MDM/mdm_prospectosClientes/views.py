@@ -3,6 +3,7 @@ from .serializers import (
     ProspectosClientesSerializer,   ProspectosClientesListarSerializer, ProspectosClienteImagenSerializer,
     ProspectosClientesSearchSerializer, ProspectosClientesResource
 )
+from ..mdm_clientes.models import Clientes
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -240,6 +241,18 @@ def prospecto_cliente_update(request, pk):
             serializer = ProspectosClientesSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
+                if request.data['confirmacionProspecto'] == 'Confirmado':
+                    cliente = {
+                        'nombreCompleto': serializer.data['nombres'] + serializer.data['apellidos'],
+                        'nombres': serializer.data['nombres'],
+                        'apellidos': serializer.data['apellidos'],
+                        'cedula': serializer.data['identificacion'],
+                        'correo': serializer.data['correo1'],
+                        'paisNacimiento': serializer.data['pais'],
+                        'provinciaNacimiento': serializer.data['provincia'],
+                        'ciudadNacimiento': serializer.data['ciudad'],
+                    }
+                    Clientes.objects.create(**cliente)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)

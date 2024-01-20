@@ -22,7 +22,7 @@ class ProspectosClientesListarSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProspectosClientes
         fields = ['id', 'nombres', 'apellidos', 'whatsapp', 'correo1', 'correo2', 'ciudad', 'codigoProducto',
-                  'created_at']
+                  'created_at', 'confirmacionProspecto']
 
 
 class ProspectosClienteImagenSerializer(serializers.HyperlinkedModelSerializer):
