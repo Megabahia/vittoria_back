@@ -6,6 +6,7 @@ from ..serializers import (
     ClientesUpdateSerializer, ClientePrediccionSerializer, DatosVirtualesClientesSerializer,
     ClientesResource
 )
+from ....GDE.gde_gestionEntrega.models import Oferta
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -268,9 +269,22 @@ def cliente_update(request, pk):
                 serializer.save()
                 prospectoCliente = ProspectosClientes.objects.filter(identificacion=request.data['cedula'],
                                                                      state=1).first()
-                if prospectoCliente is not None:
-                    prospectoCliente.state = 0
-                    prospectoCliente.save()
+                # if prospectoCliente is not None:
+                #     prospectoCliente.state = 0
+                #     prospectoCliente.save()
+
+                gestionEntregaCliente = {
+                    'cliente': serializer.data['id'],
+                    'fechaOferta': serializer.data['created_at'][:10],
+                    'nombres': serializer.data['nombres'],
+                    'apellidos': serializer.data['apellidos'],
+                    'identificacion': serializer.data['cedula'],
+                    'telefono': serializer.data['telefono'],
+                    'correo': serializer.data['correo'],
+                    'total': prospectoCliente.precio,
+                }
+
+                Oferta.objects.create(**gestionEntregaCliente)
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
