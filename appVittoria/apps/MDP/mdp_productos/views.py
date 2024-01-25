@@ -9,7 +9,8 @@ from .serializers import (
     AbastecimientoListSerializer,
     StockListSerializer, CaducidadListSerializer, RotacionListSerializer, RefilListSerializer,
     HistorialAvisosSerializer, ImagenSerializer, PrediccionCrosselingSerializer,
-    PrediccionRefilSerializer, PrediccionRefilOneSerializer, ProductoSearchSerializer
+    PrediccionRefilSerializer, PrediccionRefilOneSerializer, ProductoSearchSerializer,
+    ListarProductoCreateSerializer,
 )
 from rest_framework import status
 from rest_framework.response import Response
@@ -920,6 +921,68 @@ def prediccion_productosNuevos_list(request):
             query = ReporteRotacion.objects.filter(producto__categoria=query.producto.categoria, tipoRotacion='Bajo',
                                                    state=1).order_by('-created_at', '-producto__stock')
             serializer = PrediccionCrosselingSerializer(query[0:3], many=True)
+            createLog(logModel, serializer.data, logTransaccion)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def productos_findOne_free(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'listOne/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        try:
+            query = Productos.objects.get(pk=pk, state=1)
+        except Productos.DoesNotExist:
+            err = {"error": "No existe"}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+        # tomar el dato
+        if request.method == 'GET':
+            serializer = ListarProductoCreateSerializer(query)
+            createLog(logModel, serializer.data, logTransaccion)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def productos_findOne_codigo_producto(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'listOne/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        try:
+            query = Productos.objects.get(codigoBarras=pk, state=1)
+        except Productos.DoesNotExist:
+            err = {"error": "No existe"}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+        # tomar el dato
+        if request.method == 'GET':
+            serializer = ProductoCreateSerializer(query)
             createLog(logModel, serializer.data, logTransaccion)
             return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:

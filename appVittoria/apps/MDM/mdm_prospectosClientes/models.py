@@ -37,6 +37,7 @@ class ProspectosClientes(models.Model):
     referencia = models.CharField(max_length=255, null=True, blank=True)
     comentarios = models.CharField(max_length=255, null=True, blank=True)
     comentariosVendedor = models.CharField(max_length=255, null=True, blank=True)
+    cantidad = models.IntegerField(default=1)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
@@ -48,3 +49,29 @@ class ProspectosClientes(models.Model):
 
     def __str__(self):
         return '{}'.format(self.nombres)
+
+class ProspectosClientesDetalles(models.Model):
+    # NOMBRAMOS A LA RELACION DETALLATES
+    prospectoClienteEncabezado = models.ForeignKey(ProspectosClientes, related_name='detalles', null=True, blank=True,
+                                          on_delete=models.DO_NOTHING)  # Relacion Factura
+    articulo = models.CharField(max_length=150, null=True)
+    valorUnitario = models.FloatField(null=True)
+    cantidad = models.PositiveIntegerField(null=True)
+    precio = models.FloatField(null=True)
+    codigo = models.CharField(max_length=250, null=True)
+    informacionAdicional = models.CharField(max_length=250, null=True)
+    descuento = models.FloatField(null=True)
+    impuesto = models.FloatField(null=True)
+    valorDescuento = models.FloatField(null=True)
+    total = models.FloatField(null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True)
+    state = models.SmallIntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        # self.tipo = self.tipo.upper()
+        return super(ProspectosClientesDetalles, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return '{}'.format(self.id)

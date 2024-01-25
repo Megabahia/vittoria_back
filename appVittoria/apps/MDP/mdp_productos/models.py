@@ -8,10 +8,13 @@ from django.utils import timezone
 # IMPORTAR ENVIO CONFIGURACION CORREO
 from apps.config.util2 import sendEmail
 
-from apps.MDP.mdp_parametrizaciones.models import Parametrizaciones
+from ..mdp_parametrizaciones.models import Parametrizaciones
 
 def upload_path(instance, filname):
     return '/'.join(['MDP/imgProductos', str(instance.producto.id) +"_" + filname])
+
+def upload_path_video(instance, filname):
+    return '/'.join(['MDP/videoProductos', str(instance.id) +"_" + filname])
 
 # Create your models here.
 class Productos(models.Model):
@@ -36,6 +39,11 @@ class Productos(models.Model):
     lote = models.CharField(max_length=150,null=True)
     fechaElaboracion = models.DateField(null=True)
     fechaCaducidad = models.DateField(null=True)
+    caracteristicas = models.TextField(null=True, blank=True)
+    video = models.FileField(blank=True, null=True, upload_to=upload_path_video)
+    precioOferta = models.FloatField(null=True)
+    lugarVenta = models.CharField(max_length=255, null=True)
+    courier = models.CharField(max_length=255, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

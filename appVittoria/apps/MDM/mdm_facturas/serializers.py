@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.MDM.mdm_facturas.models import FacturasEncabezados, FacturasDetalles
+from .models import FacturasEncabezados, FacturasDetalles
 from apps.MDM.mdm_negocios.models import Negocios
 from apps.MDM.mdm_clientes.models import Clientes
 from apps.MDP.mdp_productos.models import Productos, HistorialAvisos

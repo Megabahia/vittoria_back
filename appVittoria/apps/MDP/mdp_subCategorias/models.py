@@ -1,6 +1,6 @@
 from django.db import models
 
-from apps.MDP.mdp_categorias.models import Categorias
+from ..mdp_categorias.models import Categorias
 
 # Create your models here.
 class SubCategorias(models.Model):

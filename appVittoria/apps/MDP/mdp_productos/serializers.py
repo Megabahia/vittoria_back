@@ -68,6 +68,33 @@ class ProductoCreateSerializer(serializers.ModelSerializer):
             producto = Productos.objects.create(**validated_data)
         return producto
 
+    # def to_representation(self, instance):
+    #     data = super(ProductoCreateSerializer, self).to_representation(instance)
+    #     categoria = data.pop('categoria')
+    #     subCategoria = data.pop('subCategoria')
+    #     if categoria:
+    #         data['categoria'] = Categorias.objects.filter(id=categoria).first().nombre
+    #     if subCategoria:
+    #         data['subCategoria'] = SubCategorias.objects.filter(id=subCategoria).first().nombre
+    #     return data
+
+# CREAR PRODUCTO
+class ListarProductoCreateSerializer(serializers.ModelSerializer):
+    imagenes = DetallesSerializer(many=True, required=False, allow_null=True, allow_empty=True)
+
+    class Meta:
+        model = Productos
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        data = super(ListarProductoCreateSerializer, self).to_representation(instance)
+        categoria = data.pop('categoria')
+        subCategoria = data.pop('subCategoria')
+        if categoria:
+            data['categoria'] = Categorias.objects.filter(id=categoria).first().nombre
+        if subCategoria:
+            data['subCategoria'] = SubCategorias.objects.filter(id=subCategoria).first().nombre
+        return data
 
 # ACTUALIZAR PRODUCTO
 class DetallesImagenesSerializer(serializers.ModelSerializer):
@@ -102,10 +129,10 @@ class ProductosActualizarSerializer(serializers.ModelSerializer):
             instance.save()
 
             # Eliminar los imagenes que no esté incluida en la solicitud de la productos imagenes
-            for detalle in instance.imagenes.all():
-                if detalle.id not in detalles_actualizar:
-                    detalle.imagen.delete()
-                    detalle.delete()
+            # for detalle in instance.imagenes.all():
+            #     if detalle.id not in detalles_actualizar:
+            #         detalle.imagen.delete()
+            #         detalle.delete()
 
             # Crear o actualizar instancias de imagenes que se encuentran en la solicitud de producto imagenes
             for detalle_id, data in detalles_actualizar.items():

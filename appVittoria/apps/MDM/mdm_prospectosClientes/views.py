@@ -1,8 +1,9 @@
 from .models import ProspectosClientes
 from .serializers import (
     ProspectosClientesSerializer,   ProspectosClientesListarSerializer, ProspectosClienteImagenSerializer,
-    ProspectosClientesSearchSerializer, ProspectosClientesResource
+    ProspectosClientesSearchSerializer, ProspectosClientesResource, ActualizarProspectosClientesSerializer
 )
+from ..mdm_clientes.serializers import ClientesUpdateSerializer
 from ..mdm_clientes.models import Clientes
 from rest_framework import status
 from rest_framework.response import Response
@@ -179,10 +180,6 @@ def prospecto_cliente_create(request):
     }
     if request.method == 'POST':
         try:
-            prospectoCliente = ProspectosClientes.objects.filter(identificacion=request.data['identificacion']).first()
-            if prospectoCliente is not None:
-                data = {'error': 'Ya existe un prospecto cliente con esa identificación.'}
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             logModel['dataEnviada'] = str(request.data)
             request.data['created_at'] = str(timezone_now)
             if 'updated_at' in request.data:
@@ -219,11 +216,6 @@ def prospecto_cliente_update(request, pk):
         'dataRecibida': '{}'
     }
     try:
-        if 'identificacion' in request.data and request.data['identificacion'] != '':
-            prospectoCliente = ProspectosClientes.objects.filter(identificacion=request.data['identificacion']).first()
-            if prospectoCliente is not None:
-                data = {'error': 'Ya existe un prospecto cliente con esa identificación.'}
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
         try:
             logModel['dataEnviada'] = str(request.data)
             query = ProspectosClientes.objects.get(pk=pk, state=1)
@@ -238,7 +230,7 @@ def prospecto_cliente_update(request, pk):
                 request.data.pop('created_at')
             if 'nombres' in request.data and request.data['nombres'] != '' and 'apellidos' in request.data and request.data['apellidos'] != '':
                 request.data['nombreCompleto'] = request.data['nombres'] + ' ' + request.data['apellidos']
-            serializer = ProspectosClientesSerializer(query, data=request.data, partial=True)
+            serializer = ActualizarProspectosClientesSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 if request.data['confirmacionProspecto'] == 'Confirmado':
@@ -252,7 +244,13 @@ def prospecto_cliente_update(request, pk):
                         'provinciaNacimiento': serializer.data['provincia'],
                         'ciudadNacimiento': serializer.data['ciudad'],
                     }
-                    Clientes.objects.create(**cliente)
+                    clienteExiste = Clientes.objects.filter(cedula=serializer.data['identificacion']).first()
+                    if clienteExiste is None:
+                        Clientes.objects.create(**cliente)
+                    else:
+                        clienteSerializer = ClientesUpdateSerializer(clienteExiste, data=cliente, partial=True)
+                        if clienteSerializer.is_valid():
+                            clienteSerializer.save()
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)

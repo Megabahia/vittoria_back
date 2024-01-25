@@ -1,6 +1,6 @@
 from django.urls import path,include
 
-from apps.MDP.mdp_subCategorias.views import(
+from .views import(
 	subCategorias_list, subCategoria_create, subCategoria_findOne, subCategoria_update, subCategoria_delete,
 	list_subcategorias_padre_combo
 )
@@ -17,5 +17,5 @@ urlpatterns = [
 	path('update/<int:pk>', subCategoria_update, name="subCategoria_update"), 
 	path('delete/<int:pk>', subCategoria_delete, name="subCategoria_delete"),
 	# BUSCAR SUBCATEGORIAS DEL PADRE
-	path('list/<int:pk>', list_subcategorias_padre_combo, name="list_subcategorias_padre_combo"), 
+	path('list/<str:pk>', list_subcategorias_padre_combo, name="list_subcategorias_padre_combo"),
 ]

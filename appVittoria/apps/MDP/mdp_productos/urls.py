@@ -7,7 +7,8 @@ from .views import (
     abastecimiento_create,
     uploadEXCEL_crearProductos, productoImagen_list, prediccion_crosseling_list,
     producto_refil_list, prediccion_refil_list, prediccion_productosNuevos_list,
-    search_producto_codigo_list, producto_images_delete
+    search_producto_codigo_list, producto_images_delete, productos_findOne_free,
+    productos_findOne_codigo_producto
 )
 
 app_name = 'productos'
@@ -17,6 +18,8 @@ urlpatterns = [
     path('list/', productos_list, name="productos_list"),
     path('create/', productos_create, name="productos_create"),
     path('listOne/<int:pk>', productos_findOne, name="productos_findOne"),
+    path('listOne/free/<int:pk>', productos_findOne_free, name="productos_findOne_free"),
+    path('listOne/codigoProducto/<str:pk>', productos_findOne_codigo_producto, name="productos_findOne_codigo_producto"),
     path('update/<int:pk>', productos_update, name="productos_update"),
     path('delete/<int:pk>', productos_delete, name="productos_delete"),
     path('search/producto/', search_producto_list, name="search_producto_list"),

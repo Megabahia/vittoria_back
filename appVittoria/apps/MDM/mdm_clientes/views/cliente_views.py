@@ -1,11 +1,13 @@
 from ..models import Clientes, DatosVirtualesClientes
 from ...mdm_prospectosClientes.models import ProspectosClientes
-from ...mdm_facturas.models import FacturasEncabezados
+from ...mdm_facturas.models import FacturasEncabezados, FacturasDetalles
 from ..serializers import (
     ClientesSerializer, ClientesListarSerializer, ClienteImagenSerializer,
     ClientesUpdateSerializer, ClientePrediccionSerializer, DatosVirtualesClientesSerializer,
     ClientesResource
 )
+from ...mdm_parametrizaciones.models import Parametrizaciones
+from ....MDP.mdp_productos.models import Productos
 from ....GDE.gde_gestionEntrega.models import Oferta
 from rest_framework import status
 from rest_framework.response import Response
@@ -273,18 +275,49 @@ def cliente_update(request, pk):
                 #     prospectoCliente.state = 0
                 #     prospectoCliente.save()
 
-                gestionEntregaCliente = {
-                    'cliente': serializer.data['id'],
-                    'fechaOferta': serializer.data['created_at'][:10],
-                    'nombres': serializer.data['nombres'],
-                    'apellidos': serializer.data['apellidos'],
-                    'identificacion': serializer.data['cedula'],
+                iva = Parametrizaciones.objects.filter(tipo='TIPO_IVA').first()
+                facturaEncabezadoJson = {
+                    'cliente': query,
+                    'fecha': serializer.data['updated_at'][:10],
+                    'tipoIdentificacion': prospectoCliente.tipoIdentificacion,
+                    'identificacion': prospectoCliente.identificacion,
+                    'direccion': prospectoCliente.callePrincipal,
                     'telefono': serializer.data['telefono'],
                     'correo': serializer.data['correo'],
+                    'nombreVendedor': prospectoCliente.nombreVendedor,
+                    'subTotal': 0,
+                    'descuento': 0,
+                    'iva': iva.valor,
                     'total': prospectoCliente.precio,
+                    'canal': prospectoCliente.canal,
+                    'numeroProductosComprados': prospectoCliente.cantidad,
+                    'state': 1,
+                    'pais': prospectoCliente.pais,
+                    'provincia': prospectoCliente.provincia,
+                    'ciudad': prospectoCliente.ciudad,
+                    'callePrincipal': prospectoCliente.callePrincipal,
+                    'calleSecundaria': prospectoCliente.calleSecundaria,
+                    'numeroCasa': prospectoCliente.numeroCasa,
+                    'referencia': prospectoCliente.referencia,
+                }
+                facturaEncabezado = FacturasEncabezados.objects.create(**facturaEncabezadoJson)
+                producto = Productos.objects.filter(codigoBarras=prospectoCliente.codigoProducto).first()
+                facturaDetalleJson = {
+                    'facturaEncabezado': facturaEncabezado,
+                    'articulo': prospectoCliente.nombreProducto,
+                    'valorUnitario': producto.precioVentaA,
+                    'cantidad': prospectoCliente.cantidad,
+                    'precio': producto.precioVentaA,
+                    'codigo': producto.codigoBarras,
+                    'informacionAdicional': '',
+                    'descuento': 0,
+                    'impuesto': 0,
+                    'valorDescuento': 0,
+                    'total': producto.precioVentaA * prospectoCliente.cantidad,
+                    'state': 1
                 }
 
-                Oferta.objects.create(**gestionEntregaCliente)
+                FacturasDetalles.objects.create(**facturaDetalleJson)
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
