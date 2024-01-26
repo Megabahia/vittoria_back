@@ -341,7 +341,7 @@ class ProductoSearchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Productos
         fields = ['id', 'codigoBarras', 'nombre', 'precioVentaA', 'precioVentaB', 'precioVentaC', 'precioVentaD',
-                  'precioVentaE']
+                  'precioVentaE', 'precioOferta']
 
     def to_representation(self, instance):
         data = super(ProductoSearchSerializer, self).to_representation(instance)

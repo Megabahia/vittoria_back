@@ -1,5 +1,6 @@
 from ..models import Clientes, DatosVirtualesClientes
-from ...mdm_prospectosClientes.models import ProspectosClientes
+from ...mdm_prospectosClientes.models import ProspectosClientes, ProspectosClientesDetalles
+from ...mdm_prospectosClientes.serializers import ProspectosClientesDetallesSerializer
 from ...mdm_facturas.models import FacturasEncabezados, FacturasDetalles
 from ..serializers import (
     ClientesSerializer, ClientesListarSerializer, ClienteImagenSerializer,
@@ -270,7 +271,7 @@ def cliente_update(request, pk):
             if serializer.is_valid():
                 serializer.save()
                 prospectoCliente = ProspectosClientes.objects.filter(identificacion=request.data['cedula'],
-                                                                     state=1).first()
+                                                                     state=1).order_by('-created_at').first()
                 # if prospectoCliente is not None:
                 #     prospectoCliente.state = 0
                 #     prospectoCliente.save()
@@ -285,10 +286,10 @@ def cliente_update(request, pk):
                     'telefono': serializer.data['telefono'],
                     'correo': serializer.data['correo'],
                     'nombreVendedor': prospectoCliente.nombreVendedor,
-                    'subTotal': 0,
+                    'subTotal': prospectoCliente.subTotal,
                     'descuento': 0,
-                    'iva': iva.valor,
-                    'total': prospectoCliente.precio,
+                    'iva': prospectoCliente.iva,
+                    'total': prospectoCliente.total,
                     'canal': prospectoCliente.canal,
                     'numeroProductosComprados': prospectoCliente.cantidad,
                     'state': 1,
@@ -301,23 +302,28 @@ def cliente_update(request, pk):
                     'referencia': prospectoCliente.referencia,
                 }
                 facturaEncabezado = FacturasEncabezados.objects.create(**facturaEncabezadoJson)
-                producto = Productos.objects.filter(codigoBarras=prospectoCliente.codigoProducto).first()
-                facturaDetalleJson = {
-                    'facturaEncabezado': facturaEncabezado,
-                    'articulo': prospectoCliente.nombreProducto,
-                    'valorUnitario': producto.precioVentaA,
-                    'cantidad': prospectoCliente.cantidad,
-                    'precio': producto.precioVentaA,
-                    'codigo': producto.codigoBarras,
-                    'informacionAdicional': '',
-                    'descuento': 0,
-                    'impuesto': 0,
-                    'valorDescuento': 0,
-                    'total': producto.precioVentaA * prospectoCliente.cantidad,
-                    'state': 1
-                }
-
-                FacturasDetalles.objects.create(**facturaDetalleJson)
+                facturaDetalleJson = ProspectosClientesDetalles.objects.filter(prospectoClienteEncabezado=prospectoCliente.id)
+                # producto = Productos.objects.filter(codigoBarras=prospectoCliente.codigoProducto).first()
+                # facturaDetalleJson = {
+                #     'facturaEncabezado': facturaEncabezado,
+                #     'articulo': prospectoCliente.nombreProducto,
+                #     'valorUnitario': producto.precioVentaA,
+                #     'cantidad': prospectoCliente.cantidad,
+                #     'precio': producto.precioVentaA,
+                #     'codigo': producto.codigoBarras,
+                #     'informacionAdicional': '',
+                #     'descuento': 0,
+                #     'impuesto': 0,
+                #     'valorDescuento': 0,
+                #     'total': producto.precioVentaA * prospectoCliente.cantidad,
+                #     'state': 1
+                # }
+                detalles = ProspectosClientesDetallesSerializer(facturaDetalleJson, many=True).data
+                for item in detalles:
+                    item.pop('prospectoClienteEncabezado')
+                    item.pop('id')
+                    item['facturaEncabezado'] = facturaEncabezado
+                    FacturasDetalles.objects.create(**item)
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)

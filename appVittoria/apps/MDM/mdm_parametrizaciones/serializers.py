@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.MDM.mdm_parametrizaciones.models import Parametrizaciones
+from .models import Parametrizaciones
 
 
 class ParametrizacionesSerializer(serializers.ModelSerializer):

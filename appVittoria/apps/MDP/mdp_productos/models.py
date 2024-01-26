@@ -42,8 +42,10 @@ class Productos(models.Model):
     caracteristicas = models.TextField(null=True, blank=True)
     video = models.FileField(blank=True, null=True, upload_to=upload_path_video)
     precioOferta = models.FloatField(null=True)
-    lugarVenta = models.CharField(max_length=255, null=True)
-    courier = models.CharField(max_length=255, null=True)
+    envioNivelNacional = models.BooleanField(default=1)
+    lugarVentaProvincia = models.CharField(max_length=255, null=True, blank=True)
+    lugarVentaCiudad = models.CharField(max_length=255, null=True, blank=True)
+    courier = models.CharField(max_length=255, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

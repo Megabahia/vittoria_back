@@ -38,6 +38,10 @@ class ProspectosClientes(models.Model):
     comentarios = models.CharField(max_length=255, null=True, blank=True)
     comentariosVendedor = models.CharField(max_length=255, null=True, blank=True)
     cantidad = models.IntegerField(default=1)
+    subTotal = models.FloatField(null=True)
+    descuento = models.FloatField(null=True)
+    iva = models.FloatField(null=True)
+    total = models.FloatField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

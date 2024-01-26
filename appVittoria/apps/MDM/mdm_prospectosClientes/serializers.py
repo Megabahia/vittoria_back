@@ -87,12 +87,15 @@ class ActualizarProspectosClientesSerializer(serializers.ModelSerializer):
                 detalle.delete()
 
         # Crear o actualizar instancias de detalles que se encuentran en la solicitud de factura detalles
+        print(detalles_actualizar.items())
         for detalle_id, data in detalles_actualizar.items():
             detalle = detalles_database.get(detalle_id, None)
             if detalle is None:
+                print('if')
                 data.pop('id')
                 ProspectosClientesDetalles.objects.create(**data)
             else:
+                print('else')
                 # now = timezone.localtime(timezone.now())
                 # data['updated_at'] = str(now)
                 ProspectosClientesDetalles.objects.filter(id=detalle.id).update(**data)
