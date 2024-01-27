@@ -132,3 +132,24 @@ class FacturaSerializer(serializers.ModelSerializer):
                                            productosVendidos=detalle_data['cantidad'],
                                            precioVenta=detalle_data['total'])
         return facturaEncabezado
+
+
+class FacturasParaCrearGDESerializer(serializers.ModelSerializer):
+    # id = serializers.IntegerField()
+    detalles = FacturasDetallesSerializer(many=True, allow_empty=False)
+
+    class Meta:
+        model = FacturasEncabezados
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        data = super(FacturasParaCrearGDESerializer, self).to_representation(instance)
+        cliente = data.pop('cliente')
+        if cliente:
+            clienteEncontrado = Clientes.objects.filter(pk=cliente).first()
+            data['nombres'] = ClientesSerializer(clienteEncontrado).data['nombres']
+            data['apellidos'] = ClientesSerializer(clienteEncontrado).data['apellidos']
+        data['personaGenera'] = data['nombreVendedor']
+        data['lugarEnvio'] = data['ciudad']
+        data['envioCourier'] = ''
+        return data

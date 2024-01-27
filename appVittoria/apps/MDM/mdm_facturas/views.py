@@ -1,6 +1,8 @@
 from ..mdm_facturas.models import FacturasEncabezados, FacturasDetalles
-from ..mdm_facturas.serializers import FacturasSerializer, FacturasDetallesSerializer, FacturasListarSerializer, \
-    FacturaSerializer, FacturasListarTablaSerializer
+from ..mdm_facturas.serializers import (
+    FacturasSerializer, FacturasDetallesSerializer, FacturasListarSerializer,
+    FacturaSerializer, FacturasListarTablaSerializer, FacturasParaCrearGDESerializer
+)
 from ...MDP.mdp_productos.models import Productos
 from ..mdm_clientes.models import Clientes
 from ..mdm_negocios.models import Negocios
@@ -683,16 +685,47 @@ def factura_procesar_envio(request, pk):
             return Response(err, status=status.HTTP_404_NOT_FOUND)
         # tomar el dato
         if request.method == 'GET':
-            facturaSerializer = FacturasSerializer(query)
+            facturaSerializer = FacturasParaCrearGDESerializer(query)
+            # facturasDetalles = []
+            # for item in facturaSerializer.data['detalles']:
+            #     facturasDetalles.append(
+            #         {
+            #             "oferta", item['oferta'],
+            #             "codigo", item['codigo'],
+            #             "cantidad", item['cantidad'],
+            #             "producto", item['producto'],
+            #             "precio", item['precio'],
+            #             "descuento", item['descuento'],
+            #             "total", item['total'],
+            #         }
+            #     )
+            # facturaEnviar = {
+            #     "negocio": facturaSerializer.data['negocio']['id'],
+            #     "cliente": facturaSerializer.data['cliente']['id'],
+            #     "fechaOferta": "",
+            #     "nombres": facturaSerializer.data['cliente']['nombres'],
+            #     "apellidos": facturaSerializer.data['cliente']['apellidos'],
+            #     "identificacion": facturaSerializer.data['cliente']['cedula'],
+            #     "telefono": facturaSerializer.data['cliente']['telefono'],
+            #     "correo": facturaSerializer.data['cliente']['correo1'],
+            #     "vigenciaOferta": "",
+            #     "canalVentas": "",
+            #     "calificacionCliente": "",
+            #     "indicadorCliente": "",
+            #     "personaGenera": facturaSerializer.data['nombreVendedor'],
+            #     "descripcion": "",
+            #     "total": facturaSerializer.data['total'],
+            #     "detalles": facturasDetalles,
+            # }
             serializer = GestionOfertaSerializer(data=facturaSerializer.data)
-            print('llego')
             if serializer.is_valid():
                 print('llego2')
                 serializer.save()
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            createLog(logModel, serializer.data, logTransaccion)
-            return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+            print('llego', serializer.data)
+            createLog(logModel, serializer.errors, logTransaccion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)

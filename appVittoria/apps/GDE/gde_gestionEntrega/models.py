@@ -8,7 +8,7 @@ class Oferta(models.Model):
     fechaOferta = models.DateField(null=True)
     nombres = models.CharField(max_length=150,null=True)
     apellidos = models.CharField(max_length=150,null=True)
-    identificacion = models.CharField(max_length=13,null=True)    
+    identificacion = models.CharField(max_length=13,null=True)
     telefono = models.CharField(max_length=150,null=True)
     correo = models.EmailField(max_length=150,null=True)
     vigenciaOferta = models.IntegerField(null=True)
@@ -21,12 +21,14 @@ class Oferta(models.Model):
 
     fechaCompra = models.DateField(null=True)
     entregoProducto = models.CharField(max_length=150,null=True, blank=True)
-    fechaEntrega = models.DateField(null=True)    
+    fechaEntrega = models.DateField(null=True)
     calificacion = models.CharField(max_length=150,null=True, blank=True)
     estado = models.CharField(max_length=150,null=True, blank=True)
     codigo = models.CharField(max_length=150,null=True)
     horaEntrega = models.CharField(max_length=150,null=True, blank=True)
-        
+    lugarEnvio = models.CharField(max_length=255,null=True, blank=True)
+    courier = models.CharField(max_length=255, null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)
@@ -43,7 +45,7 @@ class OfertaDetalles(models.Model):
     precio = models.FloatField(null=True)
     descuento = models.FloatField(null=True)
     total = models.FloatField(null=True)
-        
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)

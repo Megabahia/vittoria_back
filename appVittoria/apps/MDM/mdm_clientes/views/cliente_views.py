@@ -300,6 +300,7 @@ def cliente_update(request, pk):
                     'calleSecundaria': prospectoCliente.calleSecundaria,
                     'numeroCasa': prospectoCliente.numeroCasa,
                     'referencia': prospectoCliente.referencia,
+                    'courier': prospectoCliente.courier,
                 }
                 facturaEncabezado = FacturasEncabezados.objects.create(**facturaEncabezadoJson)
                 facturaDetalleJson = ProspectosClientesDetalles.objects.filter(prospectoClienteEncabezado=prospectoCliente.id)

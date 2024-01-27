@@ -5,6 +5,9 @@ from .serializers import (
 )
 from ..mdm_clientes.serializers import ClientesUpdateSerializer
 from ..mdm_clientes.models import Clientes
+from ...config import config
+# TWILIO
+from twilio.rest import Client
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -190,6 +193,15 @@ def prospecto_cliente_create(request):
             serializer = ProspectosClientesSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
+                account_sid = str(config.TWILIO_ACCOUNT_SID)
+                auth_token = str(config.TWILIO_AUTH_TOKEN)
+                client = Client(account_sid, auth_token)
+                message = client.messages.create(
+                    from_='whatsapp:+14155238886',
+                    body='Se genero correctamente su solicitud, en unos momentos unos de nuestros asesores se contactara',
+                    to='whatsapp:+593' + serializer.data['whatsapp'][1:]
+                )
+                print(message.sid)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)

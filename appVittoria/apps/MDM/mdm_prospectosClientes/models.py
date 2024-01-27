@@ -42,6 +42,7 @@ class ProspectosClientes(models.Model):
     descuento = models.FloatField(null=True)
     iva = models.FloatField(null=True)
     total = models.FloatField(null=True)
+    courier = models.CharField(max_length=255, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

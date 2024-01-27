@@ -373,7 +373,21 @@ def search_producto_codigo_list(request):
     }
     try:
         try:
-            query = Productos.objects.filter(codigoBarras=request.data['codigoBarras'], state=1).first()
+            filters = {
+                'codigoBarras': request.data['codigoBarras'],
+                'state': 1
+            }
+            query = Productos.objects.filter(**filters).first()
+            # Verifica si el objeto existe antes de aplicar más filtros
+            if query:
+                query2 = Productos.objects.filter(id=query.id, envioNivelNacional=False).first()
+                # Puedes ajustar los filtros según tus necesidades
+                if query2:
+                    if 'lugarVentaCiudad' in request.data and request.data['lugarVentaCiudad'] != '':
+                        filters['lugarVentaCiudad'] = request.data['lugarVentaCiudad']
+                        query = Productos.objects.filter(**filters).first()
+                    else:
+                        query = query2
         except Productos.DoesNotExist:
             err = {"error": "No existe"}
             createLog(logModel, err, logExcepcion)
