@@ -308,7 +308,6 @@ def parametrizaciones_list_hijos(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def parametrosTipo_list(request):
     if request.method == 'POST':
         try:
