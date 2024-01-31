@@ -272,9 +272,20 @@ def cliente_update(request, pk):
                 serializer.save()
                 prospectoCliente = ProspectosClientes.objects.filter(identificacion=request.data['cedula'],
                                                                      state=1).order_by('-created_at').first()
-                # if prospectoCliente is not None:
-                #     prospectoCliente.state = 0
-                #     prospectoCliente.save()
+                facturaDetalleJson = ProspectosClientesDetalles.objects.filter(
+                    prospectoClienteEncabezado=prospectoCliente.id)
+                detalles = ProspectosClientesDetallesSerializer(facturaDetalleJson, many=True).data
+                productosSinStock = []
+                for detalle in detalles:
+                    producto = Productos.objects.filter(codigoBarras=detalle['codigo'], state=1).values('stock').first()
+                    if int(detalle['cantidad']) > int(producto['stock']):
+                        productoSinStock = {}
+                        productoSinStock['codigo'] = detalle['codigo']
+                        productoSinStock['stock'] = producto['stock']
+                        productosSinStock.append(productoSinStock)
+
+                if len(productosSinStock) > 0:
+                    return Response(productosSinStock, status=status.HTTP_404_NOT_FOUND)
 
                 iva = Parametrizaciones.objects.filter(tipo='TIPO_IVA').first()
                 facturaEncabezadoJson = {
@@ -303,7 +314,6 @@ def cliente_update(request, pk):
                     'courier': prospectoCliente.courier,
                 }
                 facturaEncabezado = FacturasEncabezados.objects.create(**facturaEncabezadoJson)
-                facturaDetalleJson = ProspectosClientesDetalles.objects.filter(prospectoClienteEncabezado=prospectoCliente.id)
                 # producto = Productos.objects.filter(codigoBarras=prospectoCliente.codigoProducto).first()
                 # facturaDetalleJson = {
                 #     'facturaEncabezado': facturaEncabezado,
@@ -319,12 +329,14 @@ def cliente_update(request, pk):
                 #     'total': producto.precioVentaA * prospectoCliente.cantidad,
                 #     'state': 1
                 # }
-                detalles = ProspectosClientesDetallesSerializer(facturaDetalleJson, many=True).data
                 for item in detalles:
                     item.pop('prospectoClienteEncabezado')
                     item.pop('id')
                     item['facturaEncabezado'] = facturaEncabezado
                     FacturasDetalles.objects.create(**item)
+                    productoComprado = Productos.objects.filter(codigoBarras=item['codigo'], state=1).first()
+                    productoComprado.stock = int(productoComprado.stock) - int(item['cantidad'])
+                    productoComprado.save()
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)

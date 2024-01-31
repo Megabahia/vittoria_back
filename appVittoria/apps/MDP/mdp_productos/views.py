@@ -375,7 +375,8 @@ def search_producto_codigo_list(request):
         try:
             filters = {
                 'codigoBarras': request.data['codigoBarras'],
-                'state': 1
+                'state': 1,
+                'estado': 'Activo'
             }
             query = Productos.objects.filter(**filters).first()
             # Verifica si el objeto existe antes de aplicar más filtros
@@ -943,7 +944,7 @@ def prediccion_productosNuevos_list(request):
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def productos_findOne_free(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
@@ -958,13 +959,20 @@ def productos_findOne_free(request, pk):
     }
     try:
         try:
-            query = Productos.objects.get(pk=pk, state=1)
+            filters = {
+                'pk': pk,
+                'state': 1
+            }
+            print('filters', request)
+            if 'estado' in request.data and request.data['estado'] != '':
+                filters['estado'] = request.data['estado']
+            query = Productos.objects.get(**filters)
         except Productos.DoesNotExist:
             err = {"error": "No existe"}
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_404_NOT_FOUND)
         # tomar el dato
-        if request.method == 'GET':
+        if request.method == 'POST':
             serializer = ListarProductoCreateSerializer(query)
             createLog(logModel, serializer.data, logTransaccion)
             return Response(serializer.data, status=status.HTTP_200_OK)

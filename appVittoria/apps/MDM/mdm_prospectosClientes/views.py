@@ -251,6 +251,7 @@ def prospecto_cliente_update(request, pk):
                         'nombres': serializer.data['nombres'],
                         'apellidos': serializer.data['apellidos'],
                         'cedula': serializer.data['identificacion'],
+                        'tipoIdentificacion': serializer.data['tipoIdentificacion'],
                         'correo': serializer.data['correo1'],
                         'paisNacimiento': serializer.data['pais'],
                         'provinciaNacimiento': serializer.data['provincia'],

@@ -75,6 +75,8 @@ INSTALLED_APPS = [
     'apps.GDE.gde_gestionEntrega',
     # apps vittoria GDP
     'apps.GDP.gdp_productos',
+    # apps vittoria SERVIENTREGA
+    'apps.SERVIENTREGA.servientrega',
     #CONFIG
     'apps.config',
     #Django external apps
