@@ -719,11 +719,13 @@ def factura_procesar_envio(request, pk):
             # }
             serializer = GestionOfertaSerializer(data=facturaSerializer.data)
             if serializer.is_valid():
-                print('llego2')
                 serializer.save()
+                # Actualizar la fecha actualizacion de la factura
+                now = timezone.localtime(timezone.now())
+                query.updated_at = str(now)
+                query.save()
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            print('llego', serializer.data)
             createLog(logModel, serializer.errors, logTransaccion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
