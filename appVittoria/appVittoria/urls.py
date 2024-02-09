@@ -56,6 +56,8 @@ urlpatterns = [
     path('gdp/productos/', include(('apps.GDP.gdp_productos.urls', 'gdp_productos'), namespace='gdp_productos')),
     # Modulo SERVIENTREGA
     path('servientrega/', include(('apps.SERVIENTREGA.servientrega.urls', 'servientrega'), namespace='servientrega')),
+    # Modulo FACTURACION
+    path('facturacion/', include(('apps.FACTURACION.facturacion.urls', 'facturacion'), namespace='facturacion')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
