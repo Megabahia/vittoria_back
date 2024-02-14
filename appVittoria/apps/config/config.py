@@ -8,7 +8,7 @@ env = environ.Env()
 # Establecer el directorio base del proyecto
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Tomar variables de entorno del archivo .env
-environ.Env.read_env(os.path.join(BASE_DIR, '../appVittoria/.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, '../appVittoria/.env.test'))
 
 # VARIABLES GLOBALES
 endpointEmailAsignacionPassword = "/auth/usuario/asignacionPassword/"
@@ -118,3 +118,7 @@ SERVIENTREGA_USER = env.str('SERVIENTREGA_USER')
 SERVIENTREGA_PASSWORD = env.str('SERVIENTREGA_PASSWORD')
 SERVIENTREGA_URL = env.str('SERVIENTREGA_URL')
 SERVIENTREGA_URL_GENERACION = env.str('SERVIENTREGA_URL_GENERACION')
+
+FAC_URL = env.str('FAC_URL')
+FAC_USER = env.str('FAC_USER')
+FAC_PASS = env.str('FAC_PASS')

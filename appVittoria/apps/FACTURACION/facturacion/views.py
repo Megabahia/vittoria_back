@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+import requests
+from ...config.config import FAC_URL, FAC_USER, FAC_PASS
 # excel
 import openpyxl
 # logs
@@ -69,7 +71,6 @@ def uploadEXCEL_crearProductos(request):
     errores = []
     try:
         if request.method == 'POST':
-
             first = True  # si tiene encabezado
             uploaded_file = request.FILES['archivo']
             # you may put validations here to check extension or file size
@@ -118,6 +119,7 @@ def uploadEXCEL_crearProductos(request):
         err = {"error": 'Error verifique el archivo, un error ha ocurrido: {}'.format(e)}
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+
 # INSERTAR DATOS EN LA BASE INDIVIDUAL
 def insertarDato_Factura(dato):
     try:
@@ -139,7 +141,8 @@ def insertarDato_Factura(dato):
             facturaEncabezado['provinciaFacturacion'] = dato[9].replace('"', "") if dato[9] != "NULL" else None
             facturaEncabezado['codigoPostalFacturacion'] = dato[10].replace('"', "") if dato[10] != "NULL" else None
             facturaEncabezado['paisFacturacion'] = dato[11].replace('"', "") if dato[11] != "NULL" else None
-            facturaEncabezado['correoElectronicoFacturacion'] = dato[12].replace('"', "") if dato[12] != "NULL" else None
+            facturaEncabezado['correoElectronicoFacturacion'] = dato[12].replace('"', "") if dato[
+                                                                                                 12] != "NULL" else None
             facturaEncabezado['telefonoFacturacion'] = dato[13].replace('"', "") if dato[13] != "NULL" else None
             facturaEncabezado['nombresEnvio'] = dato[14].replace('"', "") if dato[14] != "NULL" else None
             facturaEncabezado['apellidosEnvio'] = dato[15].replace('"', "") if dato[15] != "NULL" else None
@@ -160,11 +163,13 @@ def insertarDato_Factura(dato):
 
             facturaEncabezadoQuery = FacturasEncabezados.objects.create(**facturaEncabezado)
 
-        facturaDetalleQuery = FacturasDetalles.objects.filter(numeroPedido=dato[0].replace('"', ""), SKU=dato[29].replace('"', "")).first()
+        facturaDetalleQuery = FacturasDetalles.objects.filter(numeroPedido=dato[0].replace('"', ""),
+                                                              SKU=dato[29].replace('"', "")).first()
         print('detalle', facturaDetalleQuery)
         if facturaDetalleQuery is None:
             facturaDetalle = {}
-            facturaDetalle['facturaEncabezado_id'] = facturaEncabezadoQuery.id if facturaEncabezadoQuery is not None else facturaEncabezadoQuery.id
+            facturaDetalle[
+                'facturaEncabezado_id'] = facturaEncabezadoQuery.id if facturaEncabezadoQuery is not None else facturaEncabezadoQuery.id
             facturaDetalle['numeroPedido'] = dato[0].replace('"', "")
             facturaDetalle['SKU'] = dato[29].replace('"', "") if dato[29] != "NULL" else None
             facturaDetalle['articulo'] = dato[30].replace('"', "") if dato[30] != "NULL" else None
@@ -226,7 +231,7 @@ def facturas_list(request):
 
             # Serializar los datos
             query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
-            serializer = FacturasListarSerializer(query[offset:limit], many=True)
+            serializer = FacturasSerializer(query[offset:limit], many=True)
             new_serializer_data = {'cont': query.count(),
                                    'info': serializer.data}
             # envio de datos
@@ -267,3 +272,108 @@ def factura_findOne(request, pk):
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def factura_facturar(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+
+            resp = requests.post(f"{FAC_URL}/auth/login", json={
+                "username": FAC_USER,
+                "pass": FAC_PASS
+            }, verify=False)
+            token = resp.json()['data']['token']
+            enviarFactura(token, request.data['facturas'])
+
+            # envio de datos
+            return Response('Ok', status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+def enviarFactura(token, facturas):
+    for item in facturas:
+        detallesFacturaEnviar = []
+        for itemDetalles in item['detalles']:
+            precio = itemDetalles['precio'] if 'precio' in itemDetalles else None
+            ivaItem = (float(precio) * 12) / 100
+            detallesFacturaEnviar.append({
+                "descripcion": itemDetalles['nombreArticulo'] if 'nombreArticulo' in itemDetalles else None,
+                "cantidad": itemDetalles['cantidad'],
+                "precioUnitario": itemDetalles['valorUnitario'] if 'valorUnitario' in itemDetalles else None,
+                "descuento": itemDetalles['importeDescuento'] if 'importeDescuento' in itemDetalles else None,
+                "precioTotalSinImpuesto": precio,
+                "impuestos": [
+                    {
+                        "baseImponible": precio,
+                        "valor": ivaItem
+                    }
+                ]
+            })
+
+        ivaTotal = (float(item['subtotalPedido']) * 12) / 100
+        enviarFactura = {
+            "emissionPointId": "1",
+            "receiptTypeId": "1",
+            "parishId": "1",
+            "receipt": {
+                "infoTributaria": {
+                    "ambiente": "1",
+                    "tipoEmision": "1"
+                },
+                "infoFactura": {
+                    "fechaEmision": item['fecha'] if 'fecha' in item else item['fechaPedido'],
+                    "razonSocialComprador": f"{item['nombresFacturacion']} {item['apellidosFacturacion']}",
+                    "identificacionComprador": '1003150602',
+                    "direccionComprador": item['direccionFacturacion'],
+                    "totalSinImpuestos": item['subtotalPedido'],
+                    "totalDescuento": item['descuentoCarrito'],
+                    "totalConImpuestos": [
+                        {
+                            "baseImponible": item['subtotalPedido'],
+                            "valor": ivaTotal
+                        }
+                    ],
+                    "propina": "0",
+                    "importeTotal": item['subtotalPedido'],
+                    "moneda": "DOLAR",
+                    "pagos": [
+                        {
+                            "total": item['subtotalPedido']
+                        }
+                    ]
+                },
+                "detalles": detallesFacturaEnviar,
+                "infoAdicional": [
+                    {
+                        "nombre": "Email",
+                        "valor": item['correoElectronicoFacturacion']
+                    },
+                    {
+                        "nombre": "Email2",
+                        "valor": item['correoElectronicoFacturacion']
+                    }
+                ]
+            }
+        }
+
+        print('facura enviar', enviarFactura)
+        resp = requests.post(f"{FAC_URL}/receipt/create", headers={"Authorization": token}, json=enviarFactura,
+                             verify=False)
+        print('facturas', resp)
