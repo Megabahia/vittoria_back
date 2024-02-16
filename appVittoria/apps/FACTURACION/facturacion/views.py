@@ -4,7 +4,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 import requests
-from ...config.config import FAC_URL, FAC_USER, FAC_PASS
+from datetime import datetime
+from ...config.config import FAC_URL, FAC_USER, FAC_PASS, FAC_AMBIENTE
 # excel
 import openpyxl
 # logs
@@ -297,7 +298,8 @@ def factura_facturar(request):
                 "pass": FAC_PASS
             }, verify=False)
             token = resp.json()['data']['token']
-            enviarFactura(token, request.data['facturas'])
+            emissionPointId = resp.json()['data']['user']['accounts'][0]['id']
+            enviarFacturaExternas(emissionPointId, token, request.data['facturas'])
 
             # envio de datos
             return Response('Ok', status=status.HTTP_200_OK)
@@ -307,55 +309,104 @@ def factura_facturar(request):
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 
-def enviarFactura(token, facturas):
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def factura_facturar_locales(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+
+            resp = requests.post(f"{FAC_URL}/auth/login", json={
+                "username": FAC_USER,
+                "pass": FAC_PASS
+            }, verify=False)
+            token = resp.json()['data']['token']
+            emissionPointId = resp.json()['data']['user']['accounts'][0]['id']
+            enviarFacturaLocales(emissionPointId, token, request.data['facturas'])
+
+            # envio de datos
+            return Response('Ok', status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+def enviarFacturaExternas(emissionPointId, token, facturas):
     for item in facturas:
         detallesFacturaEnviar = []
         for itemDetalles in item['detalles']:
-            precio = itemDetalles['precio'] if 'precio' in itemDetalles else None
-            ivaItem = (float(precio) * 12) / 100
+            precio = round(float(itemDetalles['precio']) / 1.12, 2) if 'precio' in itemDetalles else 0
+            precio = precio * int(itemDetalles['cantidad'])
+            ivaItem = round(float(precio) * 0.12, 2)
             detallesFacturaEnviar.append({
-                "descripcion": itemDetalles['nombreArticulo'] if 'nombreArticulo' in itemDetalles else None,
+                "codigoPrincipal": "1",
+                "descripcion": itemDetalles['nombreArticulo'],
                 "cantidad": itemDetalles['cantidad'],
-                "precioUnitario": itemDetalles['valorUnitario'] if 'valorUnitario' in itemDetalles else None,
-                "descuento": itemDetalles['importeDescuento'] if 'importeDescuento' in itemDetalles else None,
+                "precioUnitario": itemDetalles['precio'],
+                "descuento": itemDetalles['importeDescuento'] if 'importeDescuento' in itemDetalles and itemDetalles['importeDescuento'] != 'None' else 0,
                 "precioTotalSinImpuesto": precio,
                 "impuestos": [
                     {
+                        "codigo": "2",
+                        "codigoPorcentaje": "2",
+                        "tarifa": "12",
                         "baseImponible": precio,
                         "valor": ivaItem
                     }
                 ]
             })
 
-        ivaTotal = (float(item['subtotalPedido']) * 12) / 100
+        subTotal = round(float(item['subtotalPedido']) / 1.12, 2)
+        ivaTotal = round(float(subTotal) * 0.12, 2)
+        # Convertir a objeto datetime
+        fecha_objeto = datetime.strptime(item['fechaPedido'], "%Y-%m-%d")
+
+        # Formatear como dd/mm/yyyy
+        fecha_formateada = fecha_objeto.strftime("%d/%m/%Y")
         enviarFactura = {
-            "emissionPointId": "1",
+            "emissionPointId": emissionPointId,
             "receiptTypeId": "1",
             "parishId": "1",
             "receipt": {
                 "infoTributaria": {
-                    "ambiente": "1",
+                    "ambiente": FAC_AMBIENTE,
                     "tipoEmision": "1"
                 },
                 "infoFactura": {
-                    "fechaEmision": item['fecha'] if 'fecha' in item else item['fechaPedido'],
+                    "fechaEmision":  fecha_formateada,
                     "razonSocialComprador": f"{item['nombresFacturacion']} {item['apellidosFacturacion']}",
+                    "tipoIdentificacionComprador": '05',
                     "identificacionComprador": '1003150602',
                     "direccionComprador": item['direccionFacturacion'],
-                    "totalSinImpuestos": item['subtotalPedido'],
+                    "totalSinImpuestos": subTotal,
                     "totalDescuento": item['descuentoCarrito'],
                     "totalConImpuestos": [
                         {
-                            "baseImponible": item['subtotalPedido'],
+                            "codigo": "2",
+                            "codigoPorcentaje": "2",
+                            "baseImponible": subTotal,
                             "valor": ivaTotal
                         }
                     ],
                     "propina": "0",
-                    "importeTotal": item['subtotalPedido'],
+                    "importeTotal": float(item['subtotalPedido']),
                     "moneda": "DOLAR",
                     "pagos": [
                         {
-                            "total": item['subtotalPedido']
+                            "formaPago": "20",
+                            "total": float(item['subtotalPedido'])
                         }
                     ]
                 },
@@ -368,12 +419,104 @@ def enviarFactura(token, facturas):
                     {
                         "nombre": "Email2",
                         "valor": item['correoElectronicoFacturacion']
+                    },
+                    {
+                        "nombre": "numeroPedido",
+                        "valor": item['numeroPedido']
                     }
                 ]
             }
         }
 
-        print('facura enviar', enviarFactura)
+        # print('facura enviar', enviarFactura)
         resp = requests.post(f"{FAC_URL}/receipt/create", headers={"Authorization": token}, json=enviarFactura,
                              verify=False)
-        print('facturas', resp)
+        print('facturas', resp.json())
+
+
+def enviarFacturaLocales(emissionPointId, token, facturas):
+    for item in facturas:
+        detallesFacturaEnviar = []
+        for itemDetalles in item['detalles']:
+            precio = round(float(itemDetalles['valorUnitario']), 2)
+            precio = precio * int(itemDetalles['cantidad'])
+            ivaItem = round(float(precio) * 0.12, 2)
+            detallesFacturaEnviar.append({
+                "codigoPrincipal": "1",
+                "descripcion": itemDetalles['articulo'],
+                "cantidad": itemDetalles['cantidad'],
+                "precioUnitario": itemDetalles['valorUnitario'],
+                "descuento": itemDetalles['descuento'],
+                "precioTotalSinImpuesto": precio,
+                "impuestos": [
+                    {
+                        "codigo": "2",
+                        "codigoPorcentaje": "2",
+                        "tarifa": "12",
+                        "baseImponible": precio,
+                        "valor": ivaItem
+                    }
+                ]
+            })
+
+        subTotal = round(float(item['subTotal']), 2)
+        ivaTotal = round(float(item['iva']), 2)
+        # Convertir a objeto datetime
+        fecha_objeto = datetime.strptime(item['fecha'], "%Y-%m-%d")
+
+        # Formatear como dd/mm/yyyy
+        fecha_formateada = fecha_objeto.strftime("%d/%m/%Y")
+        enviarFactura = {
+            "emissionPointId": emissionPointId,
+            "receiptTypeId": "1",
+            "parishId": "1",
+            "receipt": {
+                "infoTributaria": {
+                    "ambiente": FAC_AMBIENTE,
+                    "tipoEmision": "1"
+                },
+                "infoFactura": {
+                    "fechaEmision": fecha_formateada,
+                    "razonSocialComprador": f"{item['cliente']['nombres']} {item['cliente']['apellidos']}",
+                    "tipoIdentificacionComprador": '05',
+                    "identificacionComprador": item['cliente']['cedula'],
+                    "direccionComprador": item['direccion'],
+                    "totalSinImpuestos": subTotal,
+                    "totalDescuento": item['descuento'],
+                    "totalConImpuestos": [
+                        {
+                            "codigo": "2",
+                            "codigoPorcentaje": "2",
+                            "baseImponible": subTotal,
+                            "valor": ivaTotal
+                        }
+                    ],
+                    "propina": "0",
+                    "importeTotal": item['total'],
+                    "moneda": "DOLAR",
+                    "pagos": [
+                        {
+                            "formaPago": "20",
+                            "total": item['total']
+                        }
+                    ]
+                },
+                "detalles": detallesFacturaEnviar,
+                "infoAdicional": [
+                    {
+                        "nombre": "Email",
+                        "valor": item['correo']
+                    },
+                    {
+                        "nombre": "Email2",
+                        "valor": item['correo']
+                    }
+                ]
+            }
+        }
+
+        print('enviarFactura', enviarFactura)
+
+        resp = requests.post(f"{FAC_URL}/receipt/create", headers={"Authorization": token}, json=enviarFactura,
+                             verify=False)
+        print('facturas', resp.json())

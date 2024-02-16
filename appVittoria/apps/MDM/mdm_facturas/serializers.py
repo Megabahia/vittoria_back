@@ -9,6 +9,14 @@ from ..mdm_clientes.serializers import ClientesSerializer
 from datetime import datetime
 from django.utils import timezone
 
+from ...MDP.mdp_productos.serializers import ListarProductoCreateSerializer
+
+
+class DetallesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FacturasDetalles
+        fields = '__all__'
+
 
 # Actualizar factura
 class FacturasDetallesSerializer(serializers.ModelSerializer):
@@ -71,6 +79,7 @@ class FacturasSerializer(serializers.ModelSerializer):
 
 # Listar las facturas cabecera
 class FacturasListarSerializer(serializers.ModelSerializer):
+    detalles = DetallesSerializer(many=True, allow_empty=False)
     class Meta:
         model = FacturasEncabezados
         fields = '__all__'
@@ -92,12 +101,6 @@ class FacturasListarTablaSerializer(serializers.ModelSerializer):
 
 
 # Crear factura
-class DetallesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FacturasDetalles
-        fields = '__all__'
-
-
 class FacturaSerializer(serializers.ModelSerializer):
     # id = serializers.IntegerField()
     detalles = DetallesSerializer(many=True, allow_empty=False)
@@ -152,4 +155,30 @@ class FacturasParaCrearGDESerializer(serializers.ModelSerializer):
         data['personaGenera'] = data['nombreVendedor']
         data['lugarEnvio'] = data['ciudad']
         data['envioCourier'] = ''
+        return data
+
+
+class ReporteProductosSerializer(serializers.Serializer):
+    codigo = serializers.CharField(max_length=100)
+    total_cantidad = serializers.CharField(max_length=100)
+
+    def to_representation(self, instance):
+        data = super(ReporteProductosSerializer, self).to_representation(instance)
+        codigo = data.pop('codigo')
+        if codigo:
+            productoEncontrado = Productos.objects.filter(codigoBarras=codigo).first()
+            data['producto'] = ListarProductoCreateSerializer(productoEncontrado).data
+        return data
+
+
+class ReporteClienteSerializer(serializers.Serializer):
+    cliente = serializers.CharField(max_length=100)
+    total_cantidad = serializers.CharField(max_length=100)
+
+    def to_representation(self, instance):
+        data = super(ReporteClienteSerializer, self).to_representation(instance)
+        cliente = data.pop('cliente')
+        if cliente:
+            clienteEncontrado = Clientes.objects.filter(pk=cliente).first()
+            data['cliente'] = ClientesSerializer(clienteEncontrado).data
         return data
