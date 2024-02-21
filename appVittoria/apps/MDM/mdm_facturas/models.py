@@ -34,6 +34,7 @@ class FacturasEncabezados(models.Model):
     numeroCasa = models.CharField(max_length=150, null=True, blank=True)
     referencia = models.CharField(max_length=150, null=True, blank=True)
     courier = models.CharField(max_length=255, null=True, blank=True)
+    estadoSRI = models.CharField(max_length=255, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

@@ -5,6 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 import requests
 from datetime import datetime
+
+from .cron_facturasExternas import verificarEstadoFactura
+from .cron_facturasLocales import verificarEstadoFacturaLocal
 from ...config.config import FAC_URL, FAC_USER, FAC_PASS, FAC_AMBIENTE
 # excel
 import openpyxl
@@ -221,6 +224,11 @@ def facturas_list(request):
             if 'cliente' in request.data:
                 if request.data['cliente'] != '':
                     filters['cliente'] = request.data['cliente']
+            if 'estadoSRI' in request.data and request.data['estadoSRI'] != '':
+                filters['estadoSRI'] = request.data['estadoSRI']
+
+            if 'autorizada' in request.data:
+                filters['estadoSRI__isnull'] = request.data['autorizada']
             # if 'cedula' in request.data:
             #     if request.data['cedula']!='':
             #         filters['cedula'] = str(request.data['cedula'])
@@ -379,6 +387,7 @@ def enviarFacturaExternas(emissionPointId, token, facturas):
             "emissionPointId": emissionPointId,
             "receiptTypeId": "1",
             "parishId": "1",
+            "externalId": item['numeroPedido'],
             "receipt": {
                 "infoTributaria": {
                     "ambiente": FAC_AMBIENTE,
@@ -470,6 +479,7 @@ def enviarFacturaLocales(emissionPointId, token, facturas):
             "emissionPointId": emissionPointId,
             "receiptTypeId": "1",
             "parishId": "1",
+            "externalId": str(item['id']),
             "receipt": {
                 "infoTributaria": {
                     "ambiente": FAC_AMBIENTE,
@@ -520,3 +530,10 @@ def enviarFacturaLocales(emissionPointId, token, facturas):
         resp = requests.post(f"{FAC_URL}/receipt/create", headers={"Authorization": token}, json=enviarFactura,
                              verify=False)
         print('facturas', resp.json())
+
+
+@api_view(['GET'])
+def factura_cron(request):
+    verificarEstadoFacturaLocal()
+    # envio de datos
+    return Response('Ok', status=status.HTTP_200_OK)

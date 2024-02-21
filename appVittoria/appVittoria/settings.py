@@ -60,7 +60,8 @@ INSTALLED_APPS = [
     'apps.MDP.mdp_categorias',
     'apps.MDP.mdp_subCategorias',
     'apps.MDP.mdp_productos',
-    'apps.MDP.mdp_fichaTecnicaProductos',    
+    'apps.MDP.mdp_fichaTecnicaProductos',
+    'apps.MDP.mdp_gestionInventario',
     # apps Vittoria MDO
     'apps.MDO.mdo_parametrizaciones',
     'apps.MDO.mdo_prediccionCrosseling',
@@ -94,6 +95,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'import_export',
+    'django_crontab',
 ]
 
 REST_FRAMEWORK = {
@@ -212,4 +214,11 @@ DEFAULT_FILE_STORAGE = env.str('DEFAULT_FILE_STORAGE')
 AWS_ACCESS_KEY_ID = env.str('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env.str('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = env.str('AWS_STORAGE_BUCKET_NAME')
-AWS_QUERYSTRING_AUTH = False 
+AWS_QUERYSTRING_AUTH = False
+
+
+CRONJOBS = [
+    # La función temporizada se ejecuta cada minuto
+    ('*/1 * * * *', "apps.FACTURACION.facturacion.cron_facturasExternas.verificarEstadoFactura"),
+    ('*/1 * * * *', "apps.FACTURACION.facturacion.cron_facturasLocales.verificarEstadoFacturaLocal"),
+]

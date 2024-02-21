@@ -9,5 +9,6 @@ COPY . .
 
 WORKDIR /app/appVittoria
 EXPOSE 8003
+RUN python manage.py crontab add
 
-CMD ["sh", "-c", "python manage.py runserver 0.0.0.0:8003"]
+CMD ["sh", "-c", "cron && python manage.py runserver 0.0.0.0:8003"]

@@ -164,6 +164,12 @@ def factura_list_cliente(request):
                 if request.data['inicio'] and request.data['fin'] != '':
                     filters['fecha__range'] = [str(request.data['inicio'][:10]), str(request.data['fin'][:10])]
 
+            if 'estadoSRI' in request.data and request.data['estadoSRI'] != '':
+                filters['estadoSRI'] = request.data['estadoSRI']
+
+            if 'autorizada' in request.data:
+                filters['estadoSRI__isnull'] = request.data['autorizada']
+
             # Serializar los datos
             query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
             serializer = FacturasListarSerializer(query[offset:limit], many=True)

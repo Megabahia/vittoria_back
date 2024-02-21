@@ -47,6 +47,7 @@ class FacturasEncabezados(models.Model):
     importeReemsolsadoPedido = models.CharField(max_length=255, null=True, blank=True)
     importeTotalPedido = models.CharField(max_length=255, null=True, blank=True)
     importeTotalImpuestoPedido = models.CharField(max_length=255, null=True, blank=True)
+    estadoSRI = models.CharField(max_length=255, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

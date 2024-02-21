@@ -1,7 +1,8 @@
 from django.urls import path
 
 from .views import (
-    uploadEXCEL_subirFacturas, facturas_list, factura_findOne, factura_facturar, factura_facturar_locales
+    uploadEXCEL_subirFacturas, facturas_list, factura_findOne, factura_facturar, factura_facturar_locales,
+    factura_cron,
 )
 
 app_name = 'facturacion'
@@ -13,4 +14,5 @@ urlpatterns = [
     path('facturas/listOne/<int:pk>', factura_findOne, name="factura_findOne"),
     path('facturas/facturar/', factura_facturar, name="factura_facturar"),
     path('facturas/locales/facturar/', factura_facturar_locales, name="factura_facturar_locales"),
+    path('probar/consulta/facturas/', factura_cron, name="factura_cron"),
 ]

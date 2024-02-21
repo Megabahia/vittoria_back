@@ -50,7 +50,7 @@ class MDPRouter:
     auth and contenttypes applications.
     """
     route_app_labels = {'mdp_parametrizaciones', 'mdp_categorias', 'mdp_productos', 'mdp_fichaTecnicaProductos',
-                        'mdp_subCategorias'}
+                        'mdp_subCategorias', 'mdp_gestionInventario'}
 
     def db_for_read(self, model, **hints):
         """
