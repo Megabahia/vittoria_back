@@ -23,7 +23,16 @@ class Productos(models.Model):
     proveedor = models.CharField(max_length=255, null=True, blank=True)
     precioAdquisicion = models.CharField(max_length=255, null=True, blank=True)
     cantidad = models.IntegerField(null=True, blank=True, default=0)
-    imagen = models.FileField(blank=True, null=True, upload_to=upload_path)
+    imagen = models.CharField(max_length=255, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True)
+    state = models.SmallIntegerField(default=1)
+
+
+class ProductosImagenes(models.Model):
+    producto = models.CharField(max_length=255, null=True, blank=True)
+    imagen = models.CharField(max_length=255, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

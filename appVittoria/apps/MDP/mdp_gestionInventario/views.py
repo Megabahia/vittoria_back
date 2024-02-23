@@ -1,7 +1,8 @@
 from django.http import HttpResponse
+from ...config.config import aws_s3_instancia
 
 from .models import (
-    Productos,
+    Productos, ProductosImagenes
 )
 from .serializers import (
     ProductosSerializer, ArchivosFacturasSerializer, ProveedoresSerializer, ProductosResource
@@ -134,12 +135,33 @@ def insertarDato_Factura(dato):
         if facturaEncabezadoQuery is None:
             facturaEncabezado = {}
             facturaEncabezado['codigoBarras'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
-            facturaEncabezado['imagen'] = dato[2].replace('"', "") if dato[2] != "NULL" else None
+            # Llamar a la función obtener_archivo con una clave específica
+            fotoFrente = aws_s3_instancia.get_foto_frente_url(facturaEncabezado['codigoBarras'])
+            fotoBonita = aws_s3_instancia.get_foto_bonita_url(facturaEncabezado['codigoBarras'])
+            fotoOriginal = aws_s3_instancia.get_foto_original_url(facturaEncabezado['codigoBarras'])
             facturaEncabezado['nombreProducto'] = dato[3].replace('"', "") if dato[3] != "NULL" else None
             facturaEncabezado['proveedor'] = dato[6].replace('"', "") if dato[6] != "NULL" else None
             facturaEncabezado['precioAdquisicion'] = dato[7].replace('"', "") if dato[7] != "NULL" else None
             facturaEncabezado['created_at'] = str(timezone_now)
-            Productos.objects.create(**facturaEncabezado)
+            producto = Productos.objects.create(**facturaEncabezado)
+            if fotoOriginal:
+                ProductosImagenes.objects.create(**{
+                        "producto": producto.id,
+                        "imagen": fotoOriginal,
+                        "created_at": str(timezone_now)
+                    })
+            if fotoBonita:
+                ProductosImagenes.objects.create(**{
+                        "producto": producto.id,
+                        "imagen": fotoBonita,
+                        "created_at": str(timezone_now)
+                    })
+            if fotoFrente:
+                ProductosImagenes.objects.create(**{
+                        "producto": producto.id,
+                        "imagen": fotoFrente,
+                        "created_at": str(timezone_now)
+                    })
 
         return 'Dato insertado correctamente'
     except Exception as e:
@@ -351,3 +373,64 @@ def insertarDato_StockProducto(dato):
     except Exception as e:
         print('error', e)
         return str(e)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def sincronizar_fotos_productos(request):
+    """
+    Este metodo realiza una sincronizacion de las fotos de los productos subidos
+    @rtype: No DEvuelve
+    """
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'create/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'CREAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'GET':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+
+            productos = Productos.objects.all()
+
+            for producto in productos:
+                fotoFrente = aws_s3_instancia.get_foto_frente_url(producto.codigoBarras)
+                fotoBonita = aws_s3_instancia.get_foto_bonita_url(producto.codigoBarras)
+                fotoOriginal = aws_s3_instancia.get_foto_original_url(producto.codigoBarras)
+
+                if ProductosImagenes.objects.filter(imagen=fotoOriginal).first() is None:
+                    if fotoOriginal:
+                        print('entro if')
+                        ProductosImagenes.objects.create(**{
+                            "producto": producto.id,
+                            "imagen": fotoOriginal,
+                            "created_at": str(timezone_now)
+                        })
+                if ProductosImagenes.objects.filter(imagen=fotoBonita).first() is None:
+                    if fotoBonita:
+                        print('entro if')
+                        ProductosImagenes.objects.create(**{
+                            "producto": producto.id,
+                            "imagen": fotoBonita,
+                            "created_at": str(timezone_now)
+                        })
+                if ProductosImagenes.objects.filter(imagen=fotoFrente).first() is None:
+                    if fotoFrente:
+                        print('entro if')
+                        ProductosImagenes.objects.create(**{
+                            "producto": producto.id,
+                            "imagen": fotoFrente,
+                            "created_at": str(timezone_now)
+                        })
+            # createLog(logModel, serializer.errors, logExcepcion)
+            return Response({'Error'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)

@@ -3,6 +3,8 @@
 import os
 import environ
 
+from ..utils.AwsS3 import AwsS3
+
 env = environ.Env()
 
 # Establecer el directorio base del proyecto
@@ -123,3 +125,5 @@ FAC_URL = env.str('FAC_URL')
 FAC_USER = env.str('FAC_USER')
 FAC_PASS = env.str('FAC_PASS')
 FAC_AMBIENTE = env.str('FAC_AMBIENTE')
+
+aws_s3_instancia = AwsS3()
