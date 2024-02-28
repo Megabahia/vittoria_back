@@ -5,7 +5,7 @@ from .models import (
     Productos, ProductosImagenes
 )
 from .serializers import (
-    ProductosSerializer, ArchivosFacturasSerializer, ProveedoresSerializer, ProductosResource
+    ProductosSerializer, ArchivosFacturasSerializer, ProveedoresSerializer, ProductosResource, ProductosStockResource
 )
 from rest_framework import status
 from rest_framework.response import Response
@@ -146,22 +146,22 @@ def insertarDato_Factura(dato):
             producto = Productos.objects.create(**facturaEncabezado)
             if fotoOriginal:
                 ProductosImagenes.objects.create(**{
-                        "producto": producto.id,
-                        "imagen": fotoOriginal,
-                        "created_at": str(timezone_now)
-                    })
+                    "producto": producto.id,
+                    "imagen": fotoOriginal,
+                    "created_at": str(timezone_now)
+                })
             if fotoBonita:
                 ProductosImagenes.objects.create(**{
-                        "producto": producto.id,
-                        "imagen": fotoBonita,
-                        "created_at": str(timezone_now)
-                    })
+                    "producto": producto.id,
+                    "imagen": fotoBonita,
+                    "created_at": str(timezone_now)
+                })
             if fotoFrente:
                 ProductosImagenes.objects.create(**{
-                        "producto": producto.id,
-                        "imagen": fotoFrente,
-                        "created_at": str(timezone_now)
-                    })
+                    "producto": producto.id,
+                    "imagen": fotoFrente,
+                    "created_at": str(timezone_now)
+                })
 
         return 'Dato insertado correctamente'
     except Exception as e:
@@ -197,7 +197,7 @@ def proveedores_list(request):
             filters = {"state": "1"}
 
             if 'codigoBarras' in request.data and request.data['codigoBarras'] != '':
-                filters['codigoBarras'] = request.data['codigoBarras']
+                filters['codigoBarras__icontains'] = request.data['codigoBarras']
 
             if 'proveedor' in request.data and request.data['proveedor'] != '':
                 filters['proveedor'] = request.data['proveedor']
@@ -253,6 +253,20 @@ def productos_exportar(request):
     @rtype: DEvuelve un archivo excel
     """
     person_resource = ProductosResource()
+    dataset = person_resource.export()
+    response = HttpResponse(dataset.xls, content_type="application/ms-excel")
+    response['Content-Disposition'] = 'attachment; filename="foo.xls"'
+    return response
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def generar_productos_stock_exportar(request):
+    """
+    Este metodo realiza una exportacion de todos los catalogos en excel de la tabla catalogo, de la base de datos central
+    @rtype: DEvuelve un archivo excel
+    """
+    person_resource = ProductosStockResource()
     dataset = person_resource.export()
     response = HttpResponse(dataset.xls, content_type="application/ms-excel")
     response['Content-Disposition'] = 'attachment; filename="foo.xls"'

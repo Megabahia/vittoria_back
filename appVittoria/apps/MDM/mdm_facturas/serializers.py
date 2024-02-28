@@ -77,9 +77,11 @@ class FacturasSerializer(serializers.ModelSerializer):
             data['cliente'] = ClientesSerializer(clienteEncontrado).data
         return data
 
+
 # Listar las facturas cabecera
 class FacturasListarSerializer(serializers.ModelSerializer):
     detalles = DetallesSerializer(many=True, allow_empty=False)
+
     class Meta:
         model = FacturasEncabezados
         fields = '__all__'
@@ -180,5 +182,19 @@ class ReporteClienteSerializer(serializers.Serializer):
         cliente = data.pop('cliente')
         if cliente:
             clienteEncontrado = Clientes.objects.filter(pk=cliente).first()
+            data['cliente'] = ClientesSerializer(clienteEncontrado).data
+        return data
+
+
+class ReporteClientesCompradosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FacturasDetalles
+        fields = ['facturaEncabezado']
+
+    def to_representation(self, instance):
+        data = super(ReporteClientesCompradosSerializer, self).to_representation(instance)
+        if data['facturaEncabezado']:
+            clienteId = FacturasEncabezados.objects.values('cliente').filter(id=data['facturaEncabezado']).first()
+            clienteEncontrado = Clientes.objects.filter(id=clienteId['cliente']).first()
             data['cliente'] = ClientesSerializer(clienteEncontrado).data
         return data

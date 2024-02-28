@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import (
     uploadEXCEL_subirProductosProveedores, proveedores_list, proveedores_list_distinct, productos_exportar,
-    productos_cargar_stock, sincronizar_fotos_productos
+    productos_cargar_stock, sincronizar_fotos_productos, generar_productos_stock_exportar
 )
 
 app_name = 'facturacion'
@@ -16,4 +16,5 @@ urlpatterns = [
     path('sincronizar/fotos/productos/', sincronizar_fotos_productos, name="sincronizar_fotos_productos"),
     # Exportar
     path('exportar/', productos_exportar, name="productos_exportar"),
+    path('exportar/productos/stock/', generar_productos_stock_exportar, name="generar_productos_stock_exportar"),
 ]

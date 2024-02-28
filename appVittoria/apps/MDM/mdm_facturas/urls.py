@@ -5,7 +5,7 @@ from .views import (
     factura_list_rango_fecha_cliente, factura_list_rango_fecha_negocio, factura_list_rango_fecha_cliente_grafica,
     factura_list_rango_fecha_negocio_grafica, factura_list_latest, factura_list_todos_rango_fecha_cliente_grafica,
     factura_list_todos_rango_fecha_negocio_grafica, factura_procesar_envio,
-    factura_reporte_productos, factura_reporte_clientes
+    factura_reporte_productos, factura_reporte_clientes, factura_clientes_compradas
 )
 
 from rest_framework.authtoken.views import obtain_auth_token
@@ -37,4 +37,5 @@ urlpatterns = [
     # path('delete/<int:pk>', factura_delete, name="factura_delete"),
     # path('upload/csv/', uploadCSV_crearProspectosClientes, name="uploadCSV_crearProspectosClientes"),
     # path('upload/excel/', uploadEXCEL_crearProspectosClientes, name="uploadEXCEL_crearProspectosClientes"),
+    path('clientes/compra/<str:pk>', factura_clientes_compradas, name="factura_clientes_compradas"),
 ]
