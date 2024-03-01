@@ -80,6 +80,9 @@ INSTALLED_APPS = [
     'apps.SERVIENTREGA.servientrega',
     # apps vittoria FACTURACION
     'apps.FACTURACION.facturacion',
+    # apps vittoria FACTURACION
+    'apps.WOOCOMMERCE.mp_parametrizaciones',
+    'apps.WOOCOMMERCE.woocommerce',
     #CONFIG
     'apps.config',
     #Django external apps
@@ -149,6 +152,7 @@ DATABASE_ROUTERS = [
     'apps.config.routersDB.MDMRouter',
     'apps.config.routersDB.MDPRouter',
     'apps.config.routersDB.MDORouter',
+    'apps.config.routersDB.MPRouter',
     'apps.config.routersDB.GDORouter',
     'apps.config.routersDB.GDERouter',
     'apps.config.routersDB.USERRouter',

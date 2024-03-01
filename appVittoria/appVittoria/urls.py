@@ -59,6 +59,9 @@ urlpatterns = [
     path('servientrega/', include(('apps.SERVIENTREGA.servientrega.urls', 'servientrega'), namespace='servientrega')),
     # Modulo FACTURACION
     path('facturacion/', include(('apps.FACTURACION.facturacion.urls', 'facturacion'), namespace='facturacion')),
+    # Woocommerce
+    path('mp/param/', include(('apps.WOOCOMMERCE.mp_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizacionesMP')),
+    path('api/v3/', include(('apps.WOOCOMMERCE.woocommerce.urls', 'woocommerce'), namespace='woocommerce')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
