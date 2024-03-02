@@ -101,6 +101,11 @@ def orders_list(request):
             if 'estado' in request.data and request.data['estado'] != '':
                 filters['estado__in'] = request.data['estado']
 
+            if request.data['inicio']!='':
+                filters['created_at__gte'] = str(request.data['inicio'])
+            if request.data['fin']!='':
+                filters['created_at__lte'] = str(request.data['fin'])
+
             # Serializar los datos
             query = Pedidos.objects.filter(**filters).order_by('-created_at')
             serializer = PedidosSerializer(query[offset:limit], many=True)
