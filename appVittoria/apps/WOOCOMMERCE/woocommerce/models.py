@@ -15,7 +15,11 @@ class Pedidos(models.Model):
     json = models.JSONField(null=True)
     canal = models.CharField(max_length=255, null=True, blank=True)
 
+    entregoProducto = models.CharField(max_length=255, null=True, blank=True)
+    fechaEntrega = models.CharField(max_length=255, null=True, blank=True)
+    horaEntrega = models.CharField(max_length=255, null=True, blank=True)
+    calificacion = models.CharField(max_length=255, null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)
-
