@@ -1,11 +1,16 @@
 from django.db import models
 
+def upload_path(instance, filname):
+    return '/'.join(['MP/woocommerce/archivosGuia', str(instance.created_at) + "_" + filname])
+
+
 
 # Create your models here.
 class Pedidos(models.Model):
     estado = models.CharField(max_length=255, null=False)
     envioTotal = models.FloatField(null=True)
     total = models.FloatField(null=True)
+    subtotal = models.FloatField(null=True, blank=True)
     facturacion = models.JSONField(null=True)
     envio = models.JSONField(null=True)
     metodoPago = models.CharField(max_length=255, null=False)
@@ -19,6 +24,18 @@ class Pedidos(models.Model):
     fechaEntrega = models.CharField(max_length=255, null=True, blank=True)
     horaEntrega = models.CharField(max_length=255, null=True, blank=True)
     calificacion = models.CharField(max_length=255, null=True, blank=True)
+
+    metodoConfirmacion = models.CharField(max_length=255, null=True, blank=True)
+    codigoConfirmacion = models.CharField(max_length=255, null=True, blank=True)
+    fechaHoraConfirmacion = models.CharField(max_length=255, null=True, blank=True)
+    tipoFacturacion = models.CharField(max_length=255, null=True, blank=True)
+
+    confirmacionEnvio = models.CharField(max_length=255, null=True, blank=True)
+    canalEnvio = models.CharField(max_length=255, null=True, blank=True)
+    archivoGuia = models.FileField(blank=True, null=True, upload_to=upload_path)
+    codigoCourier = models.CharField(max_length=255, null=True, blank=True)
+    nombreCourier = models.CharField(max_length=255, null=True, blank=True)
+    correoCourier = models.CharField(max_length=255, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

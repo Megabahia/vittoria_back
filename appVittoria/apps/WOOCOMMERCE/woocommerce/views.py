@@ -3,13 +3,20 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+
+from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento
 from .serializers import (
     CreateOrderSerializer, PedidosSerializer,
 )
 from .models import (
     Pedidos
 )
-import requests
+
+# Sumar Fechas
+from datetime import datetime
+from datetime import timedelta
+
+from .utils import enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoCourier
 from ...config.config import SERVIENTREGA_USER, SERVIENTREGA_PASSWORD, SERVIENTREGA_URL, SERVIENTREGA_URL_GENERACION
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
@@ -44,27 +51,34 @@ def orders_create(request):
         try:
             logModel['dataEnviada'] = str(request.data)
 
-            data = {
-                "estado": 'Pendiente',
-                "envioTotal": request.data['shipping_total'],
-                "total": request.data['total'],
-                "facturacion": request.data['billing'],
-                "envio": request.data['shipping'],
-                "metodoPago": request.data['payment_method_title'],
-                "numeroPedido": request.data['number'],
-                "articulos": request.data['line_items'],
-                "envios": request.data['shipping_lines'],
-                "json": request.data,
-                "canal": next((objeto['value'] for objeto in request.data['meta_data'] if
-                               objeto["key"] == '_wc_order_attribution_session_entry'), None),
-            }
+            articulos = []
+
+            for articulo in request.data['line_items']:
+                articulos.append({
+                    "codigo": articulo['sku'],
+                    "articulo": articulo['name'],
+                    "valorUnitario": articulo['subtotal'],
+                    "cantidad": articulo['quantity'],
+                    "precio": articulo['total'],
+                })
+
+            for objeto in request.data['meta_data']:
+                if objeto["key"] == '_wc_order_attribution_session_entry':
+                    if 'https://megadescuento.com' in objeto['value']:
+                        data = mapeoMegaDescuento(request, articulos)
+                        break
+                    elif 'https://todomegacentro.megadescuento.com' in objeto['value']:
+                        data = mapeoTodoMegaDescuento(request, articulos)
+                        break
+
+            enviarCorreoVendedor(data)
 
             serializer = CreateOrderSerializer(data=data)
 
-            if serializer.is_valid():
-                serializer.save()
-                createLog(logModel, serializer.data, logTransaccion)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # if serializer.is_valid():
+            #     serializer.save()
+            #     createLog(logModel, serializer.data, logTransaccion)
+            #     return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -101,10 +115,10 @@ def orders_list(request):
             if 'estado' in request.data and request.data['estado'] != '':
                 filters['estado__in'] = request.data['estado']
 
-            if request.data['inicio']!='':
+            if 'inicio' in request.data and request.data['inicio']!='':
                 filters['created_at__gte'] = str(request.data['inicio'])
-            if request.data['fin']!='':
-                filters['created_at__lte'] = str(request.data['fin'])
+            if 'fin' in request.data and request.data['fin']!='':
+                filters['created_at__lte'] = datetime.strptime(request.data['fin'], "%Y-%m-%d").date() + timedelta(days=1)
 
             # Serializar los datos
             query = Pedidos.objects.filter(**filters).order_by('-created_at')
@@ -148,6 +162,9 @@ def orders_update(request, pk):
             serializer = PedidosSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
+                if serializer.data['estado'] == 'Envio':
+                    enviarCorreoCliente(serializer.data)
+                    enviarCorreoCourier(serializer.data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)
