@@ -75,10 +75,10 @@ def orders_create(request):
 
             serializer = CreateOrderSerializer(data=data)
 
-            # if serializer.is_valid():
-            #     serializer.save()
-            #     createLog(logModel, serializer.data, logTransaccion)
-            #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if serializer.is_valid():
+                serializer.save()
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:

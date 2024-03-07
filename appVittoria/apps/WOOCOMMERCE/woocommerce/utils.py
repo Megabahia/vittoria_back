@@ -3,7 +3,7 @@ from ...config.util import sendEmail
 
 
 def enviarCorreoVendedor(data):
-    usuario = Usuarios.objects.filter(username=data['facturacion']['codigoVendedor']).first()
+    usuario = Usuarios.objects.filter(username=data['facturacion']['codigoVendedor'].upper()).first()
 
     if 'Vendedor' == usuario.idRol.nombre:
         subject, from_email, to = 'Solicitud de Pedido', "08d77fe1da-d09822@inbox.mailtrap.io", usuario.email
