@@ -33,6 +33,8 @@ class Pedidos(models.Model):
     confirmacionEnvio = models.CharField(max_length=255, null=True, blank=True)
     canalEnvio = models.CharField(max_length=255, null=True, blank=True)
     archivoGuia = models.FileField(blank=True, null=True, upload_to=upload_path)
+    fotoEmpaque = models.FileField(blank=True, null=True, upload_to=upload_path)
+    videoEmpaque = models.FileField(blank=True, null=True, upload_to=upload_path)
     codigoCourier = models.CharField(max_length=255, null=True, blank=True)
     nombreCourier = models.CharField(max_length=255, null=True, blank=True)
     correoCourier = models.CharField(max_length=255, null=True, blank=True)

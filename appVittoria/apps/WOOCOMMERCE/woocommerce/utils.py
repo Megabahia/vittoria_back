@@ -5,7 +5,7 @@ from ...config.util import sendEmail
 def enviarCorreoVendedor(data):
     usuario = Usuarios.objects.filter(username=data['facturacion']['codigoVendedor'].upper()).first()
 
-    if 'Vendedor' == usuario.idRol.nombre:
+    if usuario and 'Vendedor' == usuario.idRol.nombre:
         subject, from_email, to = 'Solicitud de Pedido', "08d77fe1da-d09822@inbox.mailtrap.io", usuario.email
         txt_content = f"""
                 Registro de Pedido
@@ -163,10 +163,12 @@ def enviarCorreoVendedor(data):
 
 
 def enviarCorreoCliente(data):
-    subject, from_email, to = 'Solicitud de Pedido', "08d77fe1da-d09822@inbox.mailtrap.io", data['facturacion']['correo']
+    subject, from_email, to = 'Solicitud de Pedido', "08d77fe1da-d09822@inbox.mailtrap.io", data['facturacion'][
+        'correo']
     txt_content = f"""
             Envio de Pedido
             Hola {data['facturacion']['nombres']} {data['facturacion']['apellidos']}
+            Su pedido ha sido enviado en pocos momentos sera despachado.
             Atentamente,
             Equipo Vittoria.
     """
@@ -178,9 +180,11 @@ def enviarCorreoCliente(data):
                 Envio de Pedido
                 </h1>
                 <h2>
-                Hola {data['facturacion']['nombres']} {data['facturacion']['apellidos']}
+                Hola {data['facturacion']['nombres']} {data['facturacion']['apellidos']}.
                 </h2>
-                Su pedido ha sido enviado
+                <h2>
+                Su pedido ha sido enviado en pocos momentos sera despachado.
+                </h2>
             </div>
             <br>
             Atentamente,
@@ -212,6 +216,66 @@ def enviarCorreoCourier(data):
                 Hola {data['nombreCourier']}
                 </h2>
                 Su pedido ha sido enviado
+            </div>
+            <br>
+            Atentamente,
+            <br>
+            Equipo Vittoria.
+            <br>
+            </body>
+        </html>
+    """
+    sendEmail(subject, txt_content, from_email, to, html_content)
+
+
+def enviarCorreoClienteDespacho(data):
+    subject, from_email, to = 'Envio de despacho', "08d77fe1da-d09822@inbox.mailtrap.io", data['envio']['correo']
+    txt_content = f"""
+        Envio de Despachado
+        Hola aqui tienes el link del archivo de guia {data['archivoGuia']}
+        Atentamente,
+        Equipo Vittoria.
+    """
+    html_content = f"""
+        <html>
+            <body>
+            <div>
+                <h1>
+                Envio de despacho
+                </h1>
+                <h2>
+                Hola aqui tienes el link del archivo de guia {data['archivoGuia']}
+                </h2>
+            </div>
+            <br>
+            Atentamente,
+            <br>
+            Equipo Vittoria.
+            <br>
+            </body>
+        </html>
+    """
+    sendEmail(subject, txt_content, from_email, to, html_content)
+
+
+def enviarCorreoCourierDespacho(data):
+    subject, from_email, to = 'Envio de despacho', "08d77fe1da-d09822@inbox.mailtrap.io", data['correoCourier']
+    txt_content = f"""
+        Envio de despacho
+        Hola aqui tienes el link del archivo de guia {data['archivoGuia']}
+        Atentamente,
+        Equipo Vittoria.
+    """
+    html_content = f"""
+        <html>
+            <body>
+            <div>
+                <h1>
+                Envio de despacho
+                </h1>
+                <h2>
+                Hola aqui tienes el link del archivo de guia {data['archivoGuia']}
+                </h2>
             </div>
             <br>
             Atentamente,

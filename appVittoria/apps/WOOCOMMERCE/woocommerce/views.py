@@ -4,7 +4,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 
-from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento
+from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDescuentoSinEnvio, \
+    mapeoTodoMegaDescuentoSinEnvio
 from .serializers import (
     CreateOrderSerializer, PedidosSerializer,
 )
@@ -16,7 +17,8 @@ from .models import (
 from datetime import datetime
 from datetime import timedelta
 
-from .utils import enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoCourier
+from .utils import enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoCourier, enviarCorreoClienteDespacho, \
+    enviarCorreoCourierDespacho
 from ...config.config import SERVIENTREGA_USER, SERVIENTREGA_PASSWORD, SERVIENTREGA_URL, SERVIENTREGA_URL_GENERACION
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
@@ -65,18 +67,27 @@ def orders_create(request):
             for objeto in request.data['meta_data']:
                 if objeto["key"] == '_wc_order_attribution_session_entry':
                     if 'https://megadescuento.com' in objeto['value']:
-                        data = mapeoMegaDescuento(request, articulos)
+                        validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
+                                                  objeto["key"] == '_shipping_wooccm13'), None)
+                        if '@' in validarDatosEnvio:
+                            data = mapeoMegaDescuento(request, articulos)
+                        else:
+                            data = mapeoMegaDescuentoSinEnvio(request, articulos)
                         break
                     elif 'https://todomegacentro.megadescuento.com' in objeto['value']:
-                        data = mapeoTodoMegaDescuento(request, articulos)
+                        validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
+                                                  objeto["key"] == '_shipping_wooccm13'), None)
+                        if '@' in validarDatosEnvio:
+                            data = mapeoTodoMegaDescuento(request, articulos)
+                        else:
+                            data = mapeoTodoMegaDescuentoSinEnvio(request, articulos)
                         break
-
-            enviarCorreoVendedor(data)
 
             serializer = CreateOrderSerializer(data=data)
 
             if serializer.is_valid():
                 serializer.save()
+                enviarCorreoVendedor(data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
@@ -115,10 +126,14 @@ def orders_list(request):
             if 'estado' in request.data and request.data['estado'] != '':
                 filters['estado__in'] = request.data['estado']
 
-            if 'inicio' in request.data and request.data['inicio']!='':
+            if 'inicio' in request.data and request.data['inicio'] != '':
                 filters['created_at__gte'] = str(request.data['inicio'])
-            if 'fin' in request.data and request.data['fin']!='':
-                filters['created_at__lte'] = datetime.strptime(request.data['fin'], "%Y-%m-%d").date() + timedelta(days=1)
+            if 'fin' in request.data and request.data['fin'] != '':
+                filters['created_at__lte'] = datetime.strptime(request.data['fin'], "%Y-%m-%d").date() + timedelta(
+                    days=1)
+
+            if 'codigoVendedor' in request.data and request.data['codigoVendedor'] != '':
+                filters['facturacion__contains'] = {"codigoVendedor": request.data['codigoVendedor'].upper()}
 
             # Serializar los datos
             query = Pedidos.objects.filter(**filters).order_by('-created_at')
@@ -162,9 +177,11 @@ def orders_update(request, pk):
             serializer = PedidosSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                if serializer.data['estado'] == 'Envio':
+                if serializer.data['estado'] == 'Empacado':
                     enviarCorreoCliente(serializer.data)
-                    enviarCorreoCourier(serializer.data)
+                if serializer.data['estado'] == 'Despachado':
+                    enviarCorreoClienteDespacho(serializer.data)
+                    enviarCorreoCourierDespacho(serializer.data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)
