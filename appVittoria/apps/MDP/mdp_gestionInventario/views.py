@@ -4,6 +4,9 @@ from ...config.config import aws_s3_instancia
 from .models import (
     Productos, ProductosImagenes
 )
+from ..mdp_productos.models import (
+    Productos as ProductosMDP
+)
 from .serializers import (
     ProductosSerializer, ArchivosFacturasSerializer, ProveedoresSerializer, ProductosResource, ProductosStockResource
 )

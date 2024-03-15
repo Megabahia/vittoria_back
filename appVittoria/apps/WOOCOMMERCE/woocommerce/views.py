@@ -17,9 +17,12 @@ from .models import (
 from datetime import datetime
 from datetime import timedelta
 
-from .utils import enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoCourier, enviarCorreoClienteDespacho, \
-    enviarCorreoCourierDespacho
-from ...config.config import SERVIENTREGA_USER, SERVIENTREGA_PASSWORD, SERVIENTREGA_URL, SERVIENTREGA_URL_GENERACION
+from .utils import (
+    enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoClienteDespacho, enviarCorreoCourierDespacho,
+    enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado
+)
+from ...ADM.vittoria_usuarios.models import Usuarios
+
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
 
@@ -59,29 +62,31 @@ def orders_create(request):
                 articulos.append({
                     "codigo": articulo['sku'],
                     "articulo": articulo['name'],
-                    "valorUnitario": articulo['subtotal'],
+                    "valorUnitario": articulo['price'],
                     "cantidad": articulo['quantity'],
                     "precio": articulo['total'],
                 })
 
-            for objeto in request.data['meta_data']:
-                if objeto["key"] == '_wc_order_attribution_session_entry':
-                    if 'https://megadescuento.com' in objeto['value']:
-                        validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
-                                                  objeto["key"] == '_shipping_wooccm13'), None)
-                        if '@' in validarDatosEnvio:
-                            data = mapeoMegaDescuento(request, articulos)
-                        else:
-                            data = mapeoMegaDescuentoSinEnvio(request, articulos)
-                        break
-                    elif 'https://todomegacentro.megadescuento.com' in objeto['value']:
-                        validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
-                                                  objeto["key"] == '_shipping_wooccm13'), None)
-                        if '@' in validarDatosEnvio:
-                            data = mapeoTodoMegaDescuento(request, articulos)
-                        else:
-                            data = mapeoTodoMegaDescuentoSinEnvio(request, articulos)
-                        break
+            canal = request.data['_links']['collection'][0]['href']
+            codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
+                                    objeto["key"] == '_billing_wooccm17'), None)
+            nombreVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
+                                    objeto["key"] == '_billing_wooccm18'), None)
+
+            if 'https://megadescuento.com' in canal:
+                validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
+                                          objeto["key"] == '_shipping_wooccm13'), None)
+                if '@' in validarDatosEnvio:
+                    data = mapeoMegaDescuento(request, articulos)
+                else:
+                    data = mapeoMegaDescuentoSinEnvio(request, articulos)
+            elif 'https://todomegacentro.megadescuento.com' in canal and codigoVendedor != '' and nombreVendedor != '':
+                validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
+                                          objeto["key"] == '_shipping_wooccm13'), None)
+                if '@' in validarDatosEnvio:
+                    data = mapeoTodoMegaDescuento(request, articulos)
+                else:
+                    data = mapeoTodoMegaDescuentoSinEnvio(request, articulos)
 
             serializer = CreateOrderSerializer(data=data)
 
@@ -133,7 +138,15 @@ def orders_list(request):
                     days=1)
 
             if 'codigoVendedor' in request.data and request.data['codigoVendedor'] != '':
-                filters['facturacion__contains'] = {"codigoVendedor": request.data['codigoVendedor'].upper()}
+                filters['codigoVendedor'] = request.data['codigoVendedor'].upper()
+
+            if 'compania' in request.data and request.data['compania'] != '':
+                vendedores = list(
+                    Usuarios.objects.filter(compania=request.data['compania']).values_list('username', flat=True))
+                filters['codigoVendedor__in'] = vendedores
+
+            if 'canalEnvio' in request.data and request.data['canalEnvio'] != '':
+                filters['canalEnvio'] = request.data['canalEnvio'].upper()
 
             # Serializar los datos
             query = Pedidos.objects.filter(**filters).order_by('-created_at')
@@ -182,6 +195,10 @@ def orders_update(request, pk):
                 if serializer.data['estado'] == 'Despachado':
                     enviarCorreoClienteDespacho(serializer.data)
                     enviarCorreoCourierDespacho(serializer.data)
+                    enviarCorreoVendedorDespacho(serializer.data)
+                if serializer.data['estado'] == 'Rechazado':
+                    enviarCorreoClienteRechazado(serializer.data)
+                    enviarCorreoVendedorRechazado(serializer.data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)

@@ -27,11 +27,12 @@ provincias = {
 
 
 def mapeoTodoMegaDescuento(request, articulos):
+    total = request.data['total']
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
-        "total": request.data['total'],
-        "subtotal": request.data['total'],
+        "total": total,
+        "subtotal": total,
         "facturacion": {
             "nombres": request.data['billing']['first_name'],
             "apellidos": request.data['billing']['last_name'],
@@ -91,16 +92,19 @@ def mapeoTodoMegaDescuento(request, articulos):
         "json": request.data,
         "canal": next((objeto['value'] for objeto in request.data['meta_data'] if
                        objeto["key"] == '_wc_order_attribution_session_entry'), None),
-        "created_at": request.data['date_created']
+        "created_at": request.data['date_created'],
+        "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                objeto["key"] == '_billing_wooccm17'), None),
     }
 
 
 def mapeoTodoMegaDescuentoSinEnvio(request, articulos):
+    total = request.data['total']
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
-        "total": request.data['total'],
-        "subtotal": request.data['total'],
+        "total": total,
+        "subtotal": total,
         "facturacion": {
             "nombres": request.data['billing']['first_name'],
             "apellidos": request.data['billing']['last_name'],
@@ -158,16 +162,19 @@ def mapeoTodoMegaDescuentoSinEnvio(request, articulos):
         "json": request.data,
         "canal": next((objeto['value'] for objeto in request.data['meta_data'] if
                        objeto["key"] == '_wc_order_attribution_session_entry'), None),
-        "created_at": request.data['date_created']
+        "created_at": request.data['date_created'],
+        "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                objeto["key"] == '_billing_wooccm17'), None),
     }
 
 
 def mapeoMegaDescuento(request, articulos):
+    total = request.data['total']
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
-        "total": request.data['total'],
-        "subtotal": request.data['total'],
+        "total": total,
+        "subtotal": total,
         "facturacion": {
             "nombres": request.data['billing']['first_name'],
             "apellidos": request.data['billing']['last_name'],
@@ -223,16 +230,19 @@ def mapeoMegaDescuento(request, articulos):
         "json": request.data,
         "canal": next((objeto['value'] for objeto in request.data['meta_data'] if
                        objeto["key"] == '_wc_order_attribution_session_entry'), None),
-        "created_at": request.data['date_created']
+        "created_at": request.data['date_created'],
+        "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                objeto["key"] == '_billing_wooccm17'), None),
     }
 
 
 def mapeoMegaDescuentoSinEnvio(request, articulos):
+    total = request.data['total']
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
-        "total": request.data['total'],
-        "subtotal": request.data['total'],
+        "total": total,
+        "subtotal": total,
         "facturacion": {
             "nombres": request.data['billing']['first_name'],
             "apellidos": request.data['billing']['last_name'],
@@ -286,5 +296,7 @@ def mapeoMegaDescuentoSinEnvio(request, articulos):
         "json": request.data,
         "canal": next((objeto['value'] for objeto in request.data['meta_data'] if
                        objeto["key"] == '_wc_order_attribution_session_entry'), None),
-        "created_at": request.data['date_created']
+        "created_at": request.data['date_created'],
+        "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                objeto["key"] == '_billing_wooccm17'), None),
     }

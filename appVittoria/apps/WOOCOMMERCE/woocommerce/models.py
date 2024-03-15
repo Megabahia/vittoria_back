@@ -19,6 +19,9 @@ class Pedidos(models.Model):
     envios = models.JSONField(null=True)
     json = models.JSONField(null=True)
     canal = models.CharField(max_length=255, null=True, blank=True)
+    codigoVendedor = models.CharField(max_length=255, null=True, blank=True)
+    urlMetodoPago = models.CharField(max_length=255, null=True, blank=True)
+    motivo = models.CharField(max_length=255, null=True, blank=True)
 
     entregoProducto = models.CharField(max_length=255, null=True, blank=True)
     fechaEntrega = models.CharField(max_length=255, null=True, blank=True)
@@ -38,6 +41,8 @@ class Pedidos(models.Model):
     codigoCourier = models.CharField(max_length=255, null=True, blank=True)
     nombreCourier = models.CharField(max_length=255, null=True, blank=True)
     correoCourier = models.CharField(max_length=255, null=True, blank=True)
+    evidenciaFotoEmpaque = models.FileField(blank=True, null=True, upload_to=upload_path)
+    evidenciaVideoEmpaque = models.FileField(blank=True, null=True, upload_to=upload_path)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
