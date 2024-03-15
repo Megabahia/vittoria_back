@@ -134,7 +134,7 @@ def insertarDato_Factura(dato):
         timezone_now = timezone.localtime(timezone.now())
         if dato[1] == None and dato[6] == None or dato[1] == 'None' and dato[6] == 'None':
             return 'Dato insertado correctamente'
-        facturaEncabezadoQuery = Productos.objects.filter(codigoBarras=dato[1], proveedor=dato[6]).first()
+        facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=dato[1]).first()
         if facturaEncabezadoQuery is None:
             facturaEncabezado = {}
             facturaEncabezado['codigoBarras'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
@@ -142,11 +142,14 @@ def insertarDato_Factura(dato):
             fotoFrente = aws_s3_instancia.get_foto_frente_url(facturaEncabezado['codigoBarras'])
             fotoBonita = aws_s3_instancia.get_foto_bonita_url(facturaEncabezado['codigoBarras'])
             fotoOriginal = aws_s3_instancia.get_foto_original_url(facturaEncabezado['codigoBarras'])
-            facturaEncabezado['nombreProducto'] = dato[3].replace('"', "") if dato[3] != "NULL" else None
-            facturaEncabezado['proveedor'] = dato[6].replace('"', "") if dato[6] != "NULL" else None
-            facturaEncabezado['precioAdquisicion'] = dato[7].replace('"', "") if dato[7] != "NULL" else None
+            facturaEncabezado['nombre'] = dato[3].replace('"', "") if dato[3] != "NULL" else None
+            facturaEncabezado['descripcion'] = dato[5].replace('"', "") if dato[5] != "NULL" else None
+            facturaEncabezado['precioVentaA'] = dato[7].replace('"', "") if dato[7] != "NULL" else None
+            facturaEncabezado['estado'] = 'Activo'
+            facturaEncabezado['stock'] = 0
             facturaEncabezado['created_at'] = str(timezone_now)
-            producto = Productos.objects.create(**facturaEncabezado)
+            facturaEncabezado['updated_at'] = str(timezone_now)
+            producto = ProductosMDP.objects.create(**facturaEncabezado)
             if fotoOriginal:
                 ProductosImagenes.objects.create(**{
                     "producto": producto.id,
@@ -378,10 +381,9 @@ def insertarDato_StockProducto(dato):
         timezone_now = timezone.localtime(timezone.now())
         if dato[1] == None and dato[6] == None or dato[1] == 'None' and dato[6] == 'None':
             return 'Dato insertado correctamente'
-        facturaEncabezadoQuery = Productos.objects.filter(codigoBarras=dato[1], proveedor=dato[6]).first()
+        facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=dato[1]).first()
         if facturaEncabezadoQuery:
-            facturaEncabezadoQuery.fechaAdquisicion = str(dato[1].replace('"', "")[:10]) if dato[1] != "NULL" else None
-            facturaEncabezadoQuery.cantidad = facturaEncabezadoQuery.cantidad + int(
+            facturaEncabezadoQuery.stock = facturaEncabezadoQuery.stock + int(
                 dato[4].replace('"', "") if dato[4] != "NULL" else 0)
             facturaEncabezadoQuery.updated_at = str(timezone_now)
             facturaEncabezadoQuery.save()
