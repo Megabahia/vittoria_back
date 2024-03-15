@@ -6,7 +6,7 @@ def enviarCorreoVendedor(data):
     usuario = Usuarios.objects.filter(username=data['facturacion']['codigoVendedor'].upper()).first()
 
     if usuario and 'Vendedor' == usuario.idRol.nombre:
-        subject, from_email, to = 'Solicitud de Pedido', "08d77fe1da-d09822@inbox.mailtrap.io", usuario.email
+        subject, from_email, to = f"Su pedido {data['numeroPedido']} ha sido generado", "08d77fe1da-d09822@inbox.mailtrap.io", usuario.email
         txt_content = f"""
                 Registro de Pedido
                 Se ha generado un pedido a su nombre {usuario.nombres} {usuario.apellidos}
