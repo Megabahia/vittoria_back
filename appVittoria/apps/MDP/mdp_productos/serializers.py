@@ -146,6 +146,7 @@ class ProductosActualizarSerializer(serializers.ModelSerializer):
                 #     data['updated_at'] = str(now)
                 #     ProductoImagen.objects.filter(id=detalle.id).update(**data)
         else:
+            instance.parametrizacion = validated_data['parametrizacion']
             # Actualiza el producto
             instance.__dict__.update(validated_data)
             instance.save()
