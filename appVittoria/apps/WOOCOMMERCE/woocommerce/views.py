@@ -12,6 +12,10 @@ from .serializers import (
 from .models import (
     Pedidos
 )
+from ...MDM.mdm_clientes.models import Clientes
+from ...MDM.mdm_clientes.serializers import ClientesUpdateSerializer
+
+from ...MDP.mdp_productos.models import Productos
 
 # Sumar Fechas
 from datetime import datetime
@@ -192,10 +196,34 @@ def orders_update(request, pk):
                 serializer.save()
                 if serializer.data['estado'] == 'Empacado':
                     enviarCorreoCliente(serializer.data)
+                    for articulo in serializer.data['articulos']:
+                        producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
+                        if producto:
+                            producto.stock = producto.stock - int(articulo['cantidad'])
+                            producto.save()
                 if serializer.data['estado'] == 'Despachado':
                     enviarCorreoClienteDespacho(serializer.data)
                     enviarCorreoCourierDespacho(serializer.data)
                     enviarCorreoVendedorDespacho(serializer.data)
+                    # Se crea el usuario cuando el pedido es despachado
+                    cliente = {
+                        'nombreCompleto': serializer.data['facturacion']['nombres'] + serializer.data['facturacion']['apellidos'],
+                        'nombres': serializer.data['facturacion']['nombres'],
+                        'apellidos': serializer.data['facturacion']['apellidos'],
+                        'cedula': serializer.data['facturacion']['identificacion'],
+                        'tipoIdentificacion': 'Cédula',
+                        'correo': serializer.data['facturacion']['correo'],
+                        'paisNacimiento': serializer.data['facturacion']['pais'],
+                        'provinciaNacimiento': serializer.data['facturacion']['provincia'],
+                        'ciudadNacimiento': serializer.data['facturacion']['ciudad'],
+                    }
+                    clienteExiste = Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion']).first()
+                    if clienteExiste is None:
+                        Clientes.objects.create(**cliente)
+                    else:
+                        clienteSerializer = ClientesUpdateSerializer(clienteExiste, data=cliente, partial=True)
+                        if clienteSerializer.is_valid():
+                            clienteSerializer.save()
                 if serializer.data['estado'] == 'Rechazado':
                     enviarCorreoClienteRechazado(serializer.data)
                     enviarCorreoVendedorRechazado(serializer.data)

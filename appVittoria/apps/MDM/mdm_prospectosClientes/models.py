@@ -43,6 +43,9 @@ class ProspectosClientes(models.Model):
     iva = models.FloatField(null=True)
     total = models.FloatField(null=True)
     courier = models.CharField(max_length=255, null=True, blank=True)
+    articulos = models.JSONField(null=True)
+    facturacion = models.JSONField(null=True)
+    envio = models.JSONField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

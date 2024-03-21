@@ -50,6 +50,7 @@ class Productos(models.Model):
     lugarVentaProvincia = models.CharField(max_length=255, null=True, blank=True)
     lugarVentaCiudad = models.CharField(max_length=255, null=True, blank=True)
     courier = models.CharField(max_length=255, null=True, blank=True)
+    estadoLanding = models.BooleanField(default=0, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

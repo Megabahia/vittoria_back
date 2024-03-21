@@ -1,10 +1,13 @@
+from .constantes import mapeoProspectoCliente
 from .models import ProspectosClientes
 from .serializers import (
     ProspectosClientesSerializer,   ProspectosClientesListarSerializer, ProspectosClienteImagenSerializer,
     ProspectosClientesSearchSerializer, ProspectosClientesResource, ActualizarProspectosClientesSerializer
 )
+from .utils import enviarCorreoCliente
 from ..mdm_clientes.serializers import ClientesUpdateSerializer
 from ..mdm_clientes.models import Clientes
+from ...WOOCOMMERCE.woocommerce.models import Pedidos
 from ...config import config
 # TWILIO
 from twilio.rest import Client
@@ -193,15 +196,7 @@ def prospecto_cliente_create(request):
             serializer = ProspectosClientesSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                account_sid = str(config.TWILIO_ACCOUNT_SID)
-                auth_token = str(config.TWILIO_AUTH_TOKEN)
-                client = Client(account_sid, auth_token)
-                message = client.messages.create(
-                    from_='whatsapp:+14155238886',
-                    body='Se genero correctamente su solicitud, en unos momentos unos de nuestros asesores se contactara',
-                    to='whatsapp:+593' + serializer.data['whatsapp'][1:]
-                )
-                print(message.sid)
+                enviarCorreoCliente(serializer.data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
@@ -246,24 +241,17 @@ def prospecto_cliente_update(request, pk):
             if serializer.is_valid():
                 serializer.save()
                 if request.data['confirmacionProspecto'] == 'Confirmado':
-                    cliente = {
-                        'nombreCompleto': serializer.data['nombres'] + serializer.data['apellidos'],
-                        'nombres': serializer.data['nombres'],
-                        'apellidos': serializer.data['apellidos'],
-                        'cedula': serializer.data['identificacion'],
-                        'tipoIdentificacion': serializer.data['tipoIdentificacion'],
-                        'correo': serializer.data['correo1'],
-                        'paisNacimiento': serializer.data['pais'],
-                        'provinciaNacimiento': serializer.data['provincia'],
-                        'ciudadNacimiento': serializer.data['ciudad'],
-                    }
-                    clienteExiste = Clientes.objects.filter(cedula=serializer.data['identificacion']).first()
-                    if clienteExiste is None:
-                        Clientes.objects.create(**cliente)
-                    else:
-                        clienteSerializer = ClientesUpdateSerializer(clienteExiste, data=cliente, partial=True)
-                        if clienteSerializer.is_valid():
-                            clienteSerializer.save()
+                    articulos = []
+                    for articulo in serializer.data['detalles']:
+                        articulos.append({
+                            "codigo": articulo['codigo'],
+                            "articulo": articulo['articulo'],
+                            "valorUnitario": articulo['valorUnitario'],
+                            "cantidad": articulo['cantidad'],
+                            "precio": articulo['total'],
+                        })
+                    data = mapeoProspectoCliente(serializer.data, articulos)
+                    Pedidos.objects.create(**data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)

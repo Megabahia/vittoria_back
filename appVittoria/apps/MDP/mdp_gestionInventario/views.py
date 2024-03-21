@@ -149,6 +149,9 @@ def insertarDato_Factura(dato):
             facturaEncabezado['stock'] = 0
             facturaEncabezado['created_at'] = str(timezone_now)
             facturaEncabezado['updated_at'] = str(timezone_now)
+            facturaEncabezado['precioOferta'] = dato[7].replace('"', "") if dato[7] != "NULL" else None
+            facturaEncabezado['fechaElaboracion'] = str(timezone_now)[:10]
+            facturaEncabezado['fechaCaducidad'] = str(timezone_now)[:10]
             producto = ProductosMDP.objects.create(**facturaEncabezado)
             if fotoOriginal:
                 ProductosImagenes.objects.create(**{

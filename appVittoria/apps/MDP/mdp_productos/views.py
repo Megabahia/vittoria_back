@@ -20,6 +20,8 @@ from django.utils import timezone
 from datetime import datetime
 # excel
 import openpyxl
+from openpyxl import Workbook
+from django.http import HttpResponse
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
 
@@ -60,6 +62,12 @@ def productos_list(request):
             limit = offset + page_size
             # Filtros
             filters = {"state": "1"}
+
+            if 'nombre' in request.data and request.data['nombre'] != '':
+                filters['nombre__icontains'] = request.data['nombre']
+
+            if 'codigoBarras' in request.data and request.data['codigoBarras'] != '':
+                filters['codigoBarras__icontains'] = request.data['codigoBarras']
 
             # Serializar los datos
             query = Productos.objects.filter(**filters).order_by('-created_at')
@@ -963,9 +971,10 @@ def productos_findOne_free(request, pk):
                 'pk': pk,
                 'state': 1
             }
-            print('filters', request)
             if 'estado' in request.data and request.data['estado'] != '':
                 filters['estado'] = request.data['estado']
+            if 'estadoLanding' in request.data and request.data['estadoLanding'] != '':
+                filters['estadoLanding'] = request.data['estadoLanding']
             query = Productos.objects.get(**filters)
         except Productos.DoesNotExist:
             err = {"error": "No existe"}
@@ -1011,3 +1020,54 @@ def productos_findOne_codigo_producto(request, pk):
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def productos_exportar(request):
+    """
+    Este metodo realiza una exportacion de todos los productos en excel de la tabla productos, de la base de datos mdp
+    @rtype: DEvuelve un archivo excel
+    """
+    # Obtener los datos que deseas incluir en el archivo Excel
+    filters = {"state": "1"}
+
+    nombre = request.GET.get('nombre', None)
+    codigoBarras = request.GET.get('codigoBarras', None)
+    print(nombre, codigoBarras)
+    if nombre is not None:
+        filters['nombre__icontains'] = nombre
+
+    if codigoBarras is not None:
+        filters['codigoBarras__icontains'] = codigoBarras
+
+    # Serializar los datos
+    query = Productos.objects.filter(**filters).order_by('-created_at')
+
+    # Crear un libro de trabajo de Excel
+    wb = Workbook()
+    ws = wb.active
+
+    # Definir los encabezados
+    ws.append(['CÓDIGO DE BARRAS', 'NOMBRE', 'CATEGORÍA', 'SUBCATEGORÍA', 'STOCK', 'ESTADO'])
+
+    # Agregar datos de productos a las filas siguientes
+    for producto in query:
+        productoSerializer = ProductosListSerializer(producto).data
+
+        # Verificar si los campos están vacíos antes de acceder a ellos
+        codigo_barras = productoSerializer.get('codigoBarras', '')
+        nombre = productoSerializer.get('nombre', '')
+        categoria = productoSerializer.get('categoria', '')
+        subcategoria = productoSerializer.get('subCategoria', '')
+        stock = productoSerializer.get('stock', '')
+        estado = productoSerializer.get('estado', '')
+
+        # Agregar datos a la hoja de trabajo
+        ws.append([codigo_barras, nombre, categoria, subcategoria, stock, estado])
+
+    # Crear una respuesta HTTP con el contenido del libro de trabajo
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="reporte_productos.xlsx"'
+    wb.save(response)
+    return response

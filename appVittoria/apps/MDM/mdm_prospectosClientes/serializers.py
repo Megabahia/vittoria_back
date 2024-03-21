@@ -30,7 +30,6 @@ class ProspectosClientesSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         detalles_data = validated_data.pop('detalles')
-        print('detalles', detalles_data)
         prospectoClienteEncabezado = ProspectosClientes.objects.create(**validated_data)
         for detalle_data in detalles_data:
             ProspectosClientesDetalles.objects.create(prospectoClienteEncabezado=prospectoClienteEncabezado, **detalle_data)

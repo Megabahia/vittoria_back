@@ -287,57 +287,6 @@ def cliente_update(request, pk):
                 if len(productosSinStock) > 0:
                     return Response(productosSinStock, status=status.HTTP_404_NOT_FOUND)
 
-                iva = Parametrizaciones.objects.filter(tipo='TIPO_IVA').first()
-                facturaEncabezadoJson = {
-                    'cliente': query,
-                    'fecha': serializer.data['updated_at'][:10],
-                    'tipoIdentificacion': prospectoCliente.tipoIdentificacion,
-                    'identificacion': prospectoCliente.identificacion,
-                    'direccion': prospectoCliente.callePrincipal,
-                    'telefono': serializer.data['telefono'],
-                    'correo': serializer.data['correo'],
-                    'nombreVendedor': prospectoCliente.nombreVendedor,
-                    'subTotal': prospectoCliente.subTotal,
-                    'descuento': 0,
-                    'iva': prospectoCliente.iva,
-                    'total': prospectoCliente.total,
-                    'canal': prospectoCliente.canal,
-                    'numeroProductosComprados': prospectoCliente.cantidad,
-                    'state': 1,
-                    'pais': prospectoCliente.pais,
-                    'provincia': prospectoCliente.provincia,
-                    'ciudad': prospectoCliente.ciudad,
-                    'callePrincipal': prospectoCliente.callePrincipal,
-                    'calleSecundaria': prospectoCliente.calleSecundaria,
-                    'numeroCasa': prospectoCliente.numeroCasa,
-                    'referencia': prospectoCliente.referencia,
-                    'courier': prospectoCliente.courier,
-                }
-                facturaEncabezado = FacturasEncabezados.objects.create(**facturaEncabezadoJson)
-                # producto = Productos.objects.filter(codigoBarras=prospectoCliente.codigoProducto).first()
-                # facturaDetalleJson = {
-                #     'facturaEncabezado': facturaEncabezado,
-                #     'articulo': prospectoCliente.nombreProducto,
-                #     'valorUnitario': producto.precioVentaA,
-                #     'cantidad': prospectoCliente.cantidad,
-                #     'precio': producto.precioVentaA,
-                #     'codigo': producto.codigoBarras,
-                #     'informacionAdicional': '',
-                #     'descuento': 0,
-                #     'impuesto': 0,
-                #     'valorDescuento': 0,
-                #     'total': producto.precioVentaA * prospectoCliente.cantidad,
-                #     'state': 1
-                # }
-                for item in detalles:
-                    item.pop('prospectoClienteEncabezado')
-                    item.pop('id')
-                    item['facturaEncabezado'] = facturaEncabezado
-                    FacturasDetalles.objects.create(**item)
-                    productoComprado = Productos.objects.filter(codigoBarras=item['codigo'], state=1).first()
-                    productoComprado.stock = int(productoComprado.stock) - int(item['cantidad'])
-                    productoComprado.save()
-
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)
