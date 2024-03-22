@@ -60,12 +60,16 @@ def usuario_list(request):
             limit = offset + page_size
             # Filtros
             filters = {}
-            if 'idRol' in request.data:
-                if request.data['idRol'] != 0:
-                    filters['idRol'] = int(request.data['idRol'])
-            if 'estado' in request.data:
-                if request.data['estado'] != '':
-                    filters['estado'] = str(request.data['estado'])
+            if 'idRol' in request.data and request.data['idRol'] != 0:
+                filters['idRol'] = request.data['idRol']
+            if 'pais' in request.data and '' != request.data['pais']:
+                filters['pais'] = request.data['pais']
+            if 'provincia' in request.data and '' != request.data['provincia']:
+                filters['provincia'] = request.data['provincia']
+            if 'ciudad' in request.data and '' != request.data['ciudad']:
+                filters['ciudad'] = request.data['ciudad']
+            if 'estado' in request.data and request.data['estado'] != '':
+                filters['estado'] = str(request.data['estado'])
             # toma de datos
             usuario = Usuarios.objects.filter(**filters).order_by('-created_at')
             serializer = UsuarioRolSerializer(usuario[offset:limit], many=True)

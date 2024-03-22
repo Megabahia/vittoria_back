@@ -510,6 +510,28 @@ def enviarCorreoCourierDespacho(data):
                                                 <p style="margin:0 0 16px">Ingresa al siguiente link e ingresa las evidencias de la entrega</p>
                                                 https://vittoria-test.netlify.app/#/gde/gestionEntrega/woocommerce/enviado
                                             </div>
+                                            <table id="m_-2286063398718872391addresses" cellspacing="0" cellpadding="0" border="0" width="100%" style="width:100%;vertical-align:top;margin-bottom:40px;padding:0">
+                                                <tbody>
+                                                <tr>
+                                                    <td valign="top" width="50%" align="left" style="text-align:left;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif;padding:0">
+                                                        <h2 style="display:block;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:18px;font-weight:bold;line-height:130%;margin:0px 0px 18px;text-align:left;color:rgb(35,85,225)">
+                                                            Datos de envío</h2>
+                                                        <address style="padding:12px;border:1px solid rgb(229,229,229);color:rgb(99,99,99)">
+                                                            {data['envio']['nombres']} {data['envio']['apellidos']}<br>
+                                                            {data['envio']['correo']}<br>
+                                                            {data['envio']['identificacion']}<br>
+                                                            {data['envio']['telefono']}<br>
+                                                            {data['envio']['pais']}<br>
+                                                            {data['envio']['provincia']}<br>
+                                                            {data['envio']['ciudad']}<br>
+                                                            {data['envio']['callePrincipal']}<br>
+                                                            {data['envio']['numero']}<br>
+                                                            {data['envio']['calleSecundaria']}<br>
+                                                            {data['envio']['referencia']} </address>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
                                         </td>
                                     </tr>
                                     </tbody>
