@@ -21,6 +21,8 @@ class ProspectosClientes(models.Model):
     provincia = models.CharField(max_length=255, null=True, blank=True)
     ciudad = models.CharField(max_length=150, null=True, blank=True)
     canal = models.CharField(max_length=150, null=True, blank=True)
+    canalOrigen = models.CharField(max_length=255, null=True, blank=True)
+    metodoPago = models.CharField(max_length=255, null=True, blank=True)
     codigoProducto = models.CharField(max_length=150, null=True, blank=True)
     nombreProducto = models.TextField(null=True, blank=True)
     precio = models.FloatField(null=True, blank=True)
