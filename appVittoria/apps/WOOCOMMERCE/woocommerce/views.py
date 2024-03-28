@@ -271,3 +271,46 @@ def orders_listOne(request, pk):
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def orders_devolucion(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'devolucion/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'ESCRIBIR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            query = Pedidos.objects.get(pk=pk, state=1)
+        except Pedidos.DoesNotExist:
+            errorNoExiste = {'error': 'No existe'}
+            createLog(logModel, errorNoExiste, logExcepcion)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'POST':
+            if 'created_at' in request.data:
+                request.data.pop('created_at')
+            serializer = PedidosSerializer(query, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                for articulo in serializer.data['articulos']:
+                    producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
+                    if producto:
+                        producto.stock = producto.stock + int(articulo['cantidad'])
+                        producto.save()
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
