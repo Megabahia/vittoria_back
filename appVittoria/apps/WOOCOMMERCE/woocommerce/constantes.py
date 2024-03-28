@@ -90,8 +90,7 @@ def mapeoTodoMegaDescuento(request, articulos):
         "articulos": articulos,
         "envios": request.data['shipping_lines'],
         "json": request.data,
-        "canal": next((objeto['value'] for objeto in request.data['meta_data'] if
-                       objeto["key"] == '_wc_order_attribution_session_entry'), None),
+        "canal": request.data['_links']['collection'][0]['href'],
         "created_at": request.data['date_created'],
         "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
                                 objeto["key"] == '_billing_wooccm17'), None),
@@ -160,8 +159,7 @@ def mapeoTodoMegaDescuentoSinEnvio(request, articulos):
         "articulos": articulos,
         "envios": request.data['shipping_lines'],
         "json": request.data,
-        "canal": next((objeto['value'] for objeto in request.data['meta_data'] if
-                       objeto["key"] == '_wc_order_attribution_session_entry'), None),
+        "canal": request.data['_links']['collection'][0]['href'],
         "created_at": request.data['date_created'],
         "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
                                 objeto["key"] == '_billing_wooccm17'), None),

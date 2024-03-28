@@ -44,6 +44,8 @@ class Pedidos(models.Model):
     evidenciaFotoEmpaque = models.FileField(blank=True, null=True, upload_to=upload_path)
     evidenciaVideoEmpaque = models.FileField(blank=True, null=True, upload_to=upload_path)
     archivoMetodoPago = models.FileField(blank=True, null=True, upload_to=upload_path)
+    verificarPedido = models.BooleanField(default=False)
+    numeroGuia = models.CharField(max_length=255, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

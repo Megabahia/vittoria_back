@@ -187,8 +187,11 @@ def orders_update(request, pk):
             createLog(logModel, errorNoExiste, logExcepcion)
             return Response(status=status.HTTP_404_NOT_FOUND)
         if request.method == 'POST':
+            if 'codigoConfirmacion' in request.data and '' != request.data['codigoConfirmacion']:
+                if Pedidos.objects.filter(codigoConfirmacion=request.data['codigoConfirmacion']).exclude(pk=pk).first():
+                    return Response(data='Ya existe el numero transacción', status=status.HTTP_404_NOT_FOUND)
             now = timezone.localtime(timezone.now())
-            request.data['updated_at'] = str(now)
+            # request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
             serializer = PedidosSerializer(query, data=request.data, partial=True)
@@ -217,6 +220,7 @@ def orders_update(request, pk):
                         'provinciaNacimiento': serializer.data['facturacion']['provincia'],
                         'ciudadNacimiento': serializer.data['facturacion']['ciudad'],
                     }
+
                     clienteExiste = Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion']).first()
                     if clienteExiste is None:
                         Clientes.objects.create(**cliente)
