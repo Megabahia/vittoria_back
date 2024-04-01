@@ -51,6 +51,8 @@ class Productos(models.Model):
     lugarVentaCiudad = models.CharField(max_length=255, null=True, blank=True)
     courier = models.CharField(max_length=255, null=True, blank=True)
     estadoLanding = models.BooleanField(default=0, blank=True)
+    precioLanding = models.FloatField(null=True, blank=True)
+    precioLandingOferta = models.FloatField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
