@@ -35,6 +35,7 @@ class Productos(models.Model):
     precioVentaC = models.FloatField(null=True, blank=True)
     precioVentaD = models.FloatField(null=True, blank=True)
     precioVentaE = models.FloatField(null=True, blank=True)
+    precioVentaF = models.FloatField(null=True, blank=True)
     precioVentaBultos = models.FloatField(null=True, blank=True)
     parametrizacion = models.ForeignKey(Parametrizaciones, null=True, blank=True,
                                         on_delete=models.DO_NOTHING)  # Relacion Con la categoria
