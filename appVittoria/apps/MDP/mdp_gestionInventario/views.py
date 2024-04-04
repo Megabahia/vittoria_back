@@ -152,6 +152,7 @@ def insertarDato_Factura(dato):
             facturaEncabezado['precioOferta'] = dato[7].replace('"', "") if dato[7] != "NULL" else None
             facturaEncabezado['fechaElaboracion'] = str(timezone_now)[:10]
             facturaEncabezado['fechaCaducidad'] = str(timezone_now)[:10]
+            facturaEncabezado['proveedor'] = dato[6].replace('"', "") if dato[6] != "NULL" else None
             producto = ProductosMDP.objects.create(**facturaEncabezado)
             if fotoOriginal:
                 ProductosImagenes.objects.create(**{
@@ -243,7 +244,7 @@ def proveedores_list_distinct(request):
             logModel['dataEnviada'] = str(request.data)
 
             # Serializar los datos
-            query = Productos.objects.values('proveedor').distinct()
+            query = ProductosMDP.objects.values('proveedor').distinct()
             serializer = ProveedoresSerializer(query, many=True)
             new_serializer_data = serializer.data
             # envio de datos

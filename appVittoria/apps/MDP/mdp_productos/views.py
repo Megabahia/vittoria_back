@@ -69,6 +69,9 @@ def productos_list(request):
             if 'codigoBarras' in request.data and request.data['codigoBarras'] != '':
                 filters['codigoBarras__icontains'] = request.data['codigoBarras']
 
+            if 'proveedor' in request.data and request.data['proveedor'] != '':
+                filters['proveedor'] = request.data['proveedor']
+
             # Serializar los datos
             query = Productos.objects.filter(**filters).order_by('-created_at')
             serializer = ProductosListSerializer(query[offset:limit], many=True)

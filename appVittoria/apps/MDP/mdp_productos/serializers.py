@@ -23,7 +23,7 @@ class ProductosSerializer(serializers.ModelSerializer):
 class ProductosListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Productos
-        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado']
+        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor']
 
     def to_representation(self, instance):
         data = super(ProductosListSerializer, self).to_representation(instance)
@@ -33,6 +33,11 @@ class ProductosListSerializer(serializers.ModelSerializer):
             data['categoria'] = Categorias.objects.filter(id=categoria).first().nombre
         if subCategoria:
             data['subCategoria'] = SubCategorias.objects.filter(id=subCategoria).first().nombre
+        images = ProductoImagen.objects.filter(producto=data['id'])
+        if images:
+            data['imagenes'] = ProductosImagenesSerializer(images, many=True).data
+        else:
+            data['imagenes'] = []
         return data
 
 
@@ -348,3 +353,9 @@ class ProductoSearchSerializer(serializers.ModelSerializer):
         data = super(ProductoSearchSerializer, self).to_representation(instance)
         data['imagen'] = ImagenSerializer(instance.imagenes.first()).data['imagen'] if instance.imagenes.first() else None
         return data
+
+
+class ProductosImagenesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductoImagen
+        fields = ['imagen']

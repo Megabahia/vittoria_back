@@ -54,6 +54,7 @@ class Productos(models.Model):
     estadoLanding = models.BooleanField(default=0, blank=True)
     precioLanding = models.FloatField(null=True, blank=True)
     precioLandingOferta = models.FloatField(null=True, blank=True)
+    proveedor = models.CharField(max_length=150, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
