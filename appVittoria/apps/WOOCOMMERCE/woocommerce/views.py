@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+from urllib.parse import urlparse
 
 from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDescuentoSinEnvio, \
     mapeoTodoMegaDescuentoSinEnvio
@@ -26,6 +27,7 @@ from .utils import (
     enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado
 )
 from ...ADM.vittoria_usuarios.models import Usuarios
+from ...ADM.vittoria_catalogo.models import Catalogo
 
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
@@ -59,6 +61,19 @@ def orders_create(request):
     if request.method == 'POST':
         try:
             logModel['dataEnviada'] = str(request.data)
+
+            dominio_completo = request.headers.get('X-Wc-Webhook-Source')
+            print('dominio_completo', dominio_completo)
+            # Utiliza urlparse para obtener la información de la URL
+            parsed_url = urlparse(dominio_completo)
+            # Combina el nombre de host (dominio) y el esquema (protocolo)
+            domain = parsed_url.netloc
+            print('dominio del que llega', dominio_completo)
+            dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
+            if dominio_permitidos is None:
+                error = f"Llego un dominio: {domain}"
+                createLog(logModel, error, logTransaccion)
+                return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
             articulos = []
 

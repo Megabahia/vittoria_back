@@ -222,17 +222,13 @@ def enviarCorreoCliente(data):
                                             <div id="m_-2286063398718872391body_content_inner" align="left" style="font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:14px;line-height:150%;text-align:left;color:rgb(99,99,99)">
                                                 <p style="margin:0 0 16px">Su pedido ha sido empacado.</p>
                                                 <p style="margin:0 0 16px">Aquí están las evidencias de su pedido esta empacado.</p>
-                                                <br>
                                                 <a href="{data['fotoEmpaque']}" target="_blank">Foto del empaque</a>
-                                                <br>
                                                 <p style="margin:0 0 16px">Si no puede visualizar copie y pegue el link:</p>
-                                                <br>
                                                 {data['fotoEmpaque']}
-                                                <br>
                                                 { '' if data['videoEmpaque'] is None else f'<br><a href="{data["videoEmpaque"]}" target="_blank">Video del empaque</a><br>' }
                                                 { '' if data['videoEmpaque'] is None else f'Si no puede visualizar copie y pegue el link:<br>{data["videoEmpaque"]}<br>' }
                                                 <h2 style="display:block;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:18px;font-weight:bold;line-height:130%;margin:0px 0px 18px;text-align:left;color:rgb(35,85,225)">
-                                                    [Pedido #{data['numeroPedido']}] ({data['created_at']})</h2>
+                                                    [Pedido #{data['numeroPedido']}] </h2>
                                                 <div style="margin-bottom:40px">
                                                     <table cellspacing="0" cellpadding="6" border="1" width="100%" style="border:1px solid rgb(229,229,229);vertical-align:middle;width:100%;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;color:rgb(99,99,99)">
                                                         <thead>
@@ -254,6 +250,13 @@ def enviarCorreoCliente(data):
                                                                 Métodos de pago:</th>
                                                             <td align="left" style="border:1px solid rgb(229,229,229);vertical-align:middle;padding:12px;text-align:left;color:rgb(99,99,99)">
                                                                 {data['metodoPago']}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row" colspan="2" align="left" style="border:1px solid rgb(229,229,229);vertical-align:middle;padding:12px;text-align:left;color:rgb(99,99,99)">
+                                                                Envío:</th>
+                                                            <td align="left" style="border:1px solid rgb(229,229,229);vertical-align:middle;padding:12px;text-align:left;color:rgb(99,99,99)">
+                                                                <span><span>$</span>{data['envioTotal']}</span>
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <th scope="row" colspan="2" align="left" style="border:1px solid rgb(229,229,229);vertical-align:middle;padding:12px;text-align:left;color:rgb(99,99,99)">
@@ -499,14 +502,11 @@ def enviarCorreoCourierDespacho(data):
                                     <tr>
                                         <td valign="top" style="padding:48px 48px 32px">
                                             <div id="m_-2286063398718872391body_content_inner" align="left" style="font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:14px;line-height:150%;text-align:left;color:rgb(99,99,99)">
-                                                <p style="margin:0 0 16px">Hola aqui tienes el link del archivo de guia</p>
+                                                <p style="margin:0 0 16px">Por favor señor courier: aqui tiene el link del archivo de guia</p>
                                                 <br>
                                                 <a href="{data['archivoGuia']}" target="_blank">Ver archivo</a>
-                                                <br>
                                                 <p style="margin:0 0 16px">Hola aqui tienes el link del gps</p>
-                                                <br>
                                                 {'No hay ubicacion' if data['facturacion']['gps'] is None else f'<a href="{data["facturacion"]["gps"]}" target="_blank">Ver</a>'}
-                                                <br>
                                                 <p style="margin:0 0 16px">Ingresa al siguiente link e ingresa las evidencias de la entrega</p>
                                                 https://vittoria-test.netlify.app/#/gde/gestionEntrega/woocommerce/enviado
                                             </div>
