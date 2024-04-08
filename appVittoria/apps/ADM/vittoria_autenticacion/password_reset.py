@@ -35,7 +35,7 @@ def resetPasswordNewUser(emailUsuario):
             if user.eligible_for_reset():
                 active_user_found = True
         # Si no esta el usuario activo No enviamos el email
-        if not active_user_found:
+        if not active_user_found :
             return False
         # last but not least: iterate over all users that are active and can change their password
         # and create a Reset Password Token and send a signal with the created token

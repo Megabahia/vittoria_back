@@ -31,6 +31,7 @@ logExcepcion=datosTipoLogAux['excepcion']
 class login(ObtainAuthToken):
 
     def post(self, request, *args, **kwargs):
+        print('ENTRA')
         #log
         timezone_now = timezone.localtime(timezone.now())
         logModel = {
@@ -49,7 +50,7 @@ class login(ObtainAuthToken):
                                         context={'request': request})
             if serializer.is_valid():
                 user = serializer.validated_data['user']
-                if user.state==1:
+                if user.state==1 and user.estado!='Inactivo':
                     token= Token.objects.create(user=user)
                     #ELIMINAR USUARIOS EXPIRADOS
                     deleteExpiredTokens()

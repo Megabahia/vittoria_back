@@ -255,7 +255,7 @@ def usuario_create(request):
 
     try:
         if request.method == 'POST':
-            user = Usuarios.objects.filter(email=request.data['email'], state=1).first()
+            user = Usuarios.objects.filter(email=request.data['email'], state=1,estado='Activo').first()
             if user is not None:
                 data = {'error': 'Email ya existe.'}
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
