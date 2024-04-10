@@ -70,6 +70,8 @@ def usuario_list(request):
                 filters['ciudad'] = request.data['ciudad']
             if 'estado' in request.data and request.data['estado'] != '':
                 filters['estado'] = str(request.data['estado'])
+            if 'state' in request.data and request.data['state'] != '':
+                filters['state'] = str(request.data['state'])
             # toma de datos
             usuario = Usuarios.objects.filter(**filters).order_by('-created_at')
             serializer = UsuarioRolSerializer(usuario[offset:limit], many=True)

@@ -13,6 +13,7 @@ from .serializers import (
 from .models import (
     Pedidos
 )
+from ...FACTURACION.facturacion.models import FacturasEncabezados, FacturasDetalles
 from ...MDM.mdm_clientes.models import Clientes
 from ...MDM.mdm_clientes.serializers import ClientesUpdateSerializer
 
@@ -212,6 +213,52 @@ def orders_update(request, pk):
             serializer = PedidosSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
+                if serializer.data['estado'] == 'Autorizado' and 'Previo-Pago' in serializer.data['metodoPago']:
+                    facturaCreada = FacturasEncabezados.objects.create(**{
+                        "numeroPedido": serializer.data['numeroPedido'],
+                        "estadoPedido": "En espera",
+                        "fechaPedido": serializer.data['created_at'][:10],
+                        "notaCliente": "",
+                        "nombresFacturacion": serializer.data['facturacion']['nombres'],
+                        "apellidosFacturacion": serializer.data['facturacion']['apellidos'],
+                        "empresaFacturacion": "",
+                        "direccionFacturacion": serializer.data['facturacion']['callePrincipal'],
+                        "ciudadFacturacion": serializer.data['facturacion']['ciudad'],
+                        "provinciaFacturacion": serializer.data['facturacion']['provincia'],
+                        "codigoPostalFacturacion": "",
+                        "paisFacturacion": serializer.data['facturacion']['pais'],
+                        "correoElectronicoFacturacion": serializer.data['facturacion']['correo'],
+                        "telefonoFacturacion": serializer.data['facturacion']['telefono'],
+                        "nombresEnvio": serializer.data['envio']['nombres'],
+                        "apellidosEnvio": serializer.data['envio']['apellidos'],
+                        "direccionEnvio": serializer.data['envio']['callePrincipal'],
+                        "ciudadEnvio": serializer.data['envio']['ciudad'],
+                        "provinciaEnvio": serializer.data['envio']['provincia'],
+                        "codigoPostalEnvio": "",
+                        "paisEnvio": serializer.data['envio']['pais'],
+                        "metodoPago": serializer.data['metodoPago'],
+                        "descuentoCarrito": "",
+                        "subtotalPedido": serializer.data['subtotal'],
+                        "metodoEnvio": "",
+                        "importeEnvioPedido": "",
+                        "importeReemsolsadoPedido": "",
+                        "importeTotalPedido": serializer.data['total'],
+                        "importeTotalImpuestoPedido": "",
+                        "estadoSRI": "",
+                    })
+                    for articulo in serializer.data['articulos']:
+                        FacturasDetalles.objects.create(**{
+                            "numeroPedido": serializer.data['numeroPedido'],
+                            "SKU": articulo['codigo'],
+                            "articulo": articulo['articulo'],
+                            "nombreArticulo": "",
+                            "cantidad": articulo['cantidad'],
+                            "precio": articulo['precio'],
+                            "cupon": "",
+                            "importeDescuento": "",
+                            "importeImpuestoDescuento": "",
+                            "facturaEncabezado": facturaCreada
+                        })
                 if serializer.data['estado'] == 'Empacado':
                     enviarCorreoCliente(serializer.data)
                     for articulo in serializer.data['articulos']:
