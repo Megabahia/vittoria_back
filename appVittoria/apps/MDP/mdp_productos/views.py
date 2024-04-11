@@ -400,24 +400,20 @@ def search_producto_codigo_list(request):
                 url_cortada = url_completa[:indice_com + 4] if indice_com != -1 else url_completa
 
                 if url_cortada=='https://todomegacentro.megadescuento.com':
-                    print(url_cortada)
                     if valorUnitario ==0:
                         if(query.precioVentaA!=0):
                             query.precio = query.precioVentaA
                         else:
                             query.precio = query.precioVentaB
                         valorUnitario=query.precio
-                        print('ENTRA AL VALORUNITARIO TODO MEGACENTRO=',valorUnitario)
                     elif query.precioVentaA == valorUnitario:
                         query.precio=query.precioVentaA
-                        print("Es igual a oferta A")
                     elif query.precioVentaB == valorUnitario:
                         query.precio=query.precioVentaB
 
-                        print("Es igual a oferta B")
                     else:
                         query.precio=0
-                        print("NO COINCIDE CON OFERTA TODOMEGACENTRO")
+                        query.mensaje="NO COINCIDE CON OFERTA TODOMEGACENTRO"
                 elif url_cortada=='https://mayorista.megadescuento.com':
                     print(url_cortada)
 
@@ -430,60 +426,51 @@ def search_producto_codigo_list(request):
                             query.precio = query.precioVentaE
 
                         valorUnitario = query.precio
-                        print('ENTRA AL VALORUNITARIO=', valorUnitario)
 
                     elif query.precioVentaC == valorUnitario:
                         query.precio = query.precioVentaC
-                        print("Es igual a oferta C")
                     elif query.precioVentaD == valorUnitario:
                         query.precio = query.precioVentaD
-                        print("Es igual a oferta D")
 
                     elif query.precioVentaE == valorUnitario:
                         query.precio = query.precioVentaE
-                        print("Es igual a oferta E")
                     else:
                         query.precio = 0
-                        print("NO COINCIDE CON OFERTA MAYORISTA")
+                        query.mensaje ="NO COINCIDE CON OFERTA MAYORISTA"
 
                 elif url_cortada=='https://contraentrega.megadescuento.com':
                     print(url_cortada)
                     if valorUnitario == 0:
                         query.precio = query.precioVentaBultos
                         valorUnitario = query.precio
-                        print('ENTRA AL VALORUNITARIO Contraengrega=', valorUnitario)
                     elif query.precioVentaBultos == valorUnitario:
                         query.precio = query.precioVentaBultos
-                        print("Es igual a oferta de Contraentrega")
                     else:
                         query.precio = 0
-                        print("NO COINCIDE CON LA OFERTA CONTRAENTREGA")
+                        query.mensaje ="NO COINCIDE CON LA OFERTA CONTRAENTREGA"
                 elif url_cortada=='https://megadescuento.com':
                     print(url_cortada)
 
                     if valorUnitario == 0:
                         query.precio = query.precioOferta
                         valorUnitario = query.precio
-                        print('ENTRA AL VALORUNITARIO MEGADESCUENTO=', valorUnitario)
                     elif query.precioOferta == valorUnitario:
                         query.precio = query.precioOferta
-                        print("Es igual a oferta de megadescuento")
                     else:
                         query.precio = 0
-                        print("NO COINCIDE CON OFERTA MEGADESCUENTO")
+                        query.mensaje ="NO COINCIDE CON OFERTA MEGADESCUENTO"
                 else:
                     print(url_cortada)
 
                     if valorUnitario == 0:
                         query.precio = query.precioVentaF
                         valorUnitario = query.precio
-                        print('ENTRA AL VALORUNITARIO ALIADOS=', valorUnitario)
                     elif query.precioVentaF == valorUnitario:
                         query.precio = query.precioVentaF
-                        print("Es igual a oferta ALIADOS")
                     else:
                         query.precio=0
-                        print("NO EXISTE OFERTA SIMILAR AL PRECIO")
+                        #query.mensaje ="NO EXISTE OFERTA SIMILAR AL PRECIO"
+                        query.mensaje =''
 
 
                 query2 = Productos.objects.filter(id=query.id, envioNivelNacional=False).first()

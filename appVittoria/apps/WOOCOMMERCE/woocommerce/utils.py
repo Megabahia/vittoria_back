@@ -1003,7 +1003,6 @@ def enviarCorreoVendedorRechazado(data):
 
 def enviarCorreoNotificacionProductos(data):
     usuarios = Usuarios.objects.filter(idRol=53).values('email')
-
     if usuarios:
         emails = [usuario['email'] for usuario in usuarios]
         subject, from_email, to = f"Su pedido {data['numeroPedido']} ha sido generado", "08d77fe1da-d09822@inbox.mailtrap.io", emails
