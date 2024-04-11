@@ -25,7 +25,8 @@ from datetime import timedelta
 
 from .utils import (
     enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoClienteDespacho, enviarCorreoCourierDespacho,
-    enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado
+    enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado,
+    enviarCorreoNotificacionProductos
 )
 from ...ADM.vittoria_usuarios.models import Usuarios
 from ...ADM.vittoria_catalogo.models import Catalogo
@@ -372,6 +373,39 @@ def orders_devolucion(request, pk):
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def orders_notificacion(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'listOne/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        try:
+            query = Pedidos.objects.get(pk=pk, state=1)
+        except Pedidos.DoesNotExist:
+            err = {"error": "No existe"}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+        # tomar el dato
+        if request.method == 'GET':
+            serializer = PedidosSerializer(query)
+            enviarCorreoNotificacionProductos(serializer.data)
+            createLog(logModel, serializer.data, logTransaccion)
+            return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
