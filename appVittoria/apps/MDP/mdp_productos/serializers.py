@@ -344,10 +344,11 @@ class PrediccionRefilOneSerializer(serializers.ModelSerializer):
 
 # BUSQUEDA POR CODIGO
 class ProductoSearchSerializer(serializers.ModelSerializer):
+    precio=serializers.FloatField()
     class Meta:
         model = Productos
         fields = ['id', 'codigoBarras', 'nombre', 'precioVentaA', 'precioVentaB', 'precioVentaC', 'precioVentaD',
-                  'precioVentaE', 'precioOferta', 'stock', 'precioLandingOferta']
+                  'precioVentaE', 'precioOferta', 'stock', 'precioLandingOferta','precio']
 
     def to_representation(self, instance):
         data = super(ProductoSearchSerializer, self).to_representation(instance)
