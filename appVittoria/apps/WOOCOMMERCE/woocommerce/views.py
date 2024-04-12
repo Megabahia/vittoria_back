@@ -61,21 +61,20 @@ def orders_create(request):
         'dataRecibida': '{}'
     }
     if request.method == 'POST':
+
         try:
             logModel['dataEnviada'] = str(request.data)
 
             dominio_completo = request.headers.get('X-Wc-Webhook-Source')
-            print('dominio_completo', dominio_completo)
             # Utiliza urlparse para obtener la información de la URL
             parsed_url = urlparse(dominio_completo)
             # Combina el nombre de host (dominio) y el esquema (protocolo)
             domain = parsed_url.netloc
-            print('dominio del que llega', dominio_completo)
             dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
-            #if dominio_permitidos is None:
-            #    error = f"Llego un dominio: {domain}"
-            #    createLog(logModel, error, logTransaccion)
-            #    return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            if dominio_permitidos is None:
+                error = f"Llego un dominio: {domain}"
+                createLog(logModel, error, logTransaccion)
+                return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
             articulos = []
 
@@ -294,7 +293,7 @@ def orders_update(request, pk):
                 if serializer.data['estado'] == 'Rechazado':
                     enviarCorreoClienteRechazado(serializer.data)
                     enviarCorreoVendedorRechazado(serializer.data)
-                if serializer.data['estado'] == 'Envio':
+                if serializer.data['estado'] == 'Completado':
                     enviarCorreoVendedorVentaConcreta(serializer.data)
                 if serializer.data['estado'] == 'Paquete Ingresado Stock':
                     enviarCorreoVendedorDevolucion(serializer.data)

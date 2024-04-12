@@ -304,7 +304,17 @@ def enviarCorreoVendedor(data):
             </body>
         </html>
         """
-        sendEmail(subject, txt_content, from_email, to, html_content)
+
+        emailsEnviados=[]
+        superAdmins=Usuarios.objects.filter(idRol_id=1)
+        autorizadores=Usuarios.objects.filter(idRol_id=51)
+        emailsEnviados.append(to)
+        for admin in superAdmins:
+            emailsEnviados.append(admin.email)
+
+        for autorizador in autorizadores:
+            emailsEnviados.append(autorizador.email)
+        sendEmail2(subject, txt_content, from_email, emailsEnviados, html_content)
 
 
 def enviarCorreoCliente(data):
