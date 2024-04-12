@@ -26,7 +26,7 @@ from datetime import timedelta
 from .utils import (
     enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoClienteDespacho, enviarCorreoCourierDespacho,
     enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado,
-    enviarCorreoNotificacionProductos
+    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion
 )
 from ...ADM.vittoria_usuarios.models import Usuarios
 from ...ADM.vittoria_catalogo.models import Catalogo
@@ -72,10 +72,10 @@ def orders_create(request):
             domain = parsed_url.netloc
             print('dominio del que llega', dominio_completo)
             dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
-            if dominio_permitidos is None:
-                error = f"Llego un dominio: {domain}"
-                createLog(logModel, error, logTransaccion)
-                return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            #if dominio_permitidos is None:
+            #    error = f"Llego un dominio: {domain}"
+            #    createLog(logModel, error, logTransaccion)
+            #    return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
             articulos = []
 
@@ -294,6 +294,10 @@ def orders_update(request, pk):
                 if serializer.data['estado'] == 'Rechazado':
                     enviarCorreoClienteRechazado(serializer.data)
                     enviarCorreoVendedorRechazado(serializer.data)
+                if serializer.data['estado'] == 'Envio':
+                    enviarCorreoVendedorVentaConcreta(serializer.data)
+                if serializer.data['estado'] == 'Paquete Ingresado Stock':
+                    enviarCorreoVendedorDevolucion(serializer.data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)
