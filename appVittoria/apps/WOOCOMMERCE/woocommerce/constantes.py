@@ -28,6 +28,8 @@ provincias = {
 
 def mapeoTodoMegaDescuento(request, articulos):
     total = request.data['total']
+    codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
+          objeto["key"] == '_billing_wooccm17'), None)
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
@@ -52,8 +54,7 @@ def mapeoTodoMegaDescuento(request, articulos):
                                 objeto["key"] == '_billing_wooccm13'), None),
             "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
                          objeto["key"] == '_billing_wooccm16'), None),
-            "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                    objeto["key"] == '_billing_wooccm17'), None),
+            "codigoVendedor": codigoVendedor,
             "nombreVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
                                     objeto["key"] == '_billing_wooccm18'), None),
             "correoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
@@ -92,13 +93,14 @@ def mapeoTodoMegaDescuento(request, articulos):
         "json": request.data,
         "canal": request.data['_links']['collection'][0]['href'],
         "created_at": request.data['date_created'],
-        "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                objeto["key"] == '_billing_wooccm17'), None),
+        "codigoVendedor": codigoVendedor,
     }
 
 
 def mapeoTodoMegaDescuentoSinEnvio(request, articulos):
     total = request.data['total']
+    codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
+          objeto["key"] == '_billing_wooccm17'), None)
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
@@ -123,8 +125,7 @@ def mapeoTodoMegaDescuentoSinEnvio(request, articulos):
                                 objeto["key"] == '_billing_wooccm13'), None),
             "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
                          objeto["key"] == '_billing_wooccm16'), None),
-            "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                    objeto["key"] == '_billing_wooccm17'), None),
+            "codigoVendedor": codigoVendedor,
             "nombreVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
                                     objeto["key"] == '_billing_wooccm18'), None),
             "correoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
@@ -161,13 +162,14 @@ def mapeoTodoMegaDescuentoSinEnvio(request, articulos):
         "json": request.data,
         "canal": request.data['_links']['collection'][0]['href'],
         "created_at": request.data['date_created'],
-        "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                objeto["key"] == '_billing_wooccm17'), None),
+        "codigoVendedor": codigoVendedor,
     }
 
 
 def mapeoMegaDescuento(request, articulos):
     total = request.data['total']
+    codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
+          objeto["key"] == '_billing_wooccm17'), None)
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
@@ -192,8 +194,7 @@ def mapeoMegaDescuento(request, articulos):
                                 objeto["key"] == '_billing_wooccm14'), None),
             "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
                          objeto["key"] == '_billing_wooccm15'), None),
-            "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                    objeto["key"] == '_billing_wooccm17'), None),
+            "codigoVendedor": codigoVendedor,
             "nombreVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
                                     objeto["key"] == '_billing_wooccm18'), None),
             "comprobantePago": next((objeto['value'] for objeto in request.data['meta_data'] if
@@ -229,13 +230,14 @@ def mapeoMegaDescuento(request, articulos):
         "canal": next((objeto['value'] for objeto in request.data['meta_data'] if
                        objeto["key"] == '_wc_order_attribution_session_entry'), None),
         "created_at": request.data['date_created'],
-        "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                objeto["key"] == '_billing_wooccm17'), None),
+        "codigoVendedor": codigoVendedor,
     }
 
 
 def mapeoMegaDescuentoSinEnvio(request, articulos):
     total = request.data['total']
+    codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
+                                    objeto["key"] == '_billing_wooccm17'), None)
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
@@ -260,8 +262,7 @@ def mapeoMegaDescuentoSinEnvio(request, articulos):
                                 objeto["key"] == '_billing_wooccm14'), None),
             "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
                          objeto["key"] == '_billing_wooccm15'), None),
-            "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                    objeto["key"] == '_billing_wooccm17'), None),
+            "codigoVendedor": codigoVendedor,
             "nombreVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
                                     objeto["key"] == '_billing_wooccm18'), None),
             "comprobantePago": next((objeto['value'] for objeto in request.data['meta_data'] if
@@ -295,6 +296,5 @@ def mapeoMegaDescuentoSinEnvio(request, articulos):
         "canal": next((objeto['value'] for objeto in request.data['meta_data'] if
                        objeto["key"] == '_wc_order_attribution_session_entry'), None),
         "created_at": request.data['date_created'],
-        "codigoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                objeto["key"] == '_billing_wooccm17'), None),
+        "codigoVendedor": codigoVendedor,
     }
