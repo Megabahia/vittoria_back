@@ -403,14 +403,17 @@ def search_producto_codigo_list(request):
                     if valorUnitario ==0:
                         if(query.precioVentaA!=0):
                             query.precio = query.precioVentaA
+                            query.mensaje = ""
                         else:
                             query.precio = query.precioVentaB
+                            query.mensaje = ""
                         valorUnitario=query.precio
                     elif query.precioVentaA == valorUnitario:
                         query.precio=query.precioVentaA
+                        query.mensaje = ""
                     elif query.precioVentaB == valorUnitario:
                         query.precio=query.precioVentaB
-
+                        query.mensaje = ""
                     else:
                         query.precio=0
                         query.mensaje="NO COINCIDE CON OFERTA TODOMEGACENTRO"
@@ -420,20 +423,26 @@ def search_producto_codigo_list(request):
                     if valorUnitario == 0:
                         if (query.precioVentaC != 0):
                             query.precio = query.precioVentaC
+                            query.mensaje = ""
                         elif (query.precioVentaD != 0):
                             query.precio = query.precioVentaD
+                            query.mensaje = ""
                         else:
                             query.precio = query.precioVentaE
+                            query.mensaje = ""
 
                         valorUnitario = query.precio
 
                     elif query.precioVentaC == valorUnitario:
                         query.precio = query.precioVentaC
+                        query.mensaje = ""
                     elif query.precioVentaD == valorUnitario:
                         query.precio = query.precioVentaD
+                        query.mensaje = ""
 
                     elif query.precioVentaE == valorUnitario:
                         query.precio = query.precioVentaE
+                        query.mensaje = ""
                     else:
                         query.precio = 0
                         query.mensaje ="NO COINCIDE CON OFERTA MAYORISTA"
@@ -443,8 +452,10 @@ def search_producto_codigo_list(request):
                     if valorUnitario == 0:
                         query.precio = query.precioVentaBultos
                         valorUnitario = query.precio
+                        query.mensaje = ""
                     elif query.precioVentaBultos == valorUnitario:
                         query.precio = query.precioVentaBultos
+                        query.mensaje = ""
                     else:
                         query.precio = 0
                         query.mensaje ="NO COINCIDE CON LA OFERTA CONTRAENTREGA"
@@ -454,8 +465,10 @@ def search_producto_codigo_list(request):
                     if valorUnitario == 0:
                         query.precio = query.precioOferta
                         valorUnitario = query.precio
+                        query.mensaje = ""
                     elif query.precioOferta == valorUnitario:
                         query.precio = query.precioOferta
+                        query.mensaje = ""
                     else:
                         query.precio = 0
                         query.mensaje ="NO COINCIDE CON OFERTA MEGADESCUENTO"
@@ -465,11 +478,13 @@ def search_producto_codigo_list(request):
                     if valorUnitario == 0:
                         query.precio = query.precioVentaF
                         valorUnitario = query.precio
+                        query.mensaje = ""
                     elif query.precioVentaF == valorUnitario:
                         query.precio = query.precioVentaF
+                        query.mensaje = ""
                     else:
                         query.precio=0
-                        #query.mensaje ="NO EXISTE OFERTA SIMILAR AL PRECIO"
+                        query.mensaje ="NO EXISTE OFERTA SIMILAR AL PRECIO"
                         query.mensaje =''
 
 
@@ -480,7 +495,7 @@ def search_producto_codigo_list(request):
                         filters['lugarVentaCiudad'] = request.data['lugarVentaCiudad']
                         query = Productos.objects.filter(**filters).first()
                     else:
-                        query = query2x
+                        query = query2
         except Productos.DoesNotExist:
             err = {"error": "No existe"}
             createLog(logModel, err, logExcepcion)
