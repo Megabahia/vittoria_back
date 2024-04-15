@@ -393,7 +393,7 @@ def search_producto_codigo_list(request):
             # Verifica si el objeto existe antes de aplicar más filtros
             if query:
                 url_completa = request.data['canal']
-                valorUnitario = request.data['valorUnitario']
+                valorUnitario = float(request.data['valorUnitario'])
 
                 indice_com = url_completa.find('.com')
 
@@ -407,7 +407,7 @@ def search_producto_codigo_list(request):
                         else:
                             query.precio = query.precioVentaB
                             query.mensaje = ""
-                        valorUnitario=query.precio
+                            valorUnitario=query.precio
                     elif query.precioVentaA == valorUnitario:
                         query.precio=query.precioVentaA
                         query.mensaje = ""
