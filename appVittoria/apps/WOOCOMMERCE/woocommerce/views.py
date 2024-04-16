@@ -122,6 +122,73 @@ def orders_create(request):
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def orders_create_contact(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'CREAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            request.data['created_at'] = str(timezone_now)
+            if 'updated_at' in request.data:
+                request.data.pop('updated_at')
+
+
+            articulos = []
+
+            for articulo in request.data['articulos']:
+                articulos.append({
+                    "codigo": articulo['codigo'],
+                    "articulo": articulo['articulo'],
+                    "valorUnitario": articulo['valorUnitario'],
+                    "cantidad": articulo['cantidad'],
+                })
+
+            #codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
+            #                        objeto["key"] == '_billing_wooccm17'), None)
+            #nombreVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
+            #                        objeto["key"] == '_billing_wooccm18'), None)
+
+            #if 'https://megadescuento.com' in canal:
+            #    validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
+            #                              objeto["key"] == '_shipping_wooccm13'), None)
+            #    if '@' in validarDatosEnvio:
+            #        data = mapeoMegaDescuento(request, articulos)
+            #    else:
+            #        data = mapeoMegaDescuentoSinEnvio(request, articulos)
+            #elif 'https://todomegacentro.megadescuento.com' in canal and codigoVendedor != '' and nombreVendedor != '':
+            #    validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
+            #                              objeto["key"] == '_shipping_wooccm13'), None)
+            #    if '@' in validarDatosEnvio:
+            #        data = mapeoTodoMegaDescuento(request, articulos)
+            #    else:
+            #        data = mapeoTodoMegaDescuentoSinEnvio(request, articulos)
+
+            serializer = CreateOrderSerializer(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+                #enviarCorreoVendedor(request.data)
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
