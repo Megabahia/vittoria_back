@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from urllib.parse import urlparse
-
+from django.db.models import Sum
 from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDescuentoSinEnvio, \
     mapeoTodoMegaDescuentoSinEnvio
 from .serializers import (
@@ -241,11 +241,19 @@ def orders_list(request):
                 filters['canalEnvio'] = request.data['canalEnvio'].upper()
             if 'canal' in request.data and request.data['canal'] != '':
                 filters['canal'] = request.data['canal'].upper()
+            if 'rol' in request.data:
+                if 'codigoVendedor' in request.data:
+                    filters.pop('codigoVendedor')
+                elif 'compania' in request.data:
+                    filters.pop('codigoVendedor__in')
+
 
             # Serializar los datos
             query = Pedidos.objects.filter(**filters).order_by('-created_at')
+            suma_total = Pedidos.objects.filter(**filters).aggregate(Sum('total'))
+
             serializer = PedidosSerializer(query[offset:limit], many=True)
-            new_serializer_data = {'cont': query.count(), 'info': serializer.data}
+            new_serializer_data = {'cont': query.count(), 'info': serializer.data,'suma_total':suma_total}
             # envio de datos
             return Response(new_serializer_data, status=status.HTTP_200_OK)
         except Exception as e:
