@@ -239,6 +239,8 @@ def orders_list(request):
 
             if 'canalEnvio' in request.data and request.data['canalEnvio'] != '':
                 filters['canalEnvio'] = request.data['canalEnvio'].upper()
+            if 'canal' in request.data and request.data['canal'] != '':
+                filters['canal'] = request.data['canal'].upper()
 
             # Serializar los datos
             query = Pedidos.objects.filter(**filters).order_by('-created_at')
