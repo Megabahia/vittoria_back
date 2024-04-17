@@ -161,6 +161,8 @@ def enviarCorreoVendedor(data):
                 <tr>
                     <td align="left" style="border:1px solid rgb(229,229,229);padding:12px;text-align:left;vertical-align:middle;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;color:rgb(99,99,99)">
                         {item['articulo']}
+                        <br/>
+                        {item['caracteristicas']}
                     </td>
                     <td align="left" style="border:1px solid rgb(229,229,229);padding:12px;text-align:left;vertical-align:middle;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;color:rgb(99,99,99)">
                         {item['cantidad']} </td>
@@ -335,6 +337,8 @@ def enviarCorreoCliente(data):
             <tr>
                 <td align="left" style="border:1px solid rgb(229,229,229);padding:12px;text-align:left;vertical-align:middle;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;color:rgb(99,99,99)">
                     {item['articulo']}
+                    <br/>
+                    {item['caracteristicas']}
                 </td>
                 <td align="left" style="border:1px solid rgb(229,229,229);padding:12px;text-align:left;vertical-align:middle;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;color:rgb(99,99,99)">
                     {item['cantidad']} </td>
@@ -485,6 +489,8 @@ def enviarCorreoClienteDespacho(data):
             <tr>
                 <td align="left" style="border:1px solid rgb(229,229,229);padding:12px;text-align:left;vertical-align:middle;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;color:rgb(99,99,99)">
                     {item['articulo']}
+                    <br/>
+                    {item['caracteristicas']}
                     <ul style="font-size:small;margin:1em 0 0;padding:0;list-style:none">
                         <li style="margin:.5em 0 0;padding:0"><strong style="float:left;margin-right:.25em;clear:both">Precio:</strong>
                             <p style="margin:0">{item['valorUnitario']} unidad</p>
@@ -806,6 +812,8 @@ def enviarCorreoClienteRechazado(data):
             <tr>
                 <td align="left" style="border:1px solid rgb(229,229,229);padding:12px;text-align:left;vertical-align:middle;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;color:rgb(99,99,99)">
                     {item['articulo']}
+                    <br/>
+                    {item['caracteristicas']}
                     <ul style="font-size:small;margin:1em 0 0;padding:0;list-style:none">
                         <li style="margin:.5em 0 0;padding:0"><strong style="float:left;margin-right:.25em;clear:both">Precio:</strong>
                             <p style="margin:0">{item['valorUnitario']} unidad</p>
@@ -991,6 +999,8 @@ def enviarCorreoVendedorRechazado(data):
                 <tr>
                     <td align="left" style="border:1px solid rgb(229,229,229);padding:12px;text-align:left;vertical-align:middle;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;color:rgb(99,99,99)">
                         {item['articulo']}
+                        <br/>
+                        {item['caracteristicas']}
                         <ul style="font-size:small;margin:1em 0 0;padding:0;list-style:none">
                             <li style="margin:.5em 0 0;padding:0"><strong style="float:left;margin-right:.25em;clear:both">Precio:</strong>
                                 <p style="margin:0">{item['valorUnitario']} unidad</p>
@@ -1176,6 +1186,8 @@ def enviarCorreoNotificacionProductos(data):
                 <tr>
                     <td align="left" style="border:1px solid rgb(229,229,229);padding:12px;text-align:left;vertical-align:middle;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;color:rgb(99,99,99)">
                         {item['articulo']}
+                        <br/>
+                        {item['caracteristicas']}
                     </td>
                     <td align="left" style="border:1px solid rgb(229,229,229);padding:12px;text-align:left;vertical-align:middle;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;color:rgb(99,99,99)">
                         {item['cantidad']} </td>

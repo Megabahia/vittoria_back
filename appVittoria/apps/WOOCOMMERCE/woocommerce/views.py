@@ -82,7 +82,8 @@ def orders_create(request):
                 caracteristicas = ""
                 for meta in articulo['meta_data']:
                     if meta['display_key'] != '_reduced_stock':
-                        caracteristicas = caracteristicas + f"{meta['display_key']}: {meta['display_value']}<br>"
+                        caracteristicas = caracteristicas + f"<strong>{meta['display_key']}</strong>: {meta['display_value']}<br>"
+
                 articulos.append({
                     "codigo": articulo['sku'],
                     "articulo": articulo['name'],
