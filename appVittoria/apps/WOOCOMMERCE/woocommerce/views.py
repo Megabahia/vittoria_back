@@ -6,7 +6,7 @@ from django.utils import timezone
 from urllib.parse import urlparse
 from django.db.models import Sum
 from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDescuentoSinEnvio, \
-    mapeoTodoMegaDescuentoSinEnvio
+    mapeoTodoMegaDescuentoSinEnvio,mapeoTodoMayorista,mapeoTodoMayoristaSinEnvio
 from .serializers import (
     CreateOrderSerializer, PedidosSerializer,
 )
@@ -99,6 +99,7 @@ def orders_create(request):
             nombreVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
                                     objeto["key"] == '_billing_wooccm18'), None)
 
+
             if 'https://megadescuento.com' in canal:
                 validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
                                           objeto["key"] == '_shipping_wooccm13'), None)
@@ -113,12 +114,26 @@ def orders_create(request):
                     data = mapeoTodoMegaDescuento(request, articulos)
                 else:
                     data = mapeoTodoMegaDescuentoSinEnvio(request, articulos)
+            elif 'https://megadescuento.com/' in canal:
+                print('CANAL', canal)
+            elif 'https://mayorista.megadescuento.com/' in canal:
+                validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
+                                          objeto["key"] == '_shipping_wooccm13'), None)
+                if '@' in validarDatosEnvio:
+                    data = mapeoTodoMayorista(request, articulos)
+                else:
+                    data = mapeoTodoMayoristaSinEnvio(request, articulos)
+                print('CANAL', canal)
+
+            elif 'https://contraentrega.megadescuento.com/' in canal:
+                print('CANAL', canal)
 
             serializer = CreateOrderSerializer(data=data)
 
             if serializer.is_valid():
                 serializer.save()
-                enviarCorreoVendedor(data)
+                if data['facturacion']['codigoVendedor']:
+                    enviarCorreoVendedor(data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
