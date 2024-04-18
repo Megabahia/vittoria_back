@@ -71,10 +71,10 @@ def orders_create(request):
             # Combina el nombre de host (dominio) y el esquema (protocolo)
             domain = parsed_url.netloc
             dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
-            # if dominio_permitidos is None:
-            #     error = f"Llego un dominio: {domain}"
-            #     createLog(logModel, error, logTransaccion)
-            #     return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            if dominio_permitidos is None:
+                error = f"Llego un dominio: {domain}"
+                createLog(logModel, error, logTransaccion)
+                return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
             articulos = []
 
