@@ -114,8 +114,6 @@ def orders_create(request):
                     data = mapeoTodoMegaDescuento(request, articulos)
                 else:
                     data = mapeoTodoMegaDescuentoSinEnvio(request, articulos)
-            elif 'https://megadescuento.com/' in canal:
-                print('CANAL', canal)
             elif 'https://mayorista.megadescuento.com/' in canal:
                 validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
                                           objeto["key"] == '_shipping_wooccm13'), None)
