@@ -29,15 +29,15 @@ class AwsS3:
         file_path = f"PRODUCTOS_EXTERNOS/{file_type}/{key}"
         try:
             self.s3.get_object(Bucket=self.env.str('AWS_STORAGE_BUCKET_NAME'), Key=file_path + ".png")
-            return f"https://{self.env.str('AWS_STORAGE_BUCKET_NAME')}.s3.amazonaws.com/{file_path}.png"
+            return f"{file_path}.png"
         except self.s3.exceptions.NoSuchKey:
             try:
                 self.s3.get_object(Bucket=self.env.str('AWS_STORAGE_BUCKET_NAME'), Key=file_path + ".jpeg")
-                return f"https://{self.env.str('AWS_STORAGE_BUCKET_NAME')}.s3.amazonaws.com/{file_path}.jpeg"
+                return f"{file_path}.jpeg"
             except self.s3.exceptions.NoSuchKey:
                 try:
                     self.s3.get_object(Bucket=self.env.str('AWS_STORAGE_BUCKET_NAME'), Key=file_path + ".jpg")
-                    return f"https://{self.env.str('AWS_STORAGE_BUCKET_NAME')}.s3.amazonaws.com/{file_path}.jpg"
+                    return f"{file_path}.jpg"
                 except self.s3.exceptions.NoSuchKey:
                     return None
 

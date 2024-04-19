@@ -5,7 +5,7 @@ from .models import (
     Productos, ProductosImagenes
 )
 from ..mdp_productos.models import (
-    Productos as ProductosMDP
+    Productos as ProductosMDP, ProductoImagen as ProductosImagenesMDP
 )
 from .serializers import (
     ProductosSerializer, ArchivosFacturasSerializer, ProveedoresSerializer, ProductosResource, ProductosStockResource
@@ -420,34 +420,34 @@ def sincronizar_fotos_productos(request):
         try:
             logModel['dataEnviada'] = str(request.data)
 
-            productos = Productos.objects.all()
+            productos = ProductosMDP.objects.all()
 
             for producto in productos:
                 fotoFrente = aws_s3_instancia.get_foto_frente_url(producto.codigoBarras)
                 fotoBonita = aws_s3_instancia.get_foto_bonita_url(producto.codigoBarras)
                 fotoOriginal = aws_s3_instancia.get_foto_original_url(producto.codigoBarras)
 
-                if ProductosImagenes.objects.filter(imagen=fotoOriginal).first() is None:
+                if ProductosImagenesMDP.objects.filter(imagen=fotoOriginal).first() is None:
                     if fotoOriginal:
                         print('entro if')
-                        ProductosImagenes.objects.create(**{
-                            "producto": producto.id,
+                        ProductosImagenesMDP.objects.create(**{
+                            "producto": producto,
                             "imagen": fotoOriginal,
                             "created_at": str(timezone_now)
                         })
-                if ProductosImagenes.objects.filter(imagen=fotoBonita).first() is None:
+                if ProductosImagenesMDP.objects.filter(imagen=fotoBonita).first() is None:
                     if fotoBonita:
                         print('entro if')
-                        ProductosImagenes.objects.create(**{
-                            "producto": producto.id,
+                        ProductosImagenesMDP.objects.create(**{
+                            "producto": producto,
                             "imagen": fotoBonita,
                             "created_at": str(timezone_now)
                         })
-                if ProductosImagenes.objects.filter(imagen=fotoFrente).first() is None:
+                if ProductosImagenesMDP.objects.filter(imagen=fotoFrente).first() is None:
                     if fotoFrente:
                         print('entro if')
-                        ProductosImagenes.objects.create(**{
-                            "producto": producto.id,
+                        ProductosImagenesMDP.objects.create(**{
+                            "producto": producto,
                             "imagen": fotoFrente,
                             "created_at": str(timezone_now)
                         })
