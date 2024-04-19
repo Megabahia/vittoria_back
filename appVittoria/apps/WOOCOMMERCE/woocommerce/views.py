@@ -26,7 +26,7 @@ from datetime import timedelta
 from .utils import (
     enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoClienteDespacho, enviarCorreoCourierDespacho,
     enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado,
-    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion
+    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes
 )
 from ...ADM.vittoria_usuarios.models import Usuarios
 from ...ADM.vittoria_catalogo.models import Catalogo
@@ -66,9 +66,9 @@ def orders_create(request):
             logModel['dataEnviada'] = str(request.data)
 
             dominio_completo = request.headers.get('X-Wc-Webhook-Source')
-            # Utiliza urlparse para obtener la información de la URL
+            #Utiliza urlparse para obtener la información de la URL
             parsed_url = urlparse(dominio_completo)
-            # Combina el nombre de host (dominio) y el esquema (protocolo)
+            #Combina el nombre de host (dominio) y el esquema (protocolo)
             domain = parsed_url.netloc
             dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
             if dominio_permitidos is None:
@@ -121,10 +121,8 @@ def orders_create(request):
                     data = mapeoTodoMayorista(request, articulos)
                 else:
                     data = mapeoTodoMayoristaSinEnvio(request, articulos)
-                print('CANAL', canal)
-
-            elif 'https://contraentrega.megadescuento.com/' in canal:
-                print('CANAL', canal)
+            #elif 'https://contraentrega.megadescuento.com/' in canal:
+            #    print('CANAL', canal)
 
             serializer = CreateOrderSerializer(data=data)
 
@@ -132,6 +130,7 @@ def orders_create(request):
                 serializer.save()
                 if data['facturacion']['codigoVendedor']:
                     enviarCorreoVendedor(data)
+                enviarCorreoTodosClientes(data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
