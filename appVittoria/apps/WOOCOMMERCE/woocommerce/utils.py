@@ -316,7 +316,11 @@ def enviarCorreoVendedor(data):
 
         for autorizador in autorizadores:
             emailsEnviados.append(autorizador.email)
-        sendEmail2(subject, txt_content, from_email, emailsEnviados, html_content)
+
+        for email in emailsEnviados:
+            print('EMAILS',email)
+            sendEmail(subject, txt_content, from_email, email, html_content)
+
 
 def enviarCorreoTodosClientes(data):
     subject, from_email, to = f"Su pedido {data['numeroPedido']} ha sido generado", "08d77fe1da-d09822@inbox.mailtrap.io", data['facturacion']['correo']
@@ -1492,4 +1496,5 @@ def enviarCorreoNotificacionProductos(data):
             </body>
         </html>
         """
-        sendEmail2(subject, txt_content, from_email, to, html_content)
+        for email in emails:
+            sendEmail(subject, txt_content, from_email, email, html_content)
