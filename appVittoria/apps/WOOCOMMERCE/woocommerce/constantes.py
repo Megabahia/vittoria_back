@@ -368,7 +368,6 @@ def mapeoMegaDescuento(request, articulos):
         "codigoVendedor": '',
     }
 
-
 def mapeoMegaDescuentoSinEnvio(request, articulos):
     total = request.data['total']
     codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
@@ -432,3 +431,72 @@ def mapeoMegaDescuentoSinEnvio(request, articulos):
         "created_at": request.data['date_created'],
         "codigoVendedor": '',
     }
+
+
+def mapeoTodoContraEntrega(request, articulos):
+    total = request.data['total']
+    codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
+          objeto["key"] == '_billing_wooccm16'), None)
+    return {
+        "estado": 'Pendiente',
+        "envioTotal": request.data['shipping_total'],
+        "total": total,
+        "subtotal": total,
+        "facturacion": {
+            "nombres": request.data['billing']['first_name'],
+            "apellidos": request.data['billing']['last_name'],
+            "correo": request.data['billing']['email'],
+            "identificacion": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                    objeto["key"] == '_billing_wooccm11'), None),
+            "telefono": request.data['billing']['company'],
+            "pais": "Ecuador",
+            "provincia": provincias[request.data['billing']['state']],
+            "ciudad": request.data['billing']['city'],
+            "callePrincipal": request.data['billing']['address_1'],
+            "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
+                            objeto["key"] == '_billing_wooccm12'), None),
+            "calleSecundaria": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                     objeto["key"] == '_billing_wooccm13'), None),
+            "referencia": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                objeto["key"] == '_billing_wooccm14'), None),
+            "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
+                         objeto["key"] == '_billing_wooccm15'), None),
+            "codigoVendedor": codigoVendedor,
+            "nombreVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                    objeto["key"] == '_billing_wooccm17'), None),
+            "correoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                    objeto["key"] == '_billing_wooccm19'), None),
+            "comprobantePago": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                     objeto["key"] == '_billing_wooccm11'), None),
+        },
+        "envio": {
+            "nombres": request.data['billing']['first_name'],
+            "apellidos": request.data['billing']['last_name'],
+            "correo": request.data['billing']['email'],
+            "identificacion": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                    objeto["key"] == '_billing_wooccm11'), None),
+            "telefono": request.data['billing']['company'],
+            "pais": "Ecuador",
+            "provincia": provincias[request.data['billing']['state']],
+            "ciudad": request.data['billing']['city'],
+            "callePrincipal": request.data['billing']['address_1'],
+            "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
+                            objeto["key"] == '_billing_wooccm12'), None),
+            "calleSecundaria": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                     objeto["key"] == '_billing_wooccm13'), None),
+            "referencia": next((objeto['value'] for objeto in request.data['meta_data'] if
+                                objeto["key"] == '_billing_wooccm14'), None),
+            "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
+                         objeto["key"] == '_billing_wooccm15'), None),
+            "canalEnvio": '',
+        },
+        "metodoPago": request.data['payment_method_title'],
+        "numeroPedido": request.data['number'],
+        "articulos": articulos,
+        "envios": request.data['shipping_lines'],
+        "json": request.data,
+        "canal": request.data['_links']['collection'][0]['href'],
+        "created_at": request.data['date_created'],
+        "codigoVendedor": codigoVendedor,
+    }
+
