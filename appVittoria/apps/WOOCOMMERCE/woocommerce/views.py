@@ -87,9 +87,9 @@ def orders_create(request):
                 articulos.append({
                     "codigo": articulo['sku'],
                     "articulo": articulo['name'],
-                    "valorUnitario": articulo['price'],
+                    "valorUnitario": round(articulo['price'],2),
                     "cantidad": articulo['quantity'],
-                    "precio": articulo['total'],
+                    "precio": round(articulo['total'],2),
                     "caracteristicas": caracteristicas
                 })
 
