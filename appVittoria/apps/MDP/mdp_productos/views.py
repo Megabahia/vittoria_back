@@ -340,7 +340,7 @@ def productos_delete(request, pk):
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_404_NOT_FOUND)
             return Response(status=status.HTTP_404_NOT_FOUND)
-        productosTodos = Productos.objects.filter(idPadre=query.codigoBarras).exclude(pk=pk).all()
+        productosTodos = Productos.objects.filter(idPadre=query.codigoBarras,state=1).exclude(pk=pk).all()
 
         if productosTodos:
             return Response('Este producto no puede eliminarse porque tiene productos hijos.', status=status.HTTP_404_NOT_FOUND)
