@@ -361,6 +361,11 @@ def orders_update(request, pk):
                         if producto:
                             producto.stock = producto.stock - int(articulo['cantidad'])
                             producto.save()
+                            if producto.idPadre != '':
+                                productoPadre = Productos.objects.filter(codigoBarras=producto.idPadre, state=1).first()
+                                if productoPadre:
+                                    productoPadre.stock = productoPadre.stock - int(articulo['cantidad'])
+                                    productoPadre.save()
                 if serializer.data['estado'] == 'Despachado':
                     enviarCorreoClienteDespacho(serializer.data)
                     enviarCorreoCourierDespacho(serializer.data)
