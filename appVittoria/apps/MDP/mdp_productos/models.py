@@ -23,6 +23,7 @@ def upload_path_video(instance, filname):
 class Productos(models.Model):
     categoria = models.CharField(max_length=150, null=True, blank=True)
     subCategoria = models.CharField(max_length=150, null=True, blank=True)
+    idPadre = models.CharField(max_length=150, null=True, blank=True)
     nombre = models.CharField(max_length=150, null=True, blank=True)
     descripcion = models.TextField(null=True, blank=True)
     codigoBarras = models.CharField(max_length=150, null=True, blank=True)

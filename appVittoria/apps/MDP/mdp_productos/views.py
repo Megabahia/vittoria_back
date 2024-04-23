@@ -219,10 +219,20 @@ def productos_create(request):
             request.data['created_at'] = str(timezone_now)
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
-
             serializer = ProductoCreateSerializer(data=request.data)
+
             if serializer.is_valid():
                 serializer.save()
+
+                if (request.data['idPadre'] != ''):
+
+                    productoPadre = Productos.objects.filter(codigoBarras=request.data['idPadre']).first()
+                    productoHijo = Productos.objects.filter(codigoBarras=request.data['codigoBarras']).first()
+
+                    if productoPadre and productoHijo:
+                        productoPadre.stock = productoPadre.stock + int(request.data['stock'])
+                        productoPadre.save()
+
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
@@ -269,8 +279,33 @@ def productos_update(request, pk):
             if 'created_at' in request.data:
                 request.data.pop('created_at')
             serializer = ProductosActualizarSerializer(query, data=request.data, partial=True)
+            if (request.data['idPadre'] != ''):
+
+                productoPadre = Productos.objects.filter(codigoBarras=request.data['idPadre']).first()
+                productoHijo = Productos.objects.filter(codigoBarras=request.data['codigoBarras']).first()
+
+
+                if request.data['idPadre'] == '':
+                    request.data['idPadre'] = ''
+
+                if productoPadre and productoHijo:
+                    if int(request.data['stock'])<productoHijo.stock:
+                        diferenciaStock = productoHijo.stock-int(request.data['stock'])
+                        productoHijo.stock = int(request.data['stock'])
+                        productoHijo.save()
+                        productoPadre.stock = productoPadre.stock - diferenciaStock
+                        productoPadre.save()
+                    else:
+                        diferenciaStock = int(request.data['stock']) - productoHijo.stock
+                        productoHijo.stock = int(request.data['stock'])
+                        productoHijo.save()
+                        productoPadre.stock = productoPadre.stock + diferenciaStock
+                        productoPadre.save()
+
             if serializer.is_valid():
                 serializer.save()
+
+
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)
@@ -305,15 +340,26 @@ def productos_delete(request, pk):
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_404_NOT_FOUND)
             return Response(status=status.HTTP_404_NOT_FOUND)
-        # tomar el dato
-        if request.method == 'DELETE':
-            serializer = ProductosSerializer(query, data={'state': '0', 'updated_at': str(nowDate)}, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                createLog(logModel, serializer.data, logTransaccion)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            createLog(logModel, serializer.errors, logExcepcion)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        productosTodos = Productos.objects.filter(idPadre=query.codigoBarras).exclude(pk=pk).all()
+
+        if productosTodos:
+            return Response('Este producto no puede eliminarse porque tiene productos hijos.', status=status.HTTP_404_NOT_FOUND)
+        else:
+            # tomar el dato
+            if request.method == 'DELETE':
+                serializer = ProductosSerializer(query, data={'state': '0', 'updated_at': str(nowDate)}, partial=True)
+                if (query.idPadre != ''):
+                    productoPadre = Productos.objects.filter(codigoBarras=query.idPadre).first()
+                    if productoPadre and query:
+                        productoPadre.stock = productoPadre.stock - query.stock
+                        productoPadre.save()
+
+                if serializer.is_valid():
+                    serializer.save()
+                    createLog(logModel, serializer.data, logTransaccion)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                createLog(logModel, serializer.errors, logExcepcion)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
