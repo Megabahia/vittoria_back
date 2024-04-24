@@ -232,7 +232,6 @@ def orders_list(request):
             limit = offset + page_size
             # Filtros
             filters = {"state": "1"}
-
             if 'estado' in request.data and request.data['estado'] != '':
                 filters['estado__in'] = request.data['estado']
 
@@ -263,6 +262,7 @@ def orders_list(request):
 
             # Serializar los datos
             query = Pedidos.objects.filter(**filters).order_by('-created_at')
+
             suma_total = Pedidos.objects.filter(**filters).aggregate(Sum('total'))
 
             serializer = PedidosSerializer(query[offset:limit], many=True)

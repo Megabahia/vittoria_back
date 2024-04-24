@@ -1,12 +1,25 @@
 from rest_framework import serializers
 
 from .models import Pedidos
+from ...ADM.vittoria_usuarios.models import Usuarios
 
 
 class PedidosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pedidos
         fields = '__all__'
+
+    def to_representation(self, instance):
+        data = super(PedidosSerializer, self).to_representation(instance)
+        user = Usuarios.objects.filter(username=data['facturacion']['codigoVendedor']).first()
+        if user:
+            data['nombreVendedor'] = user.nombres + ' ' + user.apellidos
+            data['companiaVendedor'] = user.compania
+        else:
+            data['nombreVendedor'] = ''
+            data['companiaVendedor'] = ''
+
+        return data
 
 
 class CreateOrderSerializer(serializers.Serializer):
@@ -27,3 +40,4 @@ class CreateOrderSerializer(serializers.Serializer):
         Create and return a new `Snippet` instance, given the validated data.
         """
         return Pedidos.objects.create(**validated_data)
+
