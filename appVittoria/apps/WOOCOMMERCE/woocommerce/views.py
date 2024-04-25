@@ -26,7 +26,7 @@ from datetime import timedelta
 from .utils import (
     enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoClienteDespacho, enviarCorreoCourierDespacho,
     enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado,
-    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes
+    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes,enviarCorreoVendedorEmpacado
 )
 from ...ADM.vittoria_usuarios.models import Usuarios
 from ...ADM.vittoria_catalogo.models import Catalogo
@@ -356,6 +356,7 @@ def orders_update(request, pk):
                         })
                 if serializer.data['estado'] == 'Empacado':
                     enviarCorreoCliente(serializer.data)
+                    enviarCorreoVendedorEmpacado(serializer.data)
                     for articulo in serializer.data['articulos']:
                         producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
                         if producto:
