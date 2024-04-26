@@ -49,6 +49,8 @@ class Pedidos(models.Model):
     verificarGeneracionGuia = models.BooleanField(default=False)
     fechaEmpacado = models.CharField(max_length=255, null=True, blank=True)
     guiServiEntrega = models.FileField(blank=True, null=True, upload_to=upload_path)
+    tipoPago = models.CharField(max_length=255, null=True, blank=True)
+    evidenciaPago=models.FileField(blank=True, null=True, upload_to=upload_path)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

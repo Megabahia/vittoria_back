@@ -26,7 +26,7 @@ from datetime import timedelta
 from .utils import (
     enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoClienteDespacho, enviarCorreoCourierDespacho,
     enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado,
-    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes
+    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes,enviarCorreoVendedorEmpacado
 )
 from ...ADM.vittoria_usuarios.models import Usuarios
 from ...ADM.vittoria_catalogo.models import Catalogo
@@ -232,7 +232,6 @@ def orders_list(request):
             limit = offset + page_size
             # Filtros
             filters = {"state": "1"}
-
             if 'estado' in request.data and request.data['estado'] != '':
                 filters['estado__in'] = request.data['estado']
 
@@ -263,6 +262,7 @@ def orders_list(request):
 
             # Serializar los datos
             query = Pedidos.objects.filter(**filters).order_by('-created_at')
+
             suma_total = Pedidos.objects.filter(**filters).aggregate(Sum('total'))
 
             serializer = PedidosSerializer(query[offset:limit], many=True)
@@ -356,6 +356,7 @@ def orders_update(request, pk):
                         })
                 if serializer.data['estado'] == 'Empacado':
                     enviarCorreoCliente(serializer.data)
+                    enviarCorreoVendedorEmpacado(serializer.data)
                     for articulo in serializer.data['articulos']:
                         producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
                         if producto:
