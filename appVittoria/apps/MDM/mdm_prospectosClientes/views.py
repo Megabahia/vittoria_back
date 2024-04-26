@@ -249,6 +249,7 @@ def prospecto_cliente_update(request, pk):
                             "valorUnitario": articulo['valorUnitario'],
                             "cantidad": articulo['cantidad'],
                             "precio": articulo['total'],
+                            "caracteristicas": ''
                         })
                     data = mapeoProspectoCliente(serializer.data, articulos)
                     Pedidos.objects.create(**data)

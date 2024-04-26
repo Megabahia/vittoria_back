@@ -173,31 +173,10 @@ def orders_create_contact(request):
                     "cantidad": articulo['cantidad'],
                 })
 
-            #codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
-            #                        objeto["key"] == '_billing_wooccm17'), None)
-            #nombreVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
-            #                        objeto["key"] == '_billing_wooccm18'), None)
-
-            #if 'https://megadescuento.com' in canal:
-            #    validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
-            #                              objeto["key"] == '_shipping_wooccm13'), None)
-            #    if '@' in validarDatosEnvio:
-            #        data = mapeoMegaDescuento(request, articulos)
-            #    else:
-            #        data = mapeoMegaDescuentoSinEnvio(request, articulos)
-            #elif 'https://todomegacentro.megadescuento.com' in canal and codigoVendedor != '' and nombreVendedor != '':
-            #    validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
-            #                              objeto["key"] == '_shipping_wooccm13'), None)
-            #    if '@' in validarDatosEnvio:
-            #        data = mapeoTodoMegaDescuento(request, articulos)
-            #    else:
-            #        data = mapeoTodoMegaDescuentoSinEnvio(request, articulos)
-
             serializer = CreateOrderSerializer(data=request.data)
 
             if serializer.is_valid():
                 serializer.save()
-                #enviarCorreoVendedor(request.data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
