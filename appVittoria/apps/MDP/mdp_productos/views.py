@@ -444,8 +444,11 @@ def search_producto_codigo_list(request):
                 indice_com = url_completa.find('.com')
 
                 url_cortada = url_completa[:indice_com + 4] if indice_com != -1 else url_completa
-
-                if url_cortada=='https://todomegacentro.megadescuento.com':
+                print('canal', url_completa)
+                if url_cortada=='Landing-Producto':
+                    query.precio = query.precioLandingOferta
+                    query.mensaje = ""
+                elif url_cortada=='https://todomegacentro.megadescuento.com':
                     if valorUnitario ==0:
                         if(query.precioVentaA!=0):
                             query.precio = query.precioVentaA
@@ -535,13 +538,17 @@ def search_producto_codigo_list(request):
 
 
                 query2 = Productos.objects.filter(id=query.id, envioNivelNacional=False).first()
-                # Puedes ajustar los filtros según tus necesidades
+                # Este if sirve para validar que el producto que se configuro para una ciudad en especifico y no puede ser vendido a otra ciudad
                 if query2:
                     if 'lugarVentaCiudad' in request.data and request.data['lugarVentaCiudad'] != '':
                         filters['lugarVentaCiudad'] = request.data['lugarVentaCiudad']
                         query = Productos.objects.filter(**filters).first()
+                        query.precio = query.precioLandingOferta
+                        query.mensaje = ""
                     else:
                         query = query2
+                        query.precio = query2.precioLandingOferta
+                        query.mensaje = ""
         except Productos.DoesNotExist:
             err = {"error": "No existe"}
             createLog(logModel, err, logExcepcion)
