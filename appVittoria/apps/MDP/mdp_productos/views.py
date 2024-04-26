@@ -445,7 +445,7 @@ def search_producto_codigo_list(request):
 
                 url_cortada = url_completa[:indice_com + 4] if indice_com != -1 else url_completa
                 print('canal', url_completa)
-                if url_cortada=='Landing-Producto':
+                if url_cortada=='Landing-Producto' or url_cortada=='Landing-Page':
                     query.precio = query.precioLandingOferta
                     query.mensaje = ""
                 elif url_cortada=='https://todomegacentro.megadescuento.com':
