@@ -321,7 +321,7 @@ class MPRouter:
     A router to control all database operations on models in the
     auth and contenttypes applications.
     """
-    route_app_labels = {'mp_parametrizaciones', 'woocommerce'}
+    route_app_labels = {'mp_parametrizaciones', 'woocommerce','gdc_gestor_contactos'}
 
     def db_for_read(self, model, **hints):
         """

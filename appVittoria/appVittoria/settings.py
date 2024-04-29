@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     # apps vittoria FACTURACION
     'apps.WOOCOMMERCE.mp_parametrizaciones',
     'apps.WOOCOMMERCE.woocommerce',
+    'apps.WOOCOMMERCE.gdc_gestor_contactos',
     #CONFIG
     'apps.config',
     #Django external apps
