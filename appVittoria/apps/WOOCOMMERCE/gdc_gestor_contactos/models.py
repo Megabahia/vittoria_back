@@ -32,7 +32,7 @@ class Contactos(models.Model):
     codigoConfirmacion = models.CharField(max_length=255, null=True, blank=True)
     fechaHoraConfirmacion = models.CharField(max_length=255, null=True, blank=True)
     tipoFacturacion = models.CharField(max_length=255, null=True, blank=True)
-
+    numeroComprobante= models.CharField(max_length=255, null=True, blank=True)
     confirmacionEnvio = models.CharField(max_length=255, null=True, blank=True)
     canalEnvio = models.CharField(max_length=255, null=True, blank=True)
     archivoGuia = models.FileField(blank=True, null=True, upload_to=upload_path)
