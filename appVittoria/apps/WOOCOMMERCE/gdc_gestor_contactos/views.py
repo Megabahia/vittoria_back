@@ -316,10 +316,11 @@ def contacts_update(request, pk):
             serializer = ContactosSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
+                print('ENTRA DESPUES DEL SAVE')
                 #Obtener id cliente
                 datosCliente=Clientes.objects.filter(cedula=request.data['facturacion']['identificacion']).first()
                 #CREAR FACTURACION ELECTRONICA
-                if 'facturaElectronica' in serializer.data['tipoPago']:
+                if serializer.data['tipoPago'] is not None and 'facturaElectronica' in serializer.data['tipoPago']:
                     serializerFacturacionElectronica={
                         'cliente':datosCliente,
                         'fecha':serializer.data['created_at'][:10],
@@ -357,6 +358,7 @@ def contacts_update(request, pk):
                             facturaEncabezado_id=facturaEncabezado.id, **detalle)
 
                 #CLIENT
+                print('SERILIZER',serializer.data['facturacion'])
                 serializerClient = {
                     "tipoCliente": "Consumidor final",
                     "tipoIdentificacion": "Cédula",
