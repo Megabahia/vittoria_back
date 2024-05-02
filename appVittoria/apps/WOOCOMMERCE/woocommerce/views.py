@@ -18,6 +18,7 @@ from ...MDM.mdm_clientes.models import Clientes
 from ...MDM.mdm_clientes.serializers import ClientesUpdateSerializer
 
 from ...MDP.mdp_productos.models import Productos
+from ...MDM.mdm_prospectosClientes.models import ProspectosClientes,ProspectosClientesDetalles
 
 # Sumar Fechas
 from datetime import datetime
@@ -65,16 +66,16 @@ def orders_create(request):
         try:
             logModel['dataEnviada'] = str(request.data)
 
-            dominio_completo = request.headers.get('X-Wc-Webhook-Source')
+            #dominio_completo = request.headers.get('X-Wc-Webhook-Source')
             #Utiliza urlparse para obtener la información de la URL
-            parsed_url = urlparse(dominio_completo)
+            #parsed_url = urlparse(dominio_completo)
             #Combina el nombre de host (dominio) y el esquema (protocolo)
-            domain = parsed_url.netloc
-            dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
-            if dominio_permitidos is None:
-                error = f"Llego un dominio: {domain}"
-                createLog(logModel, error, logTransaccion)
-                return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            #domain = parsed_url.netloc
+            #dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
+            #if dominio_permitidos is None:
+            #    error = f"Llego un dominio: {domain}"
+            #    createLog(logModel, error, logTransaccion)
+            #    return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
             articulos = []
 
@@ -128,6 +129,73 @@ def orders_create(request):
 
             if serializer.is_valid():
                 serializer.save()
+
+                serializerProspect = {
+                    "nombres": serializer.data['facturacion']['nombres'],
+                    "apellidos": serializer.data['facturacion']['apellidos'],
+                    "telefono": serializer.data['facturacion']['telefono'],
+                    "tipoCliente": '',
+                    "whatsapp": serializer.data['facturacion']['telefono'],
+                    "facebook": '',
+                    "twitter": '',
+                    "instagram": '',
+                    "correo1": serializer.data['facturacion']['correo'],
+                    "correo2": '',
+                    "pais": serializer.data['facturacion']['pais'],
+                    "provincia": serializer.data['facturacion']['provincia'],
+                    "ciudad": serializer.data['facturacion']['ciudad'],
+                    "canal": serializer.data['canal'],
+                    "canalOrigen": '',
+                    "metodoPago": '',
+                    "codigoProducto": '',
+                    "nombreProducto": '',
+                    "precio": 0,
+                    "tipoPrecio": '',
+                    "nombreVendedor": serializer.data['facturacion']['nombreVendedor'],
+                    "confirmacionProspecto": '',
+                    "imagen": '',
+                    "tipoIdentificacion": "Cédula",
+                    "identificacion": serializer.data['facturacion']['identificacion'],
+                    "nombreCompleto": '',
+                    "callePrincipal": '',
+                    "numeroCasa": '',
+                    "calleSecundaria": '',
+                    "referencia": '',
+                    "comentarios": '',
+                    "comentariosVendedor": '',
+                    "cantidad": 0,
+                    "subTotal": 0,
+                    "descuento": 0,
+                    "iva": 0,
+                    "total": 0,
+                    "courier": "",
+                    "articulos": '',
+                    "facturacion": '',
+                    "envio": '',
+                    "state": 1
+                }
+                prospectoEncabezado = ProspectosClientes.objects.create(**serializerProspect)
+                detalleProspecto = []
+
+                for articuloP in serializer.data['articulos']:
+                    detalleProspecto.append({
+                        'articulo': articuloP['articulo'],
+                        'valorUnitario': articuloP['valorUnitario'],
+                        'cantidad': articuloP['cantidad'],
+                        'precio': articuloP['precio'],
+                        'codigo': articuloP['codigo'],
+                        'informacionAdicional': '',
+                        'descuento': 0,
+                        'impuesto': 0,
+                        'valorDescuento': 0,
+                        'total': 0,
+                        'state': 1
+                    })
+
+                for detalle in detalleProspecto:
+                    ProspectosClientesDetalles.objects.create(
+                        prospectoClienteEncabezado=prospectoEncabezado, **detalle)
+
                 if data['facturacion']['codigoVendedor']:
                     enviarCorreoVendedor(data)
                 enviarCorreoTodosClientes(data)

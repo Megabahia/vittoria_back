@@ -8,8 +8,6 @@ from .serializers import (
 )
 from ...MDP.mdp_productos.models import Productos
 
-from ...FACTURACION.facturacion.models import FacturasEncabezados, FacturasDetalles
-
 from .models import (
     Contactos
 )
@@ -25,6 +23,7 @@ from ...ADM.vittoria_catalogo.models import Catalogo
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
 from ...MDM.mdm_prospectosClientes.models import ProspectosClientes,ProspectosClientesDetalles
+from ...MDM.mdm_facturas.models import FacturasEncabezados, FacturasDetalles
 from ...MDM.mdm_clientes.models import Clientes
 
 # declaracion variables log
@@ -190,6 +189,8 @@ def contacts_list(request):
             limit = offset + page_size
             # Filtros
             filters = {"state": "1"}
+            if 'estado' in request.data and request.data['estado'] != '':
+                filters['estado__in'] = request.data['estado']
 
             if 'telefono' in request.data:
                 if request.data['telefono'] != '':
@@ -203,11 +204,7 @@ def contacts_list(request):
                 filters['canalEnvio'] = request.data['canalEnvio'].upper()
             if 'canal' in request.data and request.data['canal'] != '':
                 filters['canal'] = request.data['canal'].upper()
-            if 'rol' in request.data:
-                if 'codigoVendedor' in request.data:
-                    filters.pop('codigoVendedor')
-                elif 'compania' in request.data:
-                    filters.pop('codigoVendedor__in')
+
 
 
             # Serializar los datos
@@ -310,7 +307,7 @@ def contacts_update(request, pk):
             if request.data['facturacion']['identificacion'] != '':
                 queryClientes = Clientes.objects.filter(
                     Q(cedula=request.data['facturacion']['identificacion'])).first()
-            elif request.data['facturacion']['correo'] !='':
+            elif request.data['facturacion']['correo'] != '':
                 queryClientes = Clientes.objects.filter(
                     Q(correo=request.data['facturacion']['correo'])).first()
             else:
@@ -319,6 +316,47 @@ def contacts_update(request, pk):
             serializer = ContactosSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
+                #Obtener id cliente
+                datosCliente=Clientes.objects.filter(cedula=request.data['facturacion']['identificacion']).first()
+                #CREAR FACTURACION ELECTRONICA
+                if 'facturaElectronica' in serializer.data['tipoPago']:
+                    serializerFacturacionElectronica={
+                        'cliente':datosCliente,
+                        'fecha':serializer.data['created_at'][:10],
+                        'tipoIdentificacion':'Cedula',
+                        'identificacion':serializer.data['facturacion']['identificacion'],
+                        'telefono':serializer.data['facturacion']['telefono'],
+                        'correo':serializer.data['facturacion']['correo'],
+                        'nombreVendedor':serializer.data['facturacion']['nombreVendedor'],
+                        'total':serializer.data['total'],
+                        'subTotal':serializer.data['subtotal'],
+                        'canal':serializer.data['canal'],
+                        'pais':serializer.data['facturacion']['pais'],
+                        'provincia':serializer.data['facturacion']['provincia'],
+                        'ciudad':serializer.data['facturacion']['ciudad'],
+                        'numeroProductosComprados':len(serializer.data['articulos']),
+                        'state':1,
+                    }
+                    facturaEncabezado = FacturasEncabezados.objects.create(**serializerFacturacionElectronica)
+
+                    detalleFactura = []
+
+                    for articuloFDetalle in request.data['articulos']:
+                        detalleFactura.append({
+                            'articulo':articuloFDetalle['articulo'],
+                            'valorUnitario':articuloFDetalle['valorUnitario'],
+                            'cantidad':articuloFDetalle['cantidad'],
+                            'precio':articuloFDetalle['precio'],
+                            'codigo':articuloFDetalle['codigo'],
+                            'total':articuloFDetalle['precio'],
+                            'state':1,
+                        })
+
+                    for detalle in detalleFactura:
+                        FacturasDetalles.objects.create(
+                            facturaEncabezado_id=facturaEncabezado.id, **detalle)
+
+                #CLIENT
                 serializerClient = {
                     "tipoCliente": "Consumidor final",
                     "tipoIdentificacion": "Cédula",
@@ -327,17 +365,10 @@ def contacts_update(request, pk):
                                       serializer.data['facturacion']['apellidos'],
                     "nombres": serializer.data['facturacion']['nombres'],
                     "apellidos": serializer.data['facturacion']['apellidos'],
-                    "genero": "",
                     "nacionalidad": "Ecuatoriana",
                     "paisNacimiento": serializer.data['facturacion']['pais'],
                     "provinciaNacimiento": serializer.data['facturacion']['provincia'],
                     "ciudadNacimiento": serializer.data['facturacion']['ciudad'],
-                    "estadoCivil": "",
-                    "paisResidencia": "",
-                    "provinciaResidencia": "",
-                    "ciudadResidencia": "",
-                    "nivelEstudios": "",
-                    "estado": "",
                     "correo": serializer.data['facturacion']['correo'],
                     "telefono": serializer.data['facturacion']['telefono'],
                     "state": 1
