@@ -167,6 +167,53 @@ def gdc_create_contact(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+def gdc_create_venta(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'CREAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            request.data['created_at'] = str(timezone_now)
+            if 'updated_at' in request.data:
+                request.data.pop('updated_at')
+
+
+            articulos = []
+
+            for articulo in request.data['articulos']:
+                articulos.append({
+                    "codigo": articulo['codigo'],
+                    "articulo": articulo['articulo'],
+                    "valorUnitario": articulo['valorUnitario'],
+                    "cantidad": articulo['cantidad'],
+                })
+
+            serializer = CreateContactSerializer(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def contacts_list(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {

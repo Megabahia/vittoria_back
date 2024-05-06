@@ -6,7 +6,7 @@ from django.utils import timezone
 from urllib.parse import urlparse
 from django.db.models import Sum
 from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDescuentoSinEnvio, \
-    mapeoTodoMegaDescuentoSinEnvio,mapeoTodoMayorista,mapeoTodoMayoristaSinEnvio,mapeoTodoContraEntrega
+    mapeoTodoMegaDescuentoSinEnvio,mapeoTodoMayorista,mapeoTodoMayoristaSinEnvio,mapeoTodoContraEntrega,mapeoTodoTiendaMulticompras
 from .serializers import (
     CreateOrderSerializer, PedidosSerializer,
 )
@@ -124,6 +124,13 @@ def orders_create(request):
                     data = mapeoTodoMayoristaSinEnvio(request, articulos)
             elif 'https://contraentrega.megadescuento.com/' in canal:
                 data = mapeoTodoContraEntrega(request, articulos)
+            elif 'https://tiendamulticompras.megadescuento.com' in canal:
+                #validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
+                #                          objeto["key"] == '_shipping_wooccm13'), None)
+                #if '@' in validarDatosEnvio:
+                data = mapeoTodoTiendaMulticompras(request, articulos)
+                #else:
+                #    data = mapeoTodoTiendaMulticompras(request, articulos)
 
             serializer = CreateOrderSerializer(data=data)
 
