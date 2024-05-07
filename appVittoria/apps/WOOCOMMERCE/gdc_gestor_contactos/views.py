@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -351,13 +353,13 @@ def contacts_update(request, pk):
             createLog(logModel, errorNoExiste, logExcepcion)
             return Response(status=status.HTTP_404_NOT_FOUND)
         if request.method == 'POST':
-            if request.data['facturacion']['identificacion'] != '':
+            if 'facturacion' in request.data and request.data['facturacion']['identificacion'] != '':
                 queryClientes = Clientes.objects.filter(
                     Q(cedula=request.data['facturacion']['identificacion'])).first()
-            elif request.data['facturacion']['correo'] != '':
+            elif 'facturacion' in request.data and request.data['facturacion']['correo'] != '':
                 queryClientes = Clientes.objects.filter(
                     Q(correo=request.data['facturacion']['correo'])).first()
-            else:
+            elif 'facturacion' in request.data and request.data['facturacion']['telefono'] != '':
                 queryClientes = Clientes.objects.filter(Q(telefono=request.data['facturacion']['telefono'])).first()
 
             serializer = ContactosSerializer(query, data=request.data, partial=True)
@@ -365,7 +367,7 @@ def contacts_update(request, pk):
                 serializer.save()
                 print('ENTRA DESPUES DEL SAVE')
                 #Obtener id cliente
-                datosCliente=Clientes.objects.filter(cedula=request.data['facturacion']['identificacion']).first()
+                datosCliente=Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion']).first()
                 #CREAR FACTURACION ELECTRONICA
                 if serializer.data['tipoPago'] is not None and 'facturaElectronica' in serializer.data['tipoPago']:
                     serializerFacturacionElectronica={
@@ -389,7 +391,7 @@ def contacts_update(request, pk):
 
                     detalleFactura = []
 
-                    for articuloFDetalle in request.data['articulos']:
+                    for articuloFDetalle in serializer.data['articulos']:
                         detalleFactura.append({
                             'articulo':articuloFDetalle['articulo'],
                             'valorUnitario':articuloFDetalle['valorUnitario'],
@@ -423,7 +425,7 @@ def contacts_update(request, pk):
                     "state": 1
                 }
                 if queryClientes is not None:
-                    (Clientes.objects.filter(cedula=request.data['facturacion']['identificacion'])
+                    (Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion'])
                      .update(**serializerClient))
                 else:
                     Clientes.objects.create(**serializerClient)
@@ -446,4 +448,5 @@ def contacts_update(request, pk):
     except Exception as e:
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
+        print('error', err)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
