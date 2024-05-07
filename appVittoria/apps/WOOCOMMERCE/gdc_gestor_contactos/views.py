@@ -188,14 +188,13 @@ def gdc_create_venta(request):
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
 
-
             articulos = []
 
             for articulo in request.data['articulos']:
                 articulos.append({
                     "codigo": articulo['codigo'],
-                    "articulo": articulo['articulo'],
-                    "valorUnitario": articulo['valorUnitario'],
+                     "articulo": articulo['articulo'],
+                     "valorUnitario": articulo['valorUnitario'],
                     "cantidad": articulo['cantidad'],
                 })
 
@@ -204,15 +203,26 @@ def gdc_create_venta(request):
             if serializer.is_valid():
                 serializer.save()
 
+                for articulo in serializer.data['articulos']:
+                    producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
+                    if producto:
+                        producto.stock = producto.stock - int(articulo['cantidad'])
+                        producto.save()
+                        if producto.idPadre != '':
+                            productoPadre = Productos.objects.filter(codigoBarras=producto.idPadre, state=1).first()
+                            if productoPadre:
+                                productoPadre.stock = productoPadre.stock - int(articulo['cantidad'])
+                                productoPadre.save()
+
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(status=status.HTTP_200_OK)
+
         except Exception as e:
             err = {"error": 'Un error ha ocurrido: {}'.format(e)}
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -352,7 +362,9 @@ def contacts_update(request, pk):
             errorNoExiste = {'error': 'No existe'}
             createLog(logModel, errorNoExiste, logExcepcion)
             return Response(status=status.HTTP_404_NOT_FOUND)
+
         if request.method == 'POST':
+            queryClientes=None
             if 'facturacion' in request.data and request.data['facturacion']['identificacion'] != '':
                 queryClientes = Clientes.objects.filter(
                     Q(cedula=request.data['facturacion']['identificacion'])).first()
@@ -365,7 +377,6 @@ def contacts_update(request, pk):
             serializer = ContactosSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                print('ENTRA DESPUES DEL SAVE')
                 #Obtener id cliente
                 datosCliente=Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion']).first()
                 #CREAR FACTURACION ELECTRONICA
@@ -407,7 +418,6 @@ def contacts_update(request, pk):
                             facturaEncabezado_id=facturaEncabezado.id, **detalle)
 
                 #CLIENT
-                print('SERILIZER',serializer.data['facturacion'])
                 serializerClient = {
                     "tipoCliente": "Consumidor final",
                     "tipoIdentificacion": "Cédula",
