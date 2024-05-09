@@ -252,6 +252,7 @@ def prospecto_cliente_update(request, pk):
                             "caracteristicas": ''
                         })
                     data = mapeoProspectoCliente(serializer.data, articulos)
+
                     Pedidos.objects.create(**data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)

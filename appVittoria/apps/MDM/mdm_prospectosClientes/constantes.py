@@ -46,7 +46,7 @@ def mapeoProspectoCliente(data, articulos):
         "articulos": articulos,
         "envios": data,
         "json": data,
-        "canalOrigen": data['canalOrigen'],
+        "canal": data['canalOrigen'],
         "created_at": data['created_at'],
         "fechaHoraConfirmacion": data['updated_at'],
         "codigoVendedor": None,

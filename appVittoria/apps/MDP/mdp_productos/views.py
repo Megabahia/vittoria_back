@@ -436,15 +436,16 @@ def search_producto_codigo_list(request):
                 'estado': 'Activo'
             }
             query = Productos.objects.filter(**filters).first()
+            print('REQUEST',query)
             # Verifica si el objeto existe antes de aplicar más filtros
             if query:
+                print('CANAL', request.data['canal'])
                 url_completa = request.data['canal']
                 valorUnitario = float(request.data['valorUnitario'])
 
                 indice_com = url_completa.find('.com')
 
                 url_cortada = url_completa[:indice_com + 4] if indice_com != -1 else url_completa
-                print('canal', url_completa)
                 if url_cortada=='Landing-Producto' or url_cortada=='Landing-Page':
                     query.precio = query.precioLandingOferta
                     query.mensaje = ""
@@ -467,8 +468,6 @@ def search_producto_codigo_list(request):
                         query.precio=0
                         query.mensaje="NO COINCIDE CON OFERTA TODOMEGACENTRO"
                 elif url_cortada=='https://mayorista.megadescuento.com':
-                    print(url_cortada)
-
                     if valorUnitario == 0:
                         if (query.precioVentaC != 0):
                             query.precio = query.precioVentaC
@@ -497,7 +496,6 @@ def search_producto_codigo_list(request):
                         query.mensaje ="NO COINCIDE CON OFERTA MAYORISTA"
 
                 elif url_cortada=='https://contraentrega.megadescuento.com':
-                    print(url_cortada)
                     if valorUnitario == 0:
                         query.precio = query.precioVentaBultos
                         valorUnitario = query.precio
@@ -509,8 +507,6 @@ def search_producto_codigo_list(request):
                         query.precio = 0
                         query.mensaje ="NO COINCIDE CON LA OFERTA CONTRAENTREGA"
                 elif url_cortada=='https://megadescuento.com':
-                    print(url_cortada)
-
                     if valorUnitario == 0:
                         query.precio = query.precioOferta
                         valorUnitario = query.precio
@@ -522,8 +518,6 @@ def search_producto_codigo_list(request):
                         query.precio = 0
                         query.mensaje ="NO COINCIDE CON OFERTA MEGADESCUENTO"
                 else:
-                    print(url_cortada)
-
                     if valorUnitario == 0:
                         query.precio = query.precioVentaF
                         valorUnitario = query.precio

@@ -318,7 +318,6 @@ def orders_list(request):
             query = Pedidos.objects.filter(**filters).order_by('-created_at')
 
             suma_total = Pedidos.objects.filter(**filters).aggregate(Sum('total'))
-
             serializer = PedidosSerializer(query[offset:limit], many=True)
             new_serializer_data = {'cont': query.count(), 'info': serializer.data,'suma_total':suma_total}
             # envio de datos
