@@ -229,6 +229,19 @@ def parametrizaciones_delete(request, pk):
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
     # GET ESTADOS
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def valor_list(request):
+    if request.method == 'POST':
+        try:
+            print('REQUEST: ',request)
+            query = Parametrizaciones.objects.filter(state=1, valor=request.data['valor'])
+            serializer = ParametrizacionesFiltroSerializer(query, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

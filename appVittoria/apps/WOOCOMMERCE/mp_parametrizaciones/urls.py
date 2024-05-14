@@ -5,7 +5,7 @@ from .views import (
     estado_list, tipo_list, parametrizaciones_list_hijo, parametrizaciones_list_hijoNombre,
     parametrizaciones_list_hijos,
     parametrizaciones_filter_name, parametrizaciones_filter_listOne_name_tipo, parametrosTipo_list,
-    parametrizaciones_exportar
+    parametrizaciones_exportar,valor_list
 )
 
 app_name = 'parametrizaciones'
@@ -17,6 +17,8 @@ urlpatterns = [
     path('listOne/<int:pk>', parametrizaciones_findOne, name="parametrizaciones_findOne"),
     path('update/<int:pk>', parametrizaciones_update, name="parametrizaciones_update"),
     path('delete/<int:pk>', parametrizaciones_delete, name="parametrizaciones_delete"),
+    #VALOR
+    path('list/valor/', valor_list, name="valor_list"),
     # ESTADO
     path('list/estado/', estado_list, name="estado_list"),
     # TIPO PARAMETRIZACION/parametrizaciones
