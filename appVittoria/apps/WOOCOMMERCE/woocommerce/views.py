@@ -27,7 +27,7 @@ from datetime import timedelta
 from .utils import (
     enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoClienteDespacho, enviarCorreoCourierDespacho,
     enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado,
-    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes,enviarCorreoVendedorEmpacado
+    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes,enviarCorreoVendedorEmpacado,enviarCorreoAdminAutorizador
 )
 from ...ADM.vittoria_usuarios.models import Usuarios
 from ...ADM.vittoria_catalogo.models import Catalogo
@@ -66,16 +66,16 @@ def orders_create(request):
         try:
             logModel['dataEnviada'] = str(request.data)
 
-            #dominio_completo = request.headers.get('X-Wc-Webhook-Source')
+            dominio_completo = request.headers.get('X-Wc-Webhook-Source')
             #Utiliza urlparse para obtener la información de la URL
-            #parsed_url = urlparse(dominio_completo)
+            parsed_url = urlparse(dominio_completo)
             #Combina el nombre de host (dominio) y el esquema (protocolo)
-            #domain = parsed_url.netloc
-            #dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
-            #if dominio_permitidos is None:
-            #    error = f"Llego un dominio: {domain}"
-            #    createLog(logModel, error, logTransaccion)
-            #    return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            domain = parsed_url.netloc
+            dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
+            if dominio_permitidos is None:
+                error = f"Llego un dominio: {domain}"
+                createLog(logModel, error, logTransaccion)
+                return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
             articulos = []
 
@@ -204,8 +204,8 @@ def orders_create(request):
                         prospectoClienteEncabezado=prospectoEncabezado, **detalle)
 
                 if data['facturacion']['codigoVendedor']:
-                    enviarCorreoVendedor(data)
-                enviarCorreoTodosClientes(data)
+                    enviarCorreoAdminAutorizador(data)
+                #enviarCorreoTodosClientes(data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
@@ -362,6 +362,8 @@ def orders_update(request, pk):
             if serializer.is_valid():
                 serializer.save()
                 if serializer.data['estado'] == 'Autorizado' and 'Previo-Pago' in serializer.data['metodoPago']:
+                    enviarCorreoCliente(serializer.data)
+                    enviarCorreoVendedor(serializer.data)
                     facturaCreada = FacturasEncabezados.objects.create(**{
                         "numeroPedido": serializer.data['numeroPedido'],
                         "estadoPedido": "En espera",
@@ -394,6 +396,7 @@ def orders_update(request, pk):
                         "importeTotalImpuestoPedido": "",
                         "estadoSRI": "",
                     })
+
                     for articulo in serializer.data['articulos']:
                         FacturasDetalles.objects.create(**{
                             "numeroPedido": serializer.data['numeroPedido'],
