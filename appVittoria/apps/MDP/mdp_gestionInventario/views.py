@@ -382,14 +382,29 @@ def uploadEXCEL_stockProductos(request):
 # INSERTAR DATOS EN LA BASE INDIVIDUAL
 def insertarDato_StockProducto(dato):
     try:
+        print('ENTRA 1')
         timezone_now = timezone.localtime(timezone.now())
         if dato[1] == None and dato[6] == None or dato[1] == 'None' and dato[6] == 'None':
             return 'Dato insertado correctamente'
+        print('ENTRA 2')
         facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=dato[1]).first()
+        print('ENTRA 3')
         if facturaEncabezadoQuery:
+            print('ENTRA IF', dato)
             facturaEncabezadoQuery.stock = facturaEncabezadoQuery.stock + int(
                 dato[4].replace('"', "") if dato[4] != "NULL" else 0)
+            facturaEncabezadoQuery.precioVentaA=float(
+                dato[7].replace('"', "") if dato[7] != "NULL" else 0)
+            facturaEncabezadoQuery.precioVentaB = float(
+                dato[8].replace('"', "") if dato[8] != "NULL" else 0)
+            facturaEncabezadoQuery.precioVentaC = float(
+                dato[9].replace('"', "") if dato[9] != "NULL" else 0)
+            facturaEncabezadoQuery.precioVentaD = float(
+                dato[10].replace('"', "") if dato[10] != "NULL" else 0)
+            facturaEncabezadoQuery.precioVentaE = float(
+                dato[11].replace('"', "") if dato[11] != "NULL" else 0)
             facturaEncabezadoQuery.updated_at = str(timezone_now)
+            print('SALE IF', facturaEncabezadoQuery)
             facturaEncabezadoQuery.save()
 
         return 'Dato insertado correctamente'
