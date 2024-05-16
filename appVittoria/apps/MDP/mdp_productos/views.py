@@ -445,17 +445,16 @@ def search_producto_codigo_list(request):
 
                 url_cortada = url_completa[:indice_com + 4] if indice_com != -1 else url_completa
                 if url_cortada=='Landing-Producto' or url_cortada=='Landing-Page':
-                    query.precio = query.precioLandingOferta
+                    query.precio = query.precioLandingOferta if query.precioLandingOferta is None else 0
                     query.mensaje = ""
                 elif url_cortada=='https://todomegacentro.megadescuento.com':
                     if valorUnitario ==0:
                         if(query.precioVentaA!=0):
-                            query.precio = query.precioVentaA
+                            query.precio = query.precioVentaA if query.precioVentaA is None else 0
                             query.mensaje = ""
                         else:
-                            query.precio = query.precioVentaB
+                            query.precio = query.precioVentaB if query.precioVentaB is None else 0
                             query.mensaje = ""
-                            valorUnitario=query.precio
                     elif query.precioVentaA == valorUnitario:
                         query.precio=query.precioVentaA
                         query.mensaje = ""
@@ -468,13 +467,13 @@ def search_producto_codigo_list(request):
                 elif url_cortada=='https://mayorista.megadescuento.com':
                     if valorUnitario == 0:
                         if (query.precioVentaC != 0):
-                            query.precio = query.precioVentaC
+                            query.precio = query.precioVentaC if query.precioVentaC is None else 0
                             query.mensaje = ""
                         elif (query.precioVentaD != 0):
-                            query.precio = query.precioVentaD
+                            query.precio = query.precioVentaD if query.precioVentaD is None else 0
                             query.mensaje = ""
                         else:
-                            query.precio = query.precioVentaE
+                            query.precio = query.precioVentaE if query.precioVentaE is None else 0
                             query.mensaje = ""
 
                         valorUnitario = query.precio
@@ -492,11 +491,9 @@ def search_producto_codigo_list(request):
                     else:
                         query.precio = 0
                         query.mensaje ="NO COINCIDE CON OFERTA MAYORISTA"
-
                 elif url_cortada=='https://contraentrega.megadescuento.com':
                     if valorUnitario == 0:
-                        query.precio = query.precioVentaBultos
-                        valorUnitario = query.precio
+                        query.precio = query.precioVentaBultos if query.precioVentaBultos is None else 0
                         query.mensaje = ""
                     elif query.precioVentaBultos == valorUnitario:
                         query.precio = query.precioVentaBultos
@@ -506,8 +503,7 @@ def search_producto_codigo_list(request):
                         query.mensaje ="NO COINCIDE CON LA OFERTA CONTRAENTREGA"
                 elif url_cortada=='https://megadescuento.com':
                     if valorUnitario == 0:
-                        query.precio = query.precioOferta
-                        valorUnitario = query.precio
+                        query.precio = query.precioOferta if query.precioOferta is None else 0
                         query.mensaje = ""
                     elif query.precioOferta == valorUnitario:
                         query.precio = query.precioOferta
@@ -517,8 +513,7 @@ def search_producto_codigo_list(request):
                         query.mensaje ="NO COINCIDE CON OFERTA MEGADESCUENTO"
                 else:
                     if valorUnitario == 0:
-                        query.precio = query.precioVentaF
-                        valorUnitario = query.precio
+                        query.precio = query.precioVentaF if query.precioVentaF is None else 0
                         query.mensaje = ""
                     elif query.precioVentaF == valorUnitario:
                         query.precio = query.precioVentaF
