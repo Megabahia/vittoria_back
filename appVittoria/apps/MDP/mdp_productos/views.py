@@ -279,7 +279,7 @@ def productos_update(request, pk):
             if 'created_at' in request.data:
                 request.data.pop('created_at')
             serializer = ProductosActualizarSerializer(query, data=request.data, partial=True)
-            if (request.data['idPadre'] != ''):
+            if ("idPadre" in request.data and request.data['idPadre'] != ''):
 
                 productoPadre = Productos.objects.filter(codigoBarras=request.data['idPadre']).first()
                 productoHijo = Productos.objects.filter(codigoBarras=request.data['codigoBarras']).first()
@@ -304,8 +304,6 @@ def productos_update(request, pk):
 
             if serializer.is_valid():
                 serializer.save()
-
-
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)
