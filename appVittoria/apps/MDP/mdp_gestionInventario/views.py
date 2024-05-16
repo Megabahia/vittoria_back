@@ -393,16 +393,16 @@ def insertarDato_StockProducto(dato):
             print('ENTRA IF', dato)
             facturaEncabezadoQuery.stock = facturaEncabezadoQuery.stock + int(
                 dato[4].replace('"', "") if dato[4] != "NULL" else 0)
-            facturaEncabezadoQuery.precioVentaA=float(
-                dato[7].replace('"', "") if dato[7] != "NULL" else 0)
-            facturaEncabezadoQuery.precioVentaB = float(
-                dato[8].replace('"', "") if dato[8] != "NULL" else 0)
-            facturaEncabezadoQuery.precioVentaC = float(
-                dato[9].replace('"', "") if dato[9] != "NULL" else 0)
-            facturaEncabezadoQuery.precioVentaD = float(
-                dato[10].replace('"', "") if dato[10] != "NULL" else 0)
-            facturaEncabezadoQuery.precioVentaE = float(
-                dato[11].replace('"', "") if dato[11] != "NULL" else 0)
+            facturaEncabezadoQuery.precioVentaA = round(float(
+                dato[7].replace('"', "") if dato[7] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.precioVentaB = round(float(
+                dato[8].replace('"', "") if dato[8] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.precioVentaC = round(float(
+                dato[9].replace('"', "") if dato[9] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.precioVentaD = round(float(
+                dato[10].replace('"', "") if dato[10] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.precioVentaE = round(float(
+                dato[11].replace('"', "") if dato[11] != "NULL" else 0), 2)
             facturaEncabezadoQuery.updated_at = str(timezone_now)
             print('SALE IF', facturaEncabezadoQuery)
             facturaEncabezadoQuery.save()
