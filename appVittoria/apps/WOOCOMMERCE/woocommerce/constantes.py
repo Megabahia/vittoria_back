@@ -83,8 +83,7 @@ def mapeoTodoMegaDescuento(request, articulos):
                                 objeto["key"] == '_shipping_wooccm11'), None),
             "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
                          objeto["key"] == '_shipping_wooccm12'), None),
-            "canalEnvio": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                objeto["key"] == '_shipping_wooccm12'), None),
+            "canalEnvio": 'https://todomegacentro.megadescuento.com',
         },
         "metodoPago": request.data['payment_method_title'],
         "numeroPedido": request.data['number'],
@@ -133,8 +132,8 @@ def mapeoTodoMegaDescuentoSinEnvio(request, articulos):
                                      objeto["key"] == '_billing_wooccm11'), None),
         },
         "envio": {
-            "nombres": request.data['shipping']['first_name'],
-            "apellidos": request.data['shipping']['last_name'],
+            "nombres": request.data['billing']['first_name'],
+            "apellidos": request.data['billing']['last_name'],
             "correo": request.data['billing']['email'],
             "identificacion": next((objeto['value'] for objeto in request.data['meta_data'] if
                                     objeto["key"] == '_billing_wooccm12'), None),
@@ -151,8 +150,7 @@ def mapeoTodoMegaDescuentoSinEnvio(request, articulos):
                                 objeto["key"] == '_billing_wooccm13'), None),
             "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
                          objeto["key"] == '_billing_wooccm16'), None),
-            "canalEnvio": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                objeto["key"] == '_shipping_wooccm12'), None),
+            "canalEnvio": 'https://todomegacentro.megadescuento.com',
         },
         "metodoPago": request.data['payment_method_title'],
         "numeroPedido": request.data['number'],
@@ -198,7 +196,7 @@ def mapeoTodoMayorista(request, articulos):
             "correoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
                                     objeto["key"] == '_billing_wooccm19'), None),
             "comprobantePago": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                     objeto["key"] == '_billing_wooccm11'), None),
+                                     objeto["key"] == '_billing_wooccm18'), None),
         },
         "envio": {
             "nombres": request.data['shipping']['first_name'],
@@ -221,8 +219,7 @@ def mapeoTodoMayorista(request, articulos):
                                 objeto["key"] == '_shipping_wooccm11'), None),
             "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
                          objeto["key"] == '_shipping_wooccm12'), None),
-            "canalEnvio": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                objeto["key"] == '_shipping_wooccm12'), None),
+            "canalEnvio": 'https://mayorista.megadescuento.com/',
         },
         "metodoPago": request.data['payment_method_title'],
         "numeroPedido": request.data['number'],
@@ -271,11 +268,11 @@ def mapeoTodoMayoristaSinEnvio(request, articulos):
                                      objeto["key"] == '_billing_wooccm11'), None),
         },
         "envio": {
-            "nombres": request.data['shipping']['first_name'],
-            "apellidos": request.data['shipping']['last_name'],
+            "nombres": request.data['billing']['first_name'],
+            "apellidos": request.data['billing']['last_name'],
             "correo": request.data['billing']['email'],
             "identificacion": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                    objeto["key"] == '_shipping_wooccm13'), None),
+                                    objeto["key"] == '_billing_wooccm13'), None),
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
@@ -289,8 +286,7 @@ def mapeoTodoMayoristaSinEnvio(request, articulos):
                                 objeto["key"] == '_billing_wooccm13'), None),
             "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
                          objeto["key"] == '_billing_wooccm16'), None),
-            "canalEnvio": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                objeto["key"] == '_shipping_wooccm12'), None),
+            "canalEnvio": 'https://mayorista.megadescuento.com/',
         },
         "metodoPago": request.data['payment_method_title'],
         "numeroPedido": request.data['number'],
@@ -402,8 +398,8 @@ def mapeoMegaDescuentoSinEnvio(request, articulos):
                                      objeto["key"] == '_billing_wooccm11'), None),
         },
         "envio": {
-            "nombres": request.data['shipping']['first_name'],
-            "apellidos": request.data['shipping']['last_name'],
+            "nombres": request.data['billing']['first_name'],
+            "apellidos": request.data['billing']['last_name'],
             "correo": request.data['billing']['email'],
             "identificacion": next((objeto['value'] for objeto in request.data['meta_data'] if
                                     objeto["key"] == '_billing_wooccm12'), None),
@@ -466,7 +462,7 @@ def mapeoTodoContraEntrega(request, articulos):
             "correoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
                                     objeto["key"] == '_billing_wooccm19'), None),
             "comprobantePago": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                     objeto["key"] == '_billing_wooccm11'), None),
+                                     objeto["key"] == '_billing_wooccm18'), None),
         },
         "envio": {
             "nombres": request.data['billing']['first_name'],
@@ -487,7 +483,7 @@ def mapeoTodoContraEntrega(request, articulos):
                                 objeto["key"] == '_billing_wooccm14'), None),
             "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
                          objeto["key"] == '_billing_wooccm15'), None),
-            "canalEnvio": '',
+            "canalEnvio": 'https://contraentrega.megadescuento.com/',
         },
         "metodoPago": request.data['payment_method_title'],
         "numeroPedido": request.data['number'],
@@ -502,7 +498,7 @@ def mapeoTodoContraEntrega(request, articulos):
 def mapeoTodoTiendaMulticompras(request, articulos):
     total = request.data['total']
     codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
-          objeto["key"] == '_billing_wooccm17'), None)
+          objeto["key"] == '_billing_wooccm16'), None)
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
@@ -513,51 +509,50 @@ def mapeoTodoTiendaMulticompras(request, articulos):
             "apellidos": request.data['billing']['last_name'],
             "correo": request.data['billing']['email'],
             "identificacion": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                    objeto["key"] == '_billing_wooccm12'), None),
+                                    objeto["key"] == '_billing_wooccm11'), None),
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
             "ciudad": request.data['billing']['city'],
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
-                            objeto["key"] == '_billing_wooccm15'), None),
+                            objeto["key"] == '_billing_wooccm12'), None),
             "calleSecundaria": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                     objeto["key"] == '_billing_wooccm14'), None),
+                                     objeto["key"] == '_billing_wooccm13'), None),
             "referencia": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                objeto["key"] == '_billing_wooccm13'), None),
+                                objeto["key"] == '_billing_wooccm14'), None),
             "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
-                         objeto["key"] == '_billing_wooccm16'), None),
+                         objeto["key"] == '_billing_wooccm15'), None),
             "codigoVendedor": codigoVendedor,
             "nombreVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                    objeto["key"] == '_billing_wooccm18'), None),
+                                    objeto["key"] == '_billing_wooccm17'), None),
             "correoVendedor": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                    objeto["key"] == '_billing_wooccm19'), None),
+                                    objeto["key"] == '_billing_address_2'), None),
             "comprobantePago": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                     objeto["key"] == '_billing_wooccm11'), None),
+                                     objeto["key"] == '_billing_postcode'), None),
         },
         "envio": {
             "nombres": request.data['shipping']['first_name'],
             "apellidos": request.data['shipping']['last_name'],
             "correo": next((objeto['value'] for objeto in request.data['meta_data'] if
-                            objeto["key"] == '_shipping_wooccm13'), None),
+                            objeto["key"] == '_shipping_wooccm9'), None),
             "identificacion": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                    objeto["key"] == '_shipping_wooccm14'), None),
+                                    objeto["key"] == '_shipping_wooccm10'), None),
             "telefono": next((objeto['value'] for objeto in request.data['meta_data'] if
-                              objeto["key"] == '_shipping_wooccm15'), None),
+                              objeto["key"] == '_shipping_wooccm11'), None),
             "pais": "Ecuador",
             "provincia": provincias[request.data['shipping']['state']],
             "ciudad": request.data['shipping']['city'],
             "callePrincipal": request.data['shipping']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
-                            objeto["key"] == '_shipping_wooccm9'), None),
+                            objeto["key"] == '_shipping_wooccm12'), None),
             "calleSecundaria": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                     objeto["key"] == '_shipping_wooccm10'), None),
+                                     objeto["key"] == '_shipping_wooccm13'), None),
             "referencia": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                objeto["key"] == '_shipping_wooccm11'), None),
+                                objeto["key"] == '_shipping_wooccm14'), None),
             "gps": next((objeto['value'] for objeto in request.data['meta_data'] if
-                         objeto["key"] == '_shipping_wooccm12'), None),
-            "canalEnvio": next((objeto['value'] for objeto in request.data['meta_data'] if
-                                objeto["key"] == '_shipping_wooccm12'), None),
+                         objeto["key"] == '_shipping_wooccm15'), None),
+            "canalEnvio": 'https://tiendamulticompras.megadescuento.com',
         },
         "metodoPago": request.data['payment_method_title'],
         "numeroPedido": request.data['number'],
