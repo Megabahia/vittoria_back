@@ -6,7 +6,7 @@ from django.utils import timezone
 from urllib.parse import urlparse
 from django.db.models import Sum
 from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDescuentoSinEnvio, \
-    mapeoTodoMegaDescuentoSinEnvio,mapeoTodoMayorista,mapeoTodoMayoristaSinEnvio,mapeoTodoContraEntrega,mapeoTodoTiendaMulticompras
+    mapeoTodoMegaDescuentoSinEnvio,mapeoTodoMayorista,mapeoTodoMayoristaSinEnvio,mapeoTodoContraEntrega,mapeoTodoTiendaMulticompras, mapeoTodoMaxiDescuento, mapeoTodoMegaBahia
 from .serializers import (
     CreateOrderSerializer, PedidosSerializer,
 )
@@ -125,6 +125,10 @@ def orders_create(request):
                     data = mapeoTodoMayoristaSinEnvio(request, articulos)
             elif 'https://contraentrega.megadescuento.com/' in canal:
                 data = mapeoTodoContraEntrega(request, articulos)
+            elif 'https://maxidescuento.megadescuento.com/' in canal:
+                data = mapeoTodoMaxiDescuento(request, articulos)
+            elif 'https://megabahia.megadescuento.com/' in canal:
+                data = mapeoTodoMegaBahia(request, articulos)
             elif 'https://tiendamulticompras.megadescuento.com' in canal:
                 #validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
                 #                          objeto["key"] == '_shipping_wooccm13'), None)
@@ -397,7 +401,6 @@ def orders_list_bodega(request):
             err = {"error": 'Un error ha ocurrido: {}'.format(e)}
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
