@@ -101,7 +101,7 @@ def orders_create(request):
             nombreVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
                                     objeto["key"] == '_billing_wooccm18'), None)
 
-
+            print(canal)
             if 'https://megadescuento.com' in canal:
                 validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
                                           objeto["key"] == '_shipping_wooccm13'), None)
@@ -117,12 +117,7 @@ def orders_create(request):
                 else:
                     data = mapeoTodoMegaDescuentoSinEnvio(request, articulos)
             elif 'https://mayorista.megadescuento.com/' in canal:
-                validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
-                                          objeto["key"] == '_shipping_wooccm13'), None)
-                if '@' in validarDatosEnvio:
-                    data = mapeoTodoMayorista(request, articulos)
-                else:
-                    data = mapeoTodoMayoristaSinEnvio(request, articulos)
+                data = mapeoTodoMayorista(request, articulos)
             elif 'https://contraentrega.megadescuento.com/' in canal:
                 data = mapeoTodoContraEntrega(request, articulos)
             elif 'https://maxidescuento.megadescuento.com/' in canal:

@@ -4,7 +4,7 @@ from ...config.util2 import sendEmail as sendEmail2
 
 
 def enviarCorreoVendedorVentaConcreta(data):
-    usuario = Usuarios.objects.filter(username=data['facturacion']['codigoVendedor'].upper()).first()
+    usuario = Usuarios.objects.filter(username=(data['facturacion']['codigoVendedor'] or '').upper()).first()
     nuevoTexto = '''<p style="color:rgb(255,0,0)">El pedido ya fue despachado, está pendiente la confirmación de recepción y pago del pedido por parte del cliente.</p>
                                                 <p style="color:rgb(255,0,0)">SE LE INFORMARÁ CUANDO LA VENTA HAYA SIDO CONCRETADA Y EL PAQUETE HAYA SIDO ENTREGADO.</p>'''
     if usuario and 'Asesor comercial' == usuario.idRol.nombre or usuario and 'Director GCN' == usuario.idRol.nombre:
@@ -75,7 +75,7 @@ def enviarCorreoVendedorVentaConcreta(data):
 
 
 def enviarCorreoVendedorDevolucion(data):
-    usuario = Usuarios.objects.filter(username=data['facturacion']['codigoVendedor'].upper()).first()
+    usuario = Usuarios.objects.filter(username=(data['facturacion']['codigoVendedor'] or '').upper()).first()
     nuevoTexto = '''<p style="color:rgb(255,0,0)">El pedido ya fue despachado, está pendiente la confirmación de recepción y pago del pedido por parte del cliente.</p>
                                                 <p style="color:rgb(255,0,0)">SE LE INFORMARÁ CUANDO LA VENTA HAYA SIDO CONCRETADA Y EL PAQUETE HAYA SIDO ENTREGADO.</p>'''
     if usuario and 'Asesor comercial' == usuario.idRol.nombre or usuario and 'Director GCN' == usuario.idRol.nombre:
@@ -143,7 +143,7 @@ def enviarCorreoVendedorDevolucion(data):
         sendEmail(subject, txt_content, from_email, to, html_content)
 
 def enviarCorreoAdminAutorizador(data):
-    usuario = Usuarios.objects.filter(username=data['facturacion']['codigoVendedor'].upper()).first()
+    usuario = Usuarios.objects.filter(username=(data['facturacion']['codigoVendedor'] or '').upper()).first()
 
     #if usuario and 'Asesor comercial' == usuario.idRol.nombre or usuario and 'Director GCN' == usuario.idRol.nombre:
     subject, from_email, to = f"Su pedido {data['numeroPedido']} ha sido generado", "08d77fe1da-d09822@inbox.mailtrap.io", usuario.email
@@ -323,7 +323,7 @@ def enviarCorreoAdminAutorizador(data):
 
 
 def enviarCorreoVendedor(data):
-    usuario = Usuarios.objects.filter(username=data['facturacion']['codigoVendedor'].upper()).first()
+    usuario = Usuarios.objects.filter(username=(data['facturacion']['codigoVendedor'] or '').upper()).first()
 
     if usuario and 'Asesor comercial' == usuario.idRol.nombre or usuario and 'Director GCN' == usuario.idRol.nombre:
         subject, from_email, to = f"Su pedido {data['numeroPedido']} ha sido generado", "08d77fe1da-d09822@inbox.mailtrap.io", usuario.email
@@ -1222,7 +1222,7 @@ def enviarCorreoCourierDespacho(data):
 
 
 def enviarCorreoVendedorDespacho(data):
-    usuario = Usuarios.objects.filter(username=data['facturacion']['codigoVendedor'].upper()).first()
+    usuario = Usuarios.objects.filter(username=(data['facturacion']['codigoVendedor'] or '').upper()).first()
     nuevoTexto='''<p style="color:rgb(255,0,0)">El pedido ya fue despachado, está pendiente la confirmación de recepción y pago del pedido por parte del cliente.</p>
                                                 <p style="color:rgb(255,0,0)">SE LE INFORMARÁ CUANDO LA VENTA HAYA SIDO CONCRETADA Y EL PAQUETE HAYA SIDO ENTREGADO.</p>'''
     if usuario and 'Asesor comercial' == usuario.idRol.nombre or usuario and 'Director GCN' == usuario.idRol.nombre:
@@ -1478,7 +1478,7 @@ def enviarCorreoClienteRechazado(data):
 
 
 def enviarCorreoVendedorRechazado(data):
-    usuario = Usuarios.objects.filter(username=data['facturacion']['codigoVendedor'].upper()).first()
+    usuario = Usuarios.objects.filter(username=(data['facturacion']['codigoVendedor'] or '').upper()).first()
 
     if usuario and 'Vendedor' == usuario.idRol.nombre:
         subject, from_email, to = 'Envio de pedido rechazado', "08d77fe1da-d09822@inbox.mailtrap.io", data['correoCourier']
@@ -1662,7 +1662,6 @@ def enviarCorreoVendedorRechazado(data):
         </html>
         """
         sendEmail(subject, txt_content, from_email, to, html_content)
-
 
 
 def enviarCorreoNotificacionProductos(data):
