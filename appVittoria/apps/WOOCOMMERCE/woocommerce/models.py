@@ -55,3 +55,19 @@ class Pedidos(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)
+
+
+class Productos(models.Model):
+
+    pedido=models.ForeignKey(Pedidos, related_name='detalles', null=True, blank=True, on_delete=models.CASCADE)
+
+    nombre = models.CharField(max_length=150, null=True, blank=True)
+    codigoBarras = models.CharField(max_length=150, null=True, blank=True)
+    caracteristicas = models.CharField(max_length=250, null=True, blank=True)
+    cantidad = models.PositiveIntegerField(null=True, blank=True)
+    precio = models.FloatField(null=True, blank=True)
+    total = models.FloatField(null=True, blank=True)
+    bodega = models.CharField(max_length=150, null=True, blank=True)
+    imagen = models.CharField(max_length=500, null=True, blank=True)
+
+    estado = models.CharField(max_length=150, null=True, blank=True)

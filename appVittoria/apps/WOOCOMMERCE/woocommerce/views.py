@@ -8,8 +8,10 @@ from django.db.models import Sum
 from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDescuentoSinEnvio, \
     mapeoTodoMegaDescuentoSinEnvio,mapeoTodoMayorista,mapeoTodoMayoristaSinEnvio,mapeoTodoContraEntrega,mapeoTodoTiendaMulticompras, mapeoTodoMaxiDescuento, mapeoTodoMegaBahia
 from .serializers import (
-    CreateOrderSerializer, PedidosSerializer,
+    CreateOrderSerializer, PedidosSerializer, ProductosBodegaListSerializer
 )
+from django.db.models import Max
+
 from .models import (
     Pedidos
 )
@@ -18,6 +20,8 @@ from ...MDM.mdm_clientes.models import Clientes
 from ...MDM.mdm_clientes.serializers import ClientesUpdateSerializer
 
 from ...MDP.mdp_productos.models import Productos
+from ...WOOCOMMERCE.woocommerce.models import Productos as ProductosBodega
+
 from ...MDM.mdm_prospectosClientes.models import ProspectosClientes,ProspectosClientesDetalles
 
 # Sumar Fechas
@@ -350,52 +354,77 @@ def orders_list_bodega(request):
             offset = page_size * page
             limit = offset + page_size
             # Filtros
-            filters = {"state": "1"}
+            filters = {}
 
-            if 'inicio' in request.data and request.data['inicio'] != '':
-                filters['created_at__gte'] = str(request.data['inicio'])
-            if 'fin' in request.data and request.data['fin'] != '':
-                filters['created_at__lte'] = datetime.strptime(request.data['fin'], "%Y-%m-%d").date() + timedelta(
-                    days=1)
-
-            if 'codigoVendedor' in request.data and request.data['codigoVendedor'] != '':
-                filters['codigoVendedor'] = request.data['codigoVendedor'].upper()
-
-            if 'compania' in request.data and request.data['compania'] != '':
-                vendedores = list(
-                    Usuarios.objects.filter(compania=request.data['compania']).values_list('username', flat=True))
-                filters['codigoVendedor__in'] = vendedores
-
-            if 'canalEnvio' in request.data and request.data['canalEnvio'] != '':
-                filters['canalEnvio'] = request.data['canalEnvio'].upper()
-            if 'canal' in request.data and request.data['canal'] != '':
-                filters['canal'] = request.data['canal'].upper()
-            if 'rol' in request.data:
-                if 'codigoVendedor' in request.data:
-                    filters.pop('codigoVendedor')
-                elif 'compania' in request.data:
-                    filters.pop('codigoVendedor__in')
+            #if 'inicio' in request.data and request.data['inicio'] != '':
+            #    filters['created_at__gte'] = str(request.data['inicio'])
+            #if 'fin' in request.data and request.data['fin'] != '':
+            #    filters['created_at__lte'] = datetime.strptime(request.data['fin'], "%Y-%m-%d").date() + timedelta(
+            #        days=1)
 
             if 'bodega' in request.data and request.data['bodega'] != '':
-                bodega_upper = request.data['bodega'].upper()
-                filters['articulos__contains'] = [
-                    {
-                        "bodega": bodega_upper
-                    }
-                ]
+                filters['bodega'] = request.data['bodega'].upper()
 
-            # Serializar los datos
-            query = Pedidos.objects.filter(**filters).order_by('-created_at')
+            if 'estado' in request.data and request.data['estado'] != '':
+                filters['estado'] = request.data['estado'].upper()
 
-            suma_total = Pedidos.objects.filter(**filters).aggregate(Sum('total'))
-            serializer = PedidosSerializer(query[offset:limit], many=True)
-            new_serializer_data = {'cont': query.count(), 'info': serializer.data,'suma_total':suma_total}
+            unique_ids = ProductosBodega.objects.filter(**filters).values('bodega', 'pedido_id').annotate(
+                max_id=Max('id')
+            ).values_list('max_id', flat=True)
+
+            # Consulta principal para obtener los registros completos basados en los ID obtenidos en la subconsulta
+            query = ProductosBodega.objects.filter(id__in=unique_ids)
+            serializer=ProductosBodegaListSerializer(query, many = True)
+
             # envio de datos
-            return Response(new_serializer_data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             err = {"error": 'Un error ha ocurrido: {}'.format(e)}
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def orders_listOne_bodega(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'listOne/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+
+        if request.method == 'POST':
+            try:
+                queryProducts = ProductosBodega.objects.filter(pedido_id=pk, bodega=request.data['bodega'])
+                datosFiltrados = ProductosBodega.objects.filter(pedido_id=pk)
+
+                if len(queryProducts) != len(datosFiltrados):
+                    mostrar_datos = False
+                else:
+                    mostrar_datos = True
+
+                    # tomar el dato
+                serializer = ProductosBodegaListSerializer(queryProducts)
+                new_serializer_data = {'info': serializer.data, 'mostrar_datos': mostrar_datos}
+
+                createLog(logModel, new_serializer_data, logTransaccion)
+                return Response(new_serializer_data, status=status.HTTP_200_OK)
+            except Pedidos.DoesNotExist:
+                err = {"error": "No existe"}
+                createLog(logModel, err, logExcepcion)
+                return Response(err, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

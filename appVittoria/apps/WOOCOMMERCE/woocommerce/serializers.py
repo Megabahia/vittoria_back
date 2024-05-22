@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from .models import Pedidos
 from ...ADM.vittoria_usuarios.models import Usuarios
+from ...WOOCOMMERCE.woocommerce.models import Productos as ProductosBodega
 
 
 class PedidosSerializer(serializers.ModelSerializer):
@@ -41,3 +42,19 @@ class CreateOrderSerializer(serializers.Serializer):
         """
         return Pedidos.objects.create(**validated_data)
 
+class ProductosBodegaListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductosBodega
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        data = super(ProductosBodegaListSerializer, self).to_representation(instance)
+        pedido = Pedidos.objects.filter(id=data['pedido']).first()
+        if pedido:
+            data['fechaPedido'] = pedido.created_at
+            data['canalPedido'] = pedido.canal
+        else:
+            data['fechaPedido'] = ''
+            data['canalPedido'] = ''
+
+        return data
