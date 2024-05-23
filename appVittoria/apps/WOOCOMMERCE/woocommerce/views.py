@@ -409,8 +409,8 @@ def orders_listOne_bodega(request, pk):
                 else:
                     mostrar_datos = True
 
-                    # tomar el dato
-                serializer = ProductosBodegaListSerializer(queryProducts)
+                # tomar el dato
+                serializer = ProductosBodegaListSerializer(queryProducts, many=True)
                 new_serializer_data = {'info': serializer.data, 'mostrar_datos': mostrar_datos}
 
                 createLog(logModel, new_serializer_data, logTransaccion)
