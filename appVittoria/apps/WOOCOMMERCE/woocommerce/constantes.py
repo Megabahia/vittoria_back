@@ -171,7 +171,7 @@ def mapeoTodoMayorista(request, articulos):
     apellidos = request.data['billing']['last_name']
     correo = request.data['billing']['email']
     identificacion = next((objeto['value'] for objeto in request.data['meta_data'] if
-                            objeto["key"] == '_billing_wooccm15'), None),
+                            objeto["key"] == '_billing_wooccm15'), None)
     telefono = request.data['billing']['company']
     pais = "Ecuador"
     provincia = provincias[request.data['billing']['state']]
@@ -388,7 +388,7 @@ def mapeoMegaDescuentoSinEnvio(request, articulos):
     ciudad = request.data['billing']['city']
     callePrincipal = request.data['billing']['address_1']
     numero = next((objeto['value'] for objeto in request.data['meta_data'] if
-                    objeto["key"] == '_billing_wooccm13'), None),
+                    objeto["key"] == '_billing_wooccm13'), None)
     calleSecundaria = next((objeto['value'] for objeto in request.data['meta_data'] if
                              objeto["key"] == '_billing_wooccm16'), None)
     referencia = next((objeto['value'] for objeto in request.data['meta_data'] if
