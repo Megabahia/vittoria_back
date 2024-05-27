@@ -144,12 +144,12 @@ def insertarDato_Factura(dato):
             fotoOriginal = aws_s3_instancia.get_foto_original_url(facturaEncabezado['codigoBarras'])
             facturaEncabezado['nombre'] = dato[3].replace('"', "") if dato[3] != "NULL" else None
             facturaEncabezado['descripcion'] = dato[5].replace('"', "") if dato[5] != "NULL" else None
-            facturaEncabezado['precioVentaA'] = dato[7].replace('"', "") if dato[7] != "NULL" else None
+            facturaEncabezado['precioVentaA'] = round(float(dato[7].replace('"', "") if dato[7] != "NULL" else 0), 2)
             facturaEncabezado['estado'] = 'Activo'
             facturaEncabezado['stock'] = 0
             facturaEncabezado['created_at'] = str(timezone_now)
             facturaEncabezado['updated_at'] = str(timezone_now)
-            facturaEncabezado['precioOferta'] = dato[7].replace('"', "") if dato[7] != "NULL" else None
+            facturaEncabezado['precioOferta'] = round(float(dato[7].replace('"', "") if dato[7] != "NULL" else 0), 2)
             facturaEncabezado['fechaElaboracion'] = str(timezone_now)[:10]
             facturaEncabezado['fechaCaducidad'] = str(timezone_now)[:10]
             facturaEncabezado['proveedor'] = dato[6].replace('"', "") if dato[6] != "NULL" else None
