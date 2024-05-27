@@ -428,6 +428,42 @@ def orders_listOne_bodega(request, pk):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+def orders_update_bodega(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'update/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'ESCRIBIR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            query = ProductosBodega.objects.get(pk=pk)
+        except ProductosBodega.DoesNotExist:
+            errorNoExiste = {'error': 'No existe'}
+            createLog(logModel, errorNoExiste, logExcepcion)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'POST':
+
+            serializer = ProductosBodegaListSerializer(query, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def orders_update(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
@@ -560,7 +596,6 @@ def orders_update(request, pk):
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
