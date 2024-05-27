@@ -544,6 +544,18 @@ def orders_update(request, pk):
                             "importeImpuestoDescuento": "",
                             "facturaEncabezado": facturaCreada
                         })
+                        ProductosBodega.objects.create(**{
+                            "pedido": query,
+                            "nombre": articulo['articulo'],
+                            "codigoBarras": articulo['codigo'] if 'codigo' in articulo else None,
+                            "caracteristicas": articulo['caracteristicas'] if 'caracteristicas' in articulo else None,
+                            "cantidad": articulo['cantidad'] if 'cantidad' in articulo else None,
+                            "precio": articulo['valorUnitario'] if 'valorUnitario' in articulo else None,
+                            "total": articulo['precio'] if 'precio' in articulo else None,
+                            "bodega": articulo['bodega'] if 'bodega' in articulo else None,
+                            "imagen": articulo['imagen'] if 'imagen' in articulo else None,
+                            "estado": 'Autorizado',
+                        })
                 if serializer.data['estado'] == 'Empacado':
                     enviarCorreoCliente(serializer.data)
                     enviarCorreoVendedorEmpacado(serializer.data)
