@@ -9,7 +9,9 @@ from .serializers import (
     CreateContactSerializer, ContactosSerializer,
 )
 from ...MDP.mdp_productos.models import Productos
-
+from ...WOOCOMMERCE.woocommerce.models import (
+    Pedidos
+)
 from .models import (
     Contactos
 )
@@ -93,6 +95,7 @@ def gdc_create_contact(request):
 
                 if serializer.is_valid():
                     serializer.save()
+
                     serializerProspect = {
                         "nombres": serializer.data['facturacion']['nombres'],
                         "apellidos": serializer.data['facturacion']['apellidos'],
@@ -137,6 +140,8 @@ def gdc_create_contact(request):
                         "envio": '',
                         "state": 1
                     }
+                    Pedidos.objects.create(**serializer.data)
+
                     prospectoEncabezado = ProspectosClientes.objects.create(**serializerProspect)
                     detalleProspecto = []
 
@@ -381,6 +386,8 @@ def contacts_update(request, pk):
             serializer = ContactosSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
+                Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).update(estado='Entregado')
+
                 #Obtener id cliente
                 datosCliente=Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion']).first()
                 #CREAR FACTURACION ELECTRONICA
