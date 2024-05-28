@@ -6,7 +6,7 @@ from django.utils import timezone
 from urllib.parse import urlparse
 from django.db.models import Sum
 from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDescuentoSinEnvio, \
-    mapeoTodoMegaDescuentoSinEnvio,mapeoTodoMayorista,mapeoTodoMayoristaSinEnvio,mapeoTodoContraEntrega,mapeoTodoTiendaMulticompras, mapeoTodoMaxiDescuento, mapeoTodoMegaBahia
+    mapeoTodoMegaDescuentoSinEnvio,mapeoTodoMayoristaSinEnvio,mapeoTodoContraEntrega,mapeoTodoTiendaMulticompras, mapeoTodoMaxiDescuento, mapeoTodoMegaBahia
 from .serializers import (
     CreateOrderSerializer, PedidosSerializer, ProductosBodegaListSerializer
 )
@@ -31,7 +31,8 @@ from datetime import timedelta
 from .utils import (
     enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoClienteDespacho, enviarCorreoCourierDespacho,
     enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado,
-    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes,enviarCorreoVendedorEmpacado,enviarCorreoAdminAutorizador
+    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes,enviarCorreoVendedorEmpacado,enviarCorreoAdminAutorizador,
+    enviarCorreoAdministradorGDC
 )
 from ...ADM.vittoria_usuarios.models import Usuarios
 from ...ADM.vittoria_catalogo.models import Catalogo
@@ -105,7 +106,6 @@ def orders_create(request):
             nombreVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
                                     objeto["key"] == '_billing_wooccm18'), None)
 
-            print(canal)
             if 'https://megadescuento.com' in canal:
                 validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
                                           objeto["key"] == '_shipping_wooccm13'), None)
@@ -209,7 +209,6 @@ def orders_create(request):
 
                 if data['facturacion']['codigoVendedor']:
                     enviarCorreoAdminAutorizador(data)
-                #enviarCorreoTodosClientes(data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)

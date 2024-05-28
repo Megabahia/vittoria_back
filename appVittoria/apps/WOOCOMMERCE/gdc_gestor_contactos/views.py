@@ -13,7 +13,9 @@ from ...MDP.mdp_productos.models import Productos
 from .models import (
     Contactos
 )
-
+from ..woocommerce.utils import (
+    enviarCorreoAdministradorGDC
+)
 from django.db.models import Sum
 from django.db.models import Q
 
@@ -156,9 +158,11 @@ def gdc_create_contact(request):
                     for detalle in detalleProspecto:
                         ProspectosClientesDetalles.objects.create(
                             prospectoClienteEncabezado=prospectoEncabezado, **detalle)
+                    enviarCorreoAdministradorGDC(request.data)
 
                     createLog(logModel, serializer.data, logTransaccion)
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
                 createLog(logModel, serializer.errors, logExcepcion)
                 return Response(status=status.HTTP_200_OK)
 
