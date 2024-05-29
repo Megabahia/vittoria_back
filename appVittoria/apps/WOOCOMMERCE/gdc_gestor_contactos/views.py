@@ -222,6 +222,7 @@ def gdc_create_venta(request):
                             if productoPadre:
                                 productoPadre.stock = productoPadre.stock - int(articulo['cantidad'])
                                 productoPadre.save()
+                enviarCorreoAdministradorGDC(request.data)
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)

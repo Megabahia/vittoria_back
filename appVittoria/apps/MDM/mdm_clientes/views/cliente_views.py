@@ -137,7 +137,7 @@ def cliente_findOne_cedula(request):
     }
     try:
         try:
-            query = Clientes.objects.get(cedula=str(request.data['cedula']), state=1)
+            query = Clientes.objects.filter(cedula=str(request.data['cedula']), state=1).first()
         except Clientes.DoesNotExist:
             err = {"error": "No existe"}
             createLog(logModel, err, logExcepcion)
