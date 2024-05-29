@@ -211,6 +211,7 @@ def gdc_create_venta(request):
 
             if serializer.is_valid():
                 serializer.save()
+                Pedidos.objects.create(**serializer.data)
 
                 for articulo in serializer.data['articulos']:
                     producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
