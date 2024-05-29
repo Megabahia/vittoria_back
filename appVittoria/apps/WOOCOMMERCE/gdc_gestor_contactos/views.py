@@ -213,16 +213,16 @@ def gdc_create_venta(request):
                 serializer.save()
                 Pedidos.objects.create(**serializer.data)
 
-                for articulo in serializer.data['articulos']:
-                    producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
-                    if producto:
-                        producto.stock = producto.stock - int(articulo['cantidad'])
-                        producto.save()
-                        if producto.idPadre != '':
-                            productoPadre = Productos.objects.filter(codigoBarras=producto.idPadre, state=1).first()
-                            if productoPadre:
-                                productoPadre.stock = productoPadre.stock - int(articulo['cantidad'])
-                                productoPadre.save()
+                #for articulo in serializer.data['articulos']:
+                #    producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
+                #    if producto:
+                #        producto.stock = producto.stock - int(articulo['cantidad'])
+                #        producto.save()
+                #        if producto.idPadre != '':
+                #            productoPadre = Productos.objects.filter(codigoBarras=producto.idPadre, state=1).first()
+                #            if productoPadre:
+                #                productoPadre.stock = productoPadre.stock - int(articulo['cantidad'])
+                #                productoPadre.save()
                 enviarCorreoAdministradorGDC(request.data)
 
                 createLog(logModel, serializer.data, logTransaccion)
@@ -453,16 +453,18 @@ def contacts_update(request, pk):
                 else:
                     Clientes.objects.create(**serializerClient)
 
-                for articulo in serializer.data['articulos']:
-                    producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
-                    if producto:
-                        producto.stock = producto.stock - int(articulo['cantidad'])
-                        producto.save()
-                        if producto.idPadre != '':
-                            productoPadre = Productos.objects.filter(codigoBarras=producto.idPadre, state=1).first()
-                            if productoPadre:
-                                productoPadre.stock = productoPadre.stock - int(articulo['cantidad'])
-                                productoPadre.save()
+                if 'Entregado' in serializer.data['estado']:
+                    for articulo in serializer.data['articulos']:
+                        producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
+                        if producto:
+                            producto.stock = producto.stock - int(articulo['cantidad'])
+                            producto.save()
+                            if producto.idPadre != '':
+                                productoPadre = Productos.objects.filter(codigoBarras=producto.idPadre, state=1).first()
+                                if productoPadre:
+                                    productoPadre.stock = productoPadre.stock - int(articulo['cantidad'])
+                                    productoPadre.save()
+
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)
