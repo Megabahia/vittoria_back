@@ -18,6 +18,9 @@ from .models import (
 from ..woocommerce.utils import (
     enviarCorreoAdministradorGDC
 )
+from ..woocommerce.serializers import (
+    PedidosSerializer
+)
 from django.db.models import Sum
 from django.db.models import Q
 
@@ -386,9 +389,16 @@ def contacts_update(request, pk):
                 queryClientes = Clientes.objects.filter(Q(telefono=request.data['facturacion']['telefono'])).first()
 
             serializer = ContactosSerializer(query, data=request.data, partial=True)
-            if serializer.is_valid():
+
+            query2=Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
+
+            serializerPedido = PedidosSerializer(query2, data=request.data, partial=True)
+
+            if serializer.is_valid() and serializerPedido.is_valid():
                 serializer.save()
-                Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).update(estado='Entregado')
+                serializerPedido.save()
+
+                #Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).update(estado='Entregado')
 
                 #Obtener id cliente
                 datosCliente=Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion']).first()
@@ -468,7 +478,6 @@ def contacts_update(request, pk):
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)
-
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
