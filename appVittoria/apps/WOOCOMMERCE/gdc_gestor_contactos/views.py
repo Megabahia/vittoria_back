@@ -390,15 +390,17 @@ def contacts_update(request, pk):
 
             serializer = ContactosSerializer(query, data=request.data, partial=True)
 
-            query2=Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
-
-            serializerPedido = PedidosSerializer(query2, data=request.data, partial=True)
-
-            if serializer.is_valid() and serializerPedido.is_valid():
+            if serializer.is_valid():
                 serializer.save()
-                serializerPedido.save()
 
-                #Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).update(estado='Entregado')
+                query2 = Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
+
+                serializerPedido = PedidosSerializer(query2, data=request.data, partial=True)
+                if serializerPedido.is_valid():
+                    serializerPedido.save()
+
+                if 'Entregado' in serializer.data['estado']:
+                    Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).update(estado='Entregado')
 
                 #Obtener id cliente
                 datosCliente=Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion']).first()
