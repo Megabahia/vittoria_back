@@ -3,7 +3,7 @@ from django.urls import path
 from .views import (
     orders_create, orders_list, orders_listOne, orders_update,
     orders_devolucion, orders_notificacion, orders_list_bodega,
-    orders_listOne_bodega,orders_update_bodega
+    orders_listOne_bodega, orders_update_bodega
 )
 
 app_name = 'woocommerce'
