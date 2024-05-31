@@ -350,7 +350,8 @@ def uploadEXCEL_stockProductos(request):
                 continue
             else:
                 if worksheet.iter_cols():
-                    resultadoInsertar = insertarDato_StockProducto(dato)
+                    resetearStock = True if 'resetearStock' in request.data and request.data['resetearStock'] == 'true' else False
+                    resultadoInsertar = insertarDato_StockProducto(dato, resetearStock)
                     if resultadoInsertar != 'Dato insertado correctamente':
                         if resultadoInsertar in 'Codigo producto':
                             contInvalidos += 1
@@ -380,7 +381,7 @@ def uploadEXCEL_stockProductos(request):
 
 
 # INSERTAR DATOS EN LA BASE INDIVIDUAL
-def insertarDato_StockProducto(dato):
+def insertarDato_StockProducto(dato, resetearStock):
     try:
         print('ENTRA 1')
         timezone_now = timezone.localtime(timezone.now())
@@ -391,8 +392,11 @@ def insertarDato_StockProducto(dato):
         print('ENTRA 3')
         if facturaEncabezadoQuery:
             print('ENTRA IF', dato)
-            facturaEncabezadoQuery.stock = facturaEncabezadoQuery.stock + int(
-                dato[4].replace('"', "") if dato[4] != "NULL" else 0)
+            if resetearStock:
+                facturaEncabezadoQuery.stock = int(dato[4].replace('"', "") if dato[4] != "NULL" else 0)
+            else:
+                facturaEncabezadoQuery.stock = facturaEncabezadoQuery.stock + int(
+                    dato[4].replace('"', "") if dato[4] != "NULL" else 0)
             facturaEncabezadoQuery.precioVentaA = round(float(
                 dato[7].replace('"', "") if dato[7] != "NULL" else 0), 2)
             facturaEncabezadoQuery.precioVentaB = round(float(
