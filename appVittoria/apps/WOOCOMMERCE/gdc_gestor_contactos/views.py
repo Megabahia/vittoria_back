@@ -269,6 +269,9 @@ def contacts_list(request):
                 if request.data['telefono'] != '':
                     filters['facturacion__icontains'] = str(request.data['telefono'])
 
+            if 'numeroPedido' in request.data and request.data['numeroPedido'] != '':
+                filters['numeroPedido'] = str(request.data['numeroPedido'])
+
             if 'correo' in request.data:
                 if request.data['correo'] != '':
                     filters['facturacion__icontains'] = str(request.data['correo'])
