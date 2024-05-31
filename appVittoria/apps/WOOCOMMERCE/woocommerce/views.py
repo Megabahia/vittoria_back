@@ -309,7 +309,7 @@ def orders_list(request):
                 filters['canalEnvio'] = request.data['canalEnvio'].upper()
             if 'canal' in request.data and request.data['canal'] != '':
                 filters['canal'] = request.data['canal'].upper()
-            if 'rol' in request.data:
+            if 'rol' in request.data and 1 == request.data['rol']:
                 if 'codigoVendedor' in request.data:
                     filters.pop('codigoVendedor')
                 elif 'compania' in request.data:

@@ -214,7 +214,8 @@ def gdc_create_venta(request):
 
             if serializer.is_valid():
                 serializer.save()
-                Pedidos.objects.create(**serializer.data)
+                dataPedidos = {**serializer.data, "codigoVendedor": serializer.data['facturacion']['codigoVendedor']}
+                Pedidos.objects.create(**dataPedidos)
 
                 #for articulo in serializer.data['articulos']:
                 #    producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
@@ -394,8 +395,8 @@ def contacts_update(request, pk):
                 serializer.save()
 
                 query2 = Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
-
-                serializerPedido = PedidosSerializer(query2, data=request.data, partial=True)
+                dataPedidos = {**serializer.data, "codigoVendedor": serializer.data['facturacion']['codigoVendedor']}
+                serializerPedido = PedidosSerializer(query2, data=dataPedidos, partial=True)
                 if serializerPedido.is_valid():
                     serializerPedido.save()
 
