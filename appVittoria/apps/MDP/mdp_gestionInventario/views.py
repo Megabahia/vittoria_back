@@ -61,11 +61,11 @@ def uploadEXCEL_subirProductosProveedores(request):
                 request.data.pop('updated_at')
 
             serializer = ArchivosFacturasSerializer(data=request.data)
-            uploadEXCEL_crearProductos(request)
+            result = uploadEXCEL_crearProductos(request)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel, serializer.data, logTransaccion)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(result, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -123,7 +123,7 @@ def uploadEXCEL_crearProductos(request):
                   "incorrectos": contInvalidos,
                   "errores": errores
                   }
-        return Response(result, status=status.HTTP_201_CREATED)
+        return result
 
     except Exception as e:
         err = {"error": 'Error verifique el archivo, un error ha ocurrido: {}'.format(e)}
@@ -312,11 +312,11 @@ def productos_cargar_stock(request):
                 request.data.pop('updated_at')
 
             serializer = ArchivosFacturasSerializer(data=request.data)
-            uploadEXCEL_stockProductos(request)
+            result = uploadEXCEL_stockProductos(request)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel, serializer.data, logTransaccion)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(result, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -413,7 +413,7 @@ def uploadEXCEL_stockProductos(request):
                   "incorrectos": contInvalidos,
                   "errores": errores
                   }
-        return Response(result, status=status.HTTP_201_CREATED)
+        return result
 
     except Exception as e:
         err = {"error": 'Error verifique el archivo, un error ha ocurrido: {}'.format(e)}
@@ -491,7 +491,7 @@ def insertarDato_StockProducto(dato, resetearStock):
         if dato[1] == None and dato[6] == None or dato[1] == 'None' and dato[6] == 'None':
             return 'Dato insertado correctamente'
         facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=dato[1]).first()
-        if facturaEncabezadoQuery:
+        if facturaEncabezadoQuery and None is not facturaEncabezadoQuery:
             if resetearStock:
                 facturaEncabezadoQuery.stock = int(dato[4].replace('"', "") if dato[4] != "NULL" else 0)
             else:
@@ -510,8 +510,9 @@ def insertarDato_StockProducto(dato, resetearStock):
             facturaEncabezadoQuery.updated_at = str(timezone_now)
             print('SALE IF', facturaEncabezadoQuery)
             facturaEncabezadoQuery.save()
-
-        return 'Dato insertado correctamente'
+            return 'Dato insertado correctamente'
+        else:
+            return f'Error con el codigo: {dato[0]}'
     except Exception as e:
         print('error', e)
         return str(e)
