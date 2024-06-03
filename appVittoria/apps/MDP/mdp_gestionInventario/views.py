@@ -18,6 +18,8 @@ from django.utils import timezone
 from datetime import datetime
 # excel
 import openpyxl
+import pandas as pd
+import openpyxl
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
 
@@ -348,11 +350,11 @@ def productos_cargar_stock_megabahia(request):
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
             serializer = ArchivosFacturasSerializer(data=request.data)
-            uploadEXCEL_stockProductosMegabahia(request)
+            result = uploadEXCEL_stockProductosMegabahia(request)
             if serializer.is_valid():
                 serializer.save()
                 createLog(logModel, serializer.data, logTransaccion)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(result, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -425,17 +427,22 @@ def uploadEXCEL_stockProductosMegabahia(request):
     try:
         if request.method == 'POST':
             first = True  # si tiene encabezado
-            uploaded_file = request.FILES['archivo']
-            # you may put validations here to check extension or file size
-            wb = openpyxl.load_workbook(uploaded_file)
-            # getting a particular sheet by name out of many sheets
-            worksheet = wb["A"]
+            archivo_xls = request.FILES['archivo']
+            archivo_xlsx = 'archivo_convertido.xlsx'
+            # Utiliza pandas para leer el archivo .xls y guardarlo como .xlsx
+            df = pd.read_excel(archivo_xls, dtype=str)
+            df.to_excel(archivo_xlsx, index=False)
+            # Carga del archivo .xlsx con openpyxl
+            wb = openpyxl.load_workbook(archivo_xlsx)
+            # Seleccionar una hoja específica del libro, por ejemplo, la primera hoja
+            worksheet = wb.active
+            # Crear una lista para almacenar los datos
             lines = list()
-        for row in worksheet.iter_rows():
-
+        # Iterar sobre las filas y columnas de la hoja
+        for row in worksheet.iter_rows(values_only=True):
             row_data = list()
             for cell in row:
-                row_data.append(str(cell.value))
+                row_data.append(str(cell))
             lines.append(row_data)
 
         for dato in lines:
@@ -468,7 +475,7 @@ def uploadEXCEL_stockProductosMegabahia(request):
                   "incorrectos": contInvalidos,
                   "errores": errores
                   }
-        return Response(result, status=status.HTTP_201_CREATED)
+        return result
 
     except Exception as e:
         err = {"error": 'Error verifique el archivo, un error ha ocurrido: {}'.format(e)}
@@ -511,12 +518,15 @@ def insertarDato_StockProducto(dato, resetearStock):
 
 
 def insertarDato_StockProductoMegabahia(dato, resetearStock):
+    print('dato', dato)
     try:
         timezone_now = timezone.localtime(timezone.now())
         if dato[0] == None and dato[4] == None or dato[0] == 'None' and dato[4] == 'None':
             return 'Dato insertado correctamente'
-        facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=dato[0]).first()
-        if facturaEncabezadoQuery:
+        facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=str(dato[0])).first()
+        print('encontro', facturaEncabezadoQuery)
+        if facturaEncabezadoQuery and None is not facturaEncabezadoQuery:
+            print('Entro al if', resetearStock)
             if resetearStock:
                 facturaEncabezadoQuery.stock = int(dato[3].replace('"', "") if dato[3] != "NULL" else 0)
             else:
@@ -534,7 +544,9 @@ def insertarDato_StockProductoMegabahia(dato, resetearStock):
                 dato[9].replace('"', "") if dato[9] != "NULL" else 0), 2)
             facturaEncabezadoQuery.updated_at = str(timezone_now)
             facturaEncabezadoQuery.save()
-        return 'Dato insertado correctamente'
+            return 'Dato insertado correctamente'
+        else:
+            return f'Error con el codigo: {dato[0]}'
     except Exception as e:
         print('error', e)
         return str(e)
