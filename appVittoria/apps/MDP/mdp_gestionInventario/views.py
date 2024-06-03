@@ -322,6 +322,44 @@ def productos_cargar_stock(request):
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def productos_cargar_stock_megabahia(request):
+    """
+    El metodo sirve para crear
+    @type request: REcibe los campos de la tabla credito archivo
+    @rtype: DEvuelve el registro creado
+    """
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'create/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'CREAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            request.data['created_at'] = str(timezone_now)
+            if 'updated_at' in request.data:
+                request.data.pop('updated_at')
+            serializer = ArchivosFacturasSerializer(data=request.data)
+            uploadEXCEL_stockProductosMegabahia(request)
+            if serializer.is_valid():
+                serializer.save()
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 
 def uploadEXCEL_stockProductos(request):
     contValidos = 0
@@ -379,19 +417,74 @@ def uploadEXCEL_stockProductos(request):
         err = {"error": 'Error verifique el archivo, un error ha ocurrido: {}'.format(e)}
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+def uploadEXCEL_stockProductosMegabahia(request):
+    contValidos = 0
+    contInvalidos = 0
+    contTotal = 0
+    errores = []
+    try:
+        if request.method == 'POST':
+            first = True  # si tiene encabezado
+            uploaded_file = request.FILES['archivo']
+            # you may put validations here to check extension or file size
+            wb = openpyxl.load_workbook(uploaded_file)
+            # getting a particular sheet by name out of many sheets
+            worksheet = wb["A"]
+            lines = list()
+        for row in worksheet.iter_rows():
+
+            row_data = list()
+            for cell in row:
+                row_data.append(str(cell.value))
+            lines.append(row_data)
+
+        for dato in lines:
+            contTotal += 1
+            if first:
+                first = False
+                continue
+            else:
+                if worksheet.iter_cols():
+                    resetearStock = True if 'resetearStock' in request.data and request.data['resetearStock'] == 'true' else False
+                    resultadoInsertar = insertarDato_StockProductoMegabahia(dato, resetearStock)
+                    if resultadoInsertar != 'Dato insertado correctamente':
+                        if resultadoInsertar in 'Codigo producto':
+                            contInvalidos += 1
+                            errores.append(
+                                {"error": "Producto no encontrado " + str(contTotal) + ": " + str(resultadoInsertar)})
+                        else:
+                            contInvalidos += 1
+                            errores.append(
+                                {"error": "Error en la línea " + str(contTotal) + ": " + str(resultadoInsertar)})
+                    else:
+                        contValidos += 1
+                else:
+                    contInvalidos += 1
+                    errores.append({"error": "Error en la línea " + str(
+                        contTotal) + ": la fila tiene un tamaño incorrecto (" + str(len(dato)) + ")"})
+
+        result = {"mensaje": "La Importación se Realizo Correctamente",
+                  "correctos": contValidos,
+                  "incorrectos": contInvalidos,
+                  "errores": errores
+                  }
+        return Response(result, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        err = {"error": 'Error verifique el archivo, un error ha ocurrido: {}'.format(e)}
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 # INSERTAR DATOS EN LA BASE INDIVIDUAL
 def insertarDato_StockProducto(dato, resetearStock):
     try:
-        print('ENTRA 1')
         timezone_now = timezone.localtime(timezone.now())
         if dato[1] == None and dato[6] == None or dato[1] == 'None' and dato[6] == 'None':
             return 'Dato insertado correctamente'
-        print('ENTRA 2')
         facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=dato[1]).first()
-        print('ENTRA 3')
         if facturaEncabezadoQuery:
-            print('ENTRA IF', dato)
             if resetearStock:
                 facturaEncabezadoQuery.stock = int(dato[4].replace('"', "") if dato[4] != "NULL" else 0)
             else:
@@ -415,6 +508,37 @@ def insertarDato_StockProducto(dato, resetearStock):
     except Exception as e:
         print('error', e)
         return str(e)
+
+
+def insertarDato_StockProductoMegabahia(dato, resetearStock):
+    try:
+        timezone_now = timezone.localtime(timezone.now())
+        if dato[0] == None and dato[4] == None or dato[0] == 'None' and dato[4] == 'None':
+            return 'Dato insertado correctamente'
+        facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=dato[0]).first()
+        if facturaEncabezadoQuery:
+            if resetearStock:
+                facturaEncabezadoQuery.stock = int(dato[3].replace('"', "") if dato[3] != "NULL" else 0)
+            else:
+                facturaEncabezadoQuery.stock = facturaEncabezadoQuery.stock + int(
+                    dato[3].replace('"', "") if dato[3] != "NULL" else 0)
+            facturaEncabezadoQuery.precioVentaA = round(float(
+                dato[5].replace('"', "") if dato[5] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.precioVentaB = round(float(
+                dato[6].replace('"', "") if dato[6] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.precioVentaC = round(float(
+                dato[7].replace('"', "") if dato[7] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.precioVentaD = round(float(
+                dato[8].replace('"', "") if dato[8] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.precioVentaE = round(float(
+                dato[9].replace('"', "") if dato[9] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.updated_at = str(timezone_now)
+            facturaEncabezadoQuery.save()
+        return 'Dato insertado correctamente'
+    except Exception as e:
+        print('error', e)
+        return str(e)
+
 
 
 @api_view(['GET'])
