@@ -10,8 +10,8 @@ env = environ.Env()
 # Establecer el directorio base del proyecto
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Tomar variables de entorno del archivo .env
-environ.Env.read_env(os.path.join(BASE_DIR, '../appVittoria/.env.test'))
-#environ.Env.read_env(os.path.join(BASE_DIR, '../appVittoria/.env'))
+#environ.Env.read_env(os.path.join(BASE_DIR, '../appVittoria/.env.test'))
+environ.Env.read_env(os.path.join(BASE_DIR, '../appVittoria/.env'))
 # VARIABLES GLOBALES
 endpointEmailAsignacionPassword = "/auth/usuario/asignacionPassword/"
 endpointEmailReseteoPassword = "/auth/usuario/reseteoPassword/"
