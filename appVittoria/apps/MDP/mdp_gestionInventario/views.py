@@ -364,6 +364,17 @@ def productos_cargar_stock_megabahia(request):
 
 
 def uploadEXCEL_stockProductos(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': 'mdp/gestion-inventario/cargar/stock/megadescuento',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'CREAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
     contValidos = 0
     contInvalidos = 0
     contTotal = 0
@@ -401,7 +412,11 @@ def uploadEXCEL_stockProductos(request):
                             contInvalidos += 1
                             errores.append(
                                 {"error": "Error en la línea " + str(contTotal) + ": " + str(resultadoInsertar)})
+                            createLog(logModel,
+                                      {"error": "Error en la línea " + str(contTotal) + ": " + str(resultadoInsertar)},
+                                      logTransaccion)
                     else:
+                        createLog(logModel, resultadoInsertar, logTransaccion)
                         contValidos += 1
                 else:
                     contInvalidos += 1
@@ -537,13 +552,13 @@ def insertarDato_StockProducto(dato, resetearStock):
             facturaEncabezadoQuery.precioVentaA = round(float(
                 dato[7].replace('"', "") if dato[7] != "NULL" else 0), 2)
             facturaEncabezadoQuery.precioVentaB = round(float(
-                dato[8].replace('"', "") if dato[8] != "NULL" else 0), 2)
+                dato[8].replace('"', "") if dato[8] != "None" else 0), 2)
             facturaEncabezadoQuery.precioVentaC = round(float(
-                dato[9].replace('"', "") if dato[9] != "NULL" else 0), 2)
+                dato[9].replace('"', "") if dato[9] != "None" else 0), 2)
             facturaEncabezadoQuery.precioVentaD = round(float(
-                dato[10].replace('"', "") if dato[10] != "NULL" else 0), 2)
+                dato[10].replace('"', "") if dato[10] != "None" else 0), 2)
             facturaEncabezadoQuery.precioVentaE = round(float(
-                dato[11].replace('"', "") if dato[11] != "NULL" else 0), 2)
+                dato[11].replace('"', "") if dato[11] != "None" else 0), 2)
             facturaEncabezadoQuery.updated_at = str(timezone_now)
             print('SALE IF', facturaEncabezadoQuery)
             facturaEncabezadoQuery.save()
