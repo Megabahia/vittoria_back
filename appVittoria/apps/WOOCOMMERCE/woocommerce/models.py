@@ -56,6 +56,8 @@ class Pedidos(models.Model):
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)
 
+    fotoCupon = models.FileField(blank=True, null=True, upload_to=upload_path)
+
 
 class Productos(models.Model):
 

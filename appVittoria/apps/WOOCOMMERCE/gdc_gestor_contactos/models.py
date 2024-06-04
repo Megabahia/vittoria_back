@@ -60,3 +60,5 @@ class Contactos(models.Model):
     archivoFormaPago=models.FileField(blank=True, null=True, upload_to=upload_path)
     numTransaccionTransferencia=models.CharField(max_length=255, null=True, blank=True)
     totalCobroEfectivo=models.FloatField(null=True)
+
+    fotoCupon = models.FileField(blank=True, null=True, upload_to=upload_path)

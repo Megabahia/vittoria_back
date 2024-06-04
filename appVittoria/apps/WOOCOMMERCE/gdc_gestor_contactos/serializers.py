@@ -41,3 +41,13 @@ class CreateContactSerializer(serializers.Serializer):
         """
         return Contactos.objects.create(**validated_data)
 
+    #def to_representation(self, instance):
+
+    #    print('ANTES')
+    #    data = super(CreateContactSerializer, self).to_representation(instance)
+    #    print('INSTANCE', instance.id)
+        #data.pop('id')
+    #    print('MITAD')
+    #    data['idPedido'] = instance.id
+    #    print('DESPUES', data)
+    #    return data
