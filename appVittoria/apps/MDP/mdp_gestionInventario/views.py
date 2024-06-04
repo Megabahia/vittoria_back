@@ -353,9 +353,9 @@ def productos_cargar_stock_megabahia(request):
             result = uploadEXCEL_stockProductosMegabahia(request)
             if serializer.is_valid():
                 serializer.save()
-                createLog(logModel, serializer.data, logTransaccion)
+                createLog(logModel, result, logTransaccion)
                 return Response(result, status=status.HTTP_201_CREATED)
-            createLog(logModel, serializer.errors, logExcepcion)
+            createLog(logModel, result, logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             err = {"error": 'Un error ha ocurrido: {}'.format(e)}
@@ -420,6 +420,17 @@ def uploadEXCEL_stockProductos(request):
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 def uploadEXCEL_stockProductosMegabahia(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': 'mdp/gestion-inventario/cargar/stock/megabahia',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'CREAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
     contValidos = 0
     contInvalidos = 0
     contTotal = 0
@@ -432,6 +443,29 @@ def uploadEXCEL_stockProductosMegabahia(request):
             # Utiliza pandas para leer el archivo .xls y guardarlo como .xlsx
             df = pd.read_excel(archivo_xls, dtype=str)
             df.to_excel(archivo_xlsx, index=False)
+            # listaCodigos = df['Cód. Producto'].tolist()
+            # # print('listaCodigos', listaCodigos)
+            # cantidades = pd.to_numeric(df['Existencia Total'])
+            # cantidadesList = cantidades.tolist()
+            # # print(cantidadesList)
+            # # Realizar la consulta SELECT IN y actualizar los valores de stock
+            # # codes = ['IWO-relojMD', 'TCL30SEMD3', 'sudadera-LIFEMD']
+            # # amount = [50, 50, 50]
+            # productos_update = []
+            # for codigo, cantidad in zip(listaCodigos, cantidadesList):
+            #     producto = ProductosMDP.objects.filter(codigoBarras=codigo).first()
+            #     if producto:
+            #         producto.stock = cantidad
+            #         productos_update.append(producto)
+            #
+            # ProductosMDP.objects.bulk_update(productos_update, fields=['stock'])
+            # # for producto in productos:
+            # #     print('se guardo', producto.codigoBarras)
+            # #     cantidad = int(df[df["Cód. Producto"] == producto.codigoBarras].iloc[0, 3])
+            # #     producto.stock = producto.stock + cantidad if cantidad >= 0 else 0
+            # #     producto.save()
+            # print('si guardo')
+            # return {'prueba'}
             # Carga del archivo .xlsx con openpyxl
             wb = openpyxl.load_workbook(archivo_xlsx)
             # Seleccionar una hoja específica del libro, por ejemplo, la primera hoja
@@ -453,6 +487,7 @@ def uploadEXCEL_stockProductosMegabahia(request):
             else:
                 if worksheet.iter_cols():
                     resetearStock = True if 'resetearStock' in request.data and request.data['resetearStock'] == 'true' else False
+                    logModel['dataEnviada'] = str(dato)
                     resultadoInsertar = insertarDato_StockProductoMegabahia(dato, resetearStock)
                     if resultadoInsertar != 'Dato insertado correctamente':
                         if resultadoInsertar in 'Codigo producto':
@@ -463,7 +498,9 @@ def uploadEXCEL_stockProductosMegabahia(request):
                             contInvalidos += 1
                             errores.append(
                                 {"error": "Error en la línea " + str(contTotal) + ": " + str(resultadoInsertar)})
+                        createLog(logModel, {"error": "Error en la línea " + str(contTotal) + ": " + str(resultadoInsertar)}, logTransaccion)
                     else:
+                        createLog(logModel, resultadoInsertar, logTransaccion)
                         contValidos += 1
                 else:
                     contInvalidos += 1
