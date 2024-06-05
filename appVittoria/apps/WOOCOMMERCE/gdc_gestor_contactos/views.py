@@ -396,12 +396,16 @@ def contacts_update(request, pk):
 
             if serializer.is_valid():
                 serializer.save()
-
+                fotoCupon=serializer.data['fotoCupon'].split(".com/")[1]
                 query2 = Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
-                dataPedidos = {**serializer.data, "codigoVendedor": serializer.data['facturacion']['codigoVendedor']}
+                dataPedidos = {**serializer.data, "codigoVendedor": serializer.data['facturacion']['codigoVendedor'], 'fotoCupon':None}
                 serializerPedido = PedidosSerializer(query2, data=dataPedidos, partial=True)
                 if serializerPedido.is_valid():
                     serializerPedido.save()
+                    query2.fotoCupon=fotoCupon
+                    query2.save()
+                else:
+                    print(serializerPedido.errors)
 
                 if 'Entregado' in serializer.data['estado']:
                     Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).update(estado='Entregado')
