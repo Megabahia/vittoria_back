@@ -10,6 +10,7 @@ from ..mdp_productos.models import (
 from .serializers import (
     ProductosSerializer, ArchivosFacturasSerializer, ProveedoresSerializer, ProductosResource, ProductosStockResource
 )
+from .utils import enviarCorreoInventario
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -315,6 +316,8 @@ def productos_cargar_stock(request):
             result = uploadEXCEL_stockProductos(request)
             if serializer.is_valid():
                 serializer.save()
+                enviarCorreoInventario(request.user, result)
+
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(result, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
@@ -353,6 +356,7 @@ def productos_cargar_stock_megabahia(request):
             result = uploadEXCEL_stockProductosMegabahia(request)
             if serializer.is_valid():
                 serializer.save()
+                enviarCorreoInventario(request.user, result)
                 createLog(logModel, result, logTransaccion)
                 return Response(result, status=status.HTTP_201_CREATED)
             createLog(logModel, result, logExcepcion)

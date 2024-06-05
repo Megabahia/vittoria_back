@@ -95,7 +95,7 @@ def gdc_create_contact(request):
                     })
 
                 serializer = CreateContactSerializer(data=request.data)
-
+                print(request)
                 if serializer.is_valid():
                     serializer.save()
 
