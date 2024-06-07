@@ -1933,9 +1933,9 @@ def enviarCorreoNotificacionProductos(data):
                                                                     {data['facturacion']['pais']}<br>
                                                                     {data['facturacion']['provincia']}<br>
                                                                     {data['facturacion']['ciudad']}<br>
-                                                                    {data['facturacion']['callePrincipal']}<br>
-                                                                    {data['facturacion']['numero']}<br>
-                                                                    {data['facturacion']['calleSecundaria']}<br>
+                                                                    {data['facturacion']['callePrincipal'] if 'callePrincipal' in data['facturacion'] else ''}<br>
+                                                                    {data['facturacion']['numero'] if 'numero' in data['facturacion'] else ''}<br>
+                                                                    {data['facturacion']['calleSecundaria'] if 'calleSecundaria' in data['facturacion'] else ''}<br>
                                                                     {data['facturacion']['referencia']} <br>
                                                                     <a href="mailto:{data['facturacion']['correo']}" target="_blank">{data['facturacion']['correo']}</a> </address>
                                                             </td>
