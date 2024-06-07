@@ -1936,7 +1936,7 @@ def enviarCorreoNotificacionProductos(data):
                                                                     {data['facturacion']['callePrincipal'] if 'callePrincipal' in data['facturacion'] else ''}<br>
                                                                     {data['facturacion']['numero'] if 'numero' in data['facturacion'] else ''}<br>
                                                                     {data['facturacion']['calleSecundaria'] if 'calleSecundaria' in data['facturacion'] else ''}<br>
-                                                                    {data['facturacion']['referencia']} <br>
+                                                                    {data['facturacion']['referencia'] if 'referencia' in data['facturacion'] else ''} <br>
                                                                     <a href="mailto:{data['facturacion']['correo']}" target="_blank">{data['facturacion']['correo']}</a> </address>
                                                             </td>
                                                             <td valign="top" width="50%" align="left" style="text-align:left;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif;padding:0">
