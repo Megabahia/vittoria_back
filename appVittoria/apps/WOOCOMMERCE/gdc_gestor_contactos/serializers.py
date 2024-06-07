@@ -41,13 +41,23 @@ class CreateContactSerializer(serializers.Serializer):
         """
         return Contactos.objects.create(**validated_data)
 
-    #def to_representation(self, instance):
-
-    #    print('ANTES')
-    #    data = super(CreateContactSerializer, self).to_representation(instance)
-    #    print('INSTANCE', instance.id)
-        #data.pop('id')
-    #    print('MITAD')
-    #    data['idPedido'] = instance.id
-    #    print('DESPUES', data)
-    #    return data
+    def to_representation(self, instance):
+        data = super(CreateContactSerializer, self).to_representation(instance)
+        import requests
+        articulos = data.pop('articulos')
+        articulosModificado = []
+        if articulos:
+            for articulo in articulos:
+                url = articulo['imagen']
+                response = requests.get(url)
+                import base64
+                b64_encoded = base64.b64encode(response.content)
+                # Convertir bytes a string y retornar
+                imagen = b64_encoded.decode('utf-8')
+                articulosModificado.append({
+                    **articulo,
+                    "imagen": f"data:image/jpg;base64,{imagen}"
+                })
+                print()
+        data['articulos'] = articulosModificado
+        return data
