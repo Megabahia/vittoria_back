@@ -1,4 +1,6 @@
 from rest_framework import serializers
+import requests
+import base64
 
 from .models import Contactos
 from ...ADM.vittoria_usuarios.models import Usuarios
@@ -43,14 +45,12 @@ class CreateContactSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         data = super(CreateContactSerializer, self).to_representation(instance)
-        import requests
         articulos = data.pop('articulos')
         articulosModificado = []
         if articulos:
             for articulo in articulos:
                 url = articulo['imagen']
                 response = requests.get(url)
-                import base64
                 b64_encoded = base64.b64encode(response.content)
                 # Convertir bytes a string y retornar
                 imagen = b64_encoded.decode('utf-8')
