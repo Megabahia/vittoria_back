@@ -271,11 +271,15 @@ def contacts_list(request):
                     filters['facturacion__icontains'] = str(request.data['telefono'])
 
             if 'numeroPedido' in request.data and request.data['numeroPedido'] != '':
-                filters['numeroPedido'] = str(request.data['numeroPedido'])
+                filters['numeroPedido__icontains'] = str(request.data['numeroPedido'])
 
-            if 'correo' in request.data:
-                if request.data['correo'] != '':
-                    filters['facturacion__icontains'] = str(request.data['correo'])
+            if 'nombre' in request.data:
+                if request.data['nombre'] != '':
+                    filters['facturacion__icontains'] = str(request.data['nombre'])
+
+            if 'apellido' in request.data:
+                if request.data['apellido'] != '':
+                    filters['facturacion__icontains'] = str(request.data['apellido'])
 
             if 'canalEnvio' in request.data and request.data['canalEnvio'] != '':
                 filters['canalEnvio'] = request.data['canalEnvio'].upper()
@@ -384,7 +388,7 @@ def contacts_update(request, pk):
 
         if request.method == 'POST':
 
-            if request.data['numeroComprobante'] is not None:
+            if 'numeroComprobante' in request.data and request.data['numeroComprobante'] is not None:
                 if Contactos.objects.filter(numeroComprobante=request.data['numeroComprobante']).exclude(pk=pk).first():
                     return Response(data='Ya existe el número de comprobante', status=status.HTTP_404_NOT_FOUND)
 

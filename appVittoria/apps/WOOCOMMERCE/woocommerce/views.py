@@ -289,7 +289,11 @@ def orders_list(request):
             # Filtros
             filters = {"state": "1"}
             if 'estado' in request.data and request.data['estado'] != '':
-                filters['estado__in'] = request.data['estado']
+                filters['estado'] = request.data['estado']
+
+            if 'usuarioVendedor' in request.data and request.data['usuarioVendedor'] != '':
+                filters['facturacion__contains'] = {"codigoVendedor": request.data['usuarioVendedor']}
+
 
             if 'inicio' in request.data and request.data['inicio'] != '':
                 filters['created_at__gte'] = str(request.data['inicio'])
@@ -316,12 +320,15 @@ def orders_list(request):
                     filters.pop('codigoVendedor__in')
 
 
+            companiaUsuario=Usuarios.objects.filter(email=request.user).values_list('compania', flat=True).first()
+            usuarios=Usuarios.objects.filter(compania=companiaUsuario).values('username','email','nombres','apellidos')
+
             # Serializar los datos
             query = Pedidos.objects.filter(**filters).order_by('-created_at')
-
-            suma_total = Pedidos.objects.filter(**filters).aggregate(Sum('total'))
+            estados = Pedidos.objects.values_list('estado', flat=True).distinct()
+            suma_total = Pedidos.objects.filter(estado='Entregado').aggregate(Sum('subtotal'))
             serializer = PedidosSerializer(query[offset:limit], many=True)
-            new_serializer_data = {'cont': query.count(), 'info': serializer.data,'suma_total':suma_total}
+            new_serializer_data = {'cont': query.count(), 'info': serializer.data, 'suma_total': suma_total, 'estados': estados, 'usuarios': usuarios}
             # envio de datos
             return Response(new_serializer_data, status=status.HTTP_200_OK)
         except Exception as e:
