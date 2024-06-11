@@ -376,12 +376,18 @@ def contacts_update(request, pk):
         try:
             logModel['dataEnviada'] = str(request.data)
             query = Contactos.objects.get(pk=pk, state=1)
+
         except Contactos.DoesNotExist:
             errorNoExiste = {'error': 'No existe'}
             createLog(logModel, errorNoExiste, logExcepcion)
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if request.method == 'POST':
+
+            if request.data['numeroComprobante'] is not None:
+                if Contactos.objects.filter(numeroComprobante=request.data['numeroComprobante']).exclude(pk=pk).first():
+                    return Response(data='Ya existe el número de comprobante', status=status.HTTP_404_NOT_FOUND)
+
             queryClientes=None
             if 'facturacion' in request.data and request.data['facturacion']['identificacion'] != '':
                 queryClientes = Clientes.objects.filter(
@@ -392,9 +398,14 @@ def contacts_update(request, pk):
             elif 'facturacion' in request.data and request.data['facturacion']['telefono'] != '':
                 queryClientes = Clientes.objects.filter(Q(telefono=request.data['facturacion']['telefono'])).first()
 
+
+
             serializer = ContactosSerializer(query, data=request.data, partial=True)
 
+
+
             if serializer.is_valid():
+
                 serializer.save()
                 fotoCupon=serializer.data['fotoCupon'].split(".com/")[1] if serializer.data['fotoCupon'] is not None else None
                 query2 = Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
