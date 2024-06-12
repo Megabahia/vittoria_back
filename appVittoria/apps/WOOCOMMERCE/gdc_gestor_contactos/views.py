@@ -273,13 +273,11 @@ def contacts_list(request):
             if 'numeroPedido' in request.data and request.data['numeroPedido'] != '':
                 filters['numeroPedido__icontains'] = str(request.data['numeroPedido'])
 
-            if 'nombre' in request.data:
-                if request.data['nombre'] != '':
-                    filters['facturacion__icontains'] = str(request.data['nombre'])
+            if 'nombre' in request.data and request.data['nombre'] != '':
+                filters['facturacion__nombres__icontains'] = str(request.data['nombre'])
 
-            if 'apellido' in request.data:
-                if request.data['apellido'] != '':
-                    filters['facturacion__icontains'] = str(request.data['apellido'])
+            if 'apellido' in request.data and request.data['apellido'] != '':
+                filters['facturacion__apellidos__icontains'] = str(request.data['apellido'])
 
             if 'canalEnvio' in request.data and request.data['canalEnvio'] != '':
                 filters['canalEnvio'] = request.data['canalEnvio'].upper()
