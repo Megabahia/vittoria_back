@@ -326,7 +326,13 @@ def orders_list(request):
             # Serializar los datos
             query = Pedidos.objects.filter(**filters).order_by('-created_at')
             estados = Pedidos.objects.values_list('estado', flat=True).distinct()
-            suma_total = Pedidos.objects.filter(estado='Entregado').aggregate(Sum('subtotal'))
+            if request.data['estado'] == 'Entregado':
+                suma_total = Pedidos.objects.filter(**filters).aggregate(Sum('subtotal'))
+                if suma_total['subtotal__sum'] is None:
+                    suma_total['subtotal__sum']=0
+            else:
+                suma_total = Pedidos.objects.filter(estado='Entregado').aggregate(Sum('subtotal'))
+
             serializer = PedidosSerializer(query[offset:limit], many=True)
             new_serializer_data = {'cont': query.count(), 'info': serializer.data, 'suma_total': suma_total, 'estados': estados, 'usuarios': usuarios}
             # envio de datos

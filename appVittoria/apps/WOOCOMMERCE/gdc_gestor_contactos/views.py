@@ -392,6 +392,10 @@ def contacts_update(request, pk):
                 if Contactos.objects.filter(numeroComprobante=request.data['numeroComprobante']).exclude(pk=pk).first():
                     return Response(data='Ya existe el número de comprobante', status=status.HTTP_404_NOT_FOUND)
 
+            if 'numTransaccionTransferencia' in request.data and request.data['numTransaccionTransferencia'] is not None:
+                if Contactos.objects.filter(numTransaccionTransferencia=request.data['numTransaccionTransferencia']).exclude(pk=pk).first():
+                    return Response(data='Ya existe el número de transacción', status=status.HTTP_404_NOT_FOUND)
+
             queryClientes=None
             if 'facturacion' in request.data and request.data['facturacion']['identificacion'] != '':
                 queryClientes = Clientes.objects.filter(
@@ -402,11 +406,7 @@ def contacts_update(request, pk):
             elif 'facturacion' in request.data and request.data['facturacion']['telefono'] != '':
                 queryClientes = Clientes.objects.filter(Q(telefono=request.data['facturacion']['telefono'])).first()
 
-
-
             serializer = ContactosSerializer(query, data=request.data, partial=True)
-
-
 
             if serializer.is_valid():
 
