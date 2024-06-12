@@ -2,7 +2,8 @@ from django.urls import path
 
 from .views import (
     productos_list, productos_create, productos_findOne, productos_update, productos_delete,
-    producto_images_findOne,
+    producto_images_findOne,productos_create_woocommerce,productos_update_woocommerce,
+    productos_delete_woocommerce,productos_restore_woocommerce,
     search_producto_list, abastecimiento_list, stock_list, caducidad_list, rotacion_list, refil_list,
     abastecimiento_create,
     uploadEXCEL_crearProductos, productoImagen_list, prediccion_crosseling_list,
@@ -17,6 +18,10 @@ urlpatterns = [
     # PRODUCTOS
     path('list/', productos_list, name="productos_list"),
     path('create/', productos_create, name="productos_create"),
+    path('create/woocommerce', productos_create_woocommerce, name="productos_create_woocommerce"),
+    path('update/woocommerce', productos_update_woocommerce, name="productos_update_woocommerce"),
+    path('delete/woocommerce', productos_delete_woocommerce, name="productos_delete_woocommerce"),
+    path('restore/woocommerce', productos_restore_woocommerce, name="productos_restore_woocommerce"),
     path('listOne/<int:pk>', productos_findOne, name="productos_findOne"),
     path('listOne/free/<int:pk>', productos_findOne_free, name="productos_findOne_free"),
     path('listOne/codigoProducto/<str:pk>', productos_findOne_codigo_producto, name="productos_findOne_codigo_producto"),

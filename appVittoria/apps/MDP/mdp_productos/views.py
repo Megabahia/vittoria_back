@@ -243,6 +243,8 @@ def productos_create(request):
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
 # ACTUALIZAR
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -1211,3 +1213,89 @@ def productos_exportar(request):
     response['Content-Disposition'] = 'attachment; filename="reporte_productos.xlsx"'
     wb.save(response)
     return response
+
+
+@api_view(['POST'])
+def productos_create_woocommerce(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'create/woocommerce',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'CREAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+
+        logModel['dataEnviada'] = str(request.data)
+        errorNoExiste = {'error': 'Producto creado'}
+
+        createLog(logModel, errorNoExiste, logExcepcion)
+        return Response(errorNoExiste, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def productos_update_woocommerce(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'update/woocommerce',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'ESCRIBIR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+
+        logModel['dataEnviada'] = str(request.data)
+        errorNoExiste = {'error': 'Producto actualizado'}
+
+        createLog(logModel, errorNoExiste, logExcepcion)
+        return Response(errorNoExiste, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def productos_delete_woocommerce(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'delete/woocommerce',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'BORRAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+
+        logModel['dataEnviada'] = str(request.data)
+        errorNoExiste = {'error': 'Producto eliminado'}
+
+        createLog(logModel, errorNoExiste, logExcepcion)
+        return Response(errorNoExiste, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def productos_restore_woocommerce(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'restore/woocommerce',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'ESCRIBIR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+
+        logModel['dataEnviada'] = str(request.data)
+        errorNoExiste = {'error': 'Producto restaurado'}
+
+        createLog(logModel, errorNoExiste, logExcepcion)
+        return Response(errorNoExiste, status=status.HTTP_200_OK)
