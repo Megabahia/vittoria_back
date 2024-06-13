@@ -24,6 +24,7 @@ from openpyxl import Workbook
 from django.http import HttpResponse
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
+from .constantes import mapeoCrearProducto,mapeoActualizarProducto,mapeoRestarurarProducto
 
 # declaracion variables log
 datosAux = datosProductosMDP()
@@ -241,9 +242,6 @@ def productos_create(request):
             err = {"error": 'Un error ha ocurrido: {}'.format(e)}
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 
 # ACTUALIZAR
 @api_view(['POST'])
@@ -1229,12 +1227,22 @@ def productos_create_woocommerce(request):
         'dataRecibida': '{}'
     }
     if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
 
-        logModel['dataEnviada'] = str(request.data)
-        errorNoExiste = {'error': 'Producto creado'}
+            data=mapeoCrearProducto(request)
+            serializer = ProductoCreateSerializer(data = data)
 
-        createLog(logModel, errorNoExiste, logExcepcion)
-        return Response(errorNoExiste, status=status.HTTP_200_OK)
+            if serializer.is_valid():
+                serializer.save()
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            err = {"error": "Un error ha ocurrido: {}".format(e)}
+            createLog(logModel,err,logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def productos_update_woocommerce(request):
@@ -1249,16 +1257,55 @@ def productos_update_woocommerce(request):
         'fechaFin': str(timezone_now),
         'dataRecibida': '{}'
     }
-    if request.method == 'POST':
+    try:
 
         logModel['dataEnviada'] = str(request.data)
-        errorNoExiste = {'error': 'Producto actualizado'}
+        index = request.data['permalink'].find('.com')
+        if index != -1:
+            canal = request.data['permalink'][:index + 4]
+        else:
+            canal = request.data['permalink']
 
-        createLog(logModel, errorNoExiste, logExcepcion)
-        return Response(errorNoExiste, status=status.HTTP_200_OK)
+        query = Productos.objects.filter(codigoBarras=request.data['sku'], woocommerceId=request.data['id'],
+                                         canal=canal, state=1).exclude(codigoBarras=request.data['sku'],
+                                                                       woocommerceId=request.data['id'],
+                                                                       canal=canal).first()
 
+        if query is not None:
+            errorNoExiste = {'error': 'Ya existe el producto'}
+            createLog(logModel, errorNoExiste, logExcepcion)
+            return Response(errorNoExiste, status=status.HTTP_404_NOT_FOUND)
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            query = Productos.objects.get(codigoBarras=request.data['sku'],
+                                                                       woocommerceId=request.data['id'],
+                                                                       canal=canal, state=1)
+        except Productos.DoesNotExist:
+            errorNoExiste = {'error': 'No existe'}
+            createLog(logModel, errorNoExiste, logExcepcion)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'POST':
+            now = timezone.localtime(timezone.now())
+            request.data['updated_at'] = str(now)
+            if 'created_at' in request.data:
+                request.data.pop('created_at')
 
-@api_view(['POST'])
+            data = mapeoActualizarProducto(request)
+
+            serializer = ProductosActualizarSerializer(query, data=data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
 def productos_delete_woocommerce(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
@@ -1271,13 +1318,25 @@ def productos_delete_woocommerce(request):
         'fechaFin': str(timezone_now),
         'dataRecibida': '{}'
     }
-    if request.method == 'POST':
+    try:
+        try:
+            query = Productos.objects.get(woocommerceId=request.data['id'], state=1)
+        except Productos.DoesNotExist:
+            err = {"error": "No existe"}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
 
-        logModel['dataEnviada'] = str(request.data)
-        errorNoExiste = {'error': 'Producto eliminado'}
+        if request.method == 'DELETE':
 
-        createLog(logModel, errorNoExiste, logExcepcion)
-        return Response(errorNoExiste, status=status.HTTP_200_OK)
+            query.estado='Inactivo'
+            query.state=0
+            query.save()
+            createLog(logModel, 'Ha ocurrido un error al retirar el producto de la lista', logExcepcion)
+            return Response('Producto retirado de la lista', status=status.HTTP_200_OK)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def productos_restore_woocommerce(request):
@@ -1292,10 +1351,50 @@ def productos_restore_woocommerce(request):
         'fechaFin': str(timezone_now),
         'dataRecibida': '{}'
     }
-    if request.method == 'POST':
+    try:
 
         logModel['dataEnviada'] = str(request.data)
-        errorNoExiste = {'error': 'Producto restaurado'}
+        index = request.data['permalink'].find('.com')
+        if index != -1:
+            canal = request.data['permalink'][:index + 4]
+        else:
+            canal = request.data['permalink']
 
-        createLog(logModel, errorNoExiste, logExcepcion)
-        return Response(errorNoExiste, status=status.HTTP_200_OK)
+        query = Productos.objects.filter(codigoBarras=request.data['sku'], woocommerceId=request.data['id'],
+                                         canal=canal, state=1).exclude(codigoBarras=request.data['sku'],
+                                                                       woocommerceId=request.data['id'],
+                                                                       canal=canal).first()
+
+        if query is not None:
+            errorNoExiste = {'error': 'Ya existe el producto'}
+            createLog(logModel, errorNoExiste, logExcepcion)
+            return Response(errorNoExiste, status=status.HTTP_404_NOT_FOUND)
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            query = Productos.objects.get(codigoBarras=request.data['sku'],
+                                          woocommerceId=request.data['id'],
+                                          canal=canal, state=1)
+        except Productos.DoesNotExist:
+            errorNoExiste = {'error': 'No existe'}
+            createLog(logModel, errorNoExiste, logExcepcion)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'POST':
+            now = timezone.localtime(timezone.now())
+            request.data['updated_at'] = str(now)
+            if 'created_at' in request.data:
+                request.data.pop('created_at')
+
+            data = mapeoRestarurarProducto(request)
+
+            serializer = ProductosActualizarSerializer(query, data=data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
