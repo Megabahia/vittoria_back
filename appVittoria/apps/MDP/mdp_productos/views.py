@@ -1,3 +1,5 @@
+from idlelib import query
+
 from .models import (
     ProductoImagen,
     Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion, IngresoProductos
@@ -24,7 +26,7 @@ from openpyxl import Workbook
 from django.http import HttpResponse
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
-from .constantes import mapeoCrearProducto,mapeoActualizarProducto,mapeoRestarurarProducto
+from .constantes import mapeoCrearProducto,mapeoActualizarProducto
 
 # declaracion variables log
 datosAux = datosProductosMDP()
@@ -1328,10 +1330,10 @@ def productos_delete_woocommerce(request):
 
         if request.method == 'DELETE':
 
-            query.estado='Inactivo'
-            query.state=0
+            query.estado ='Inactivo'
+            query.state =0
             query.save()
-            createLog(logModel, 'Ha ocurrido un error al retirar el producto de la lista', logExcepcion)
+            createLog(logModel, 'Producto retirado de la lista', logExcepcion)
             return Response('Producto retirado de la lista', status=status.HTTP_200_OK)
     except Exception as e:
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
@@ -1352,48 +1354,30 @@ def productos_restore_woocommerce(request):
         'dataRecibida': '{}'
     }
     try:
-
         logModel['dataEnviada'] = str(request.data)
+
         index = request.data['permalink'].find('.com')
         if index != -1:
             canal = request.data['permalink'][:index + 4]
         else:
             canal = request.data['permalink']
 
-        query = Productos.objects.filter(codigoBarras=request.data['sku'], woocommerceId=request.data['id'],
-                                         canal=canal, state=1).exclude(codigoBarras=request.data['sku'],
-                                                                       woocommerceId=request.data['id'],
-                                                                       canal=canal).first()
-
-        if query is not None:
-            errorNoExiste = {'error': 'Ya existe el producto'}
-            createLog(logModel, errorNoExiste, logExcepcion)
-            return Response(errorNoExiste, status=status.HTTP_404_NOT_FOUND)
         try:
-            logModel['dataEnviada'] = str(request.data)
-            query = Productos.objects.get(codigoBarras=request.data['sku'],
-                                          woocommerceId=request.data['id'],
-                                          canal=canal, state=1)
+            query = Productos.objects.filter(codigoBarras=request.data['sku'], woocommerceId=request.data['id'],
+                                             canal=canal).first()
+
+            if request.method == 'POST':
+                query.estado = 'Activo'
+                query.state = 1
+
+                query.save()
+                createLog(logModel, 'Se ha restaurado el producto', logExcepcion)
+                return Response('Producto restaurado', status=status.HTTP_200_OK)
         except Productos.DoesNotExist:
-            errorNoExiste = {'error': 'No existe'}
-            createLog(logModel, errorNoExiste, logExcepcion)
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        if request.method == 'POST':
-            now = timezone.localtime(timezone.now())
-            request.data['updated_at'] = str(now)
-            if 'created_at' in request.data:
-                request.data.pop('created_at')
+            err = {"error": "No existe"}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
 
-            data = mapeoRestarurarProducto(request)
-
-            serializer = ProductosActualizarSerializer(query, data=data, partial=True)
-
-            if serializer.is_valid():
-                serializer.save()
-                createLog(logModel, serializer.data, logTransaccion)
-                return Response(serializer.data)
-            createLog(logModel, serializer.errors, logExcepcion)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
