@@ -35,7 +35,7 @@ def mapeoActualizarProducto(request):
         "nombre":request.data['name'],
         "descripcion":request.data['description'],
         "stock":int(request.data['stock_quantity']),
-        "costoCompra":float(request.data['price']),
+        "costoCompra":0,
         "precioVentaA":float(request.data['regular_price']),
         "precioVentaB":float(request.data['sale_price']),
         "precioVentaC":0.00,
