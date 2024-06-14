@@ -15,6 +15,9 @@ from .serializers import (
     ListarProductoCreateSerializer,
 )
 from rest_framework import status
+from urllib.parse import urlparse
+from ...ADM.vittoria_catalogo.models import Catalogo
+
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -1231,6 +1234,17 @@ def productos_create_woocommerce(request):
     if request.method == 'POST':
         try:
             logModel['dataEnviada'] = str(request.data)
+
+            dominio_completo = request.headers.get('X-Wc-Webhook-Source')
+            # Utiliza urlparse para obtener la información de la URL
+            parsed_url = urlparse(dominio_completo)
+            # Combina el nombre de host (dominio) y el esquema (protocolo)
+            domain = parsed_url.netloc
+            dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
+            if dominio_permitidos is None:
+                error = f"Llego un dominio: {domain}"
+                createLog(logModel, error, logTransaccion)
+                return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
             data=mapeoCrearProducto(request)
             serializer = ProductoCreateSerializer(data = data)

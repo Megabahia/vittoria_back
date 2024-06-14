@@ -57,9 +57,12 @@ def catalogo_list(request):
 
             # Serializar los datos
             query = Catalogo.objects.filter(**filters).order_by('-created_at')
+            print(query)
             serializer = CatalogoListaSerializer(query[offset:limit], many=True)
+            serializerAllDta= CatalogoListaSerializer(query,many=True)
             new_serializer_data = {'cont': query.count(),
-                                   'info': serializer.data}
+                                   'info': serializer.data,
+                                   'data':serializerAllDta.data}
             # envio de datos
             return Response(new_serializer_data, status=status.HTTP_200_OK)
         except Exception as e:
