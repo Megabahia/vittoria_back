@@ -138,6 +138,8 @@ def cliente_findOne_cedula(request):
     try:
         try:
             query = Clientes.objects.filter(cedula=str(request.data['cedula']), state=1).first()
+            if query is None:
+                return Response('No existe el cliente', status=status.HTTP_404_NOT_FOUND)
         except Clientes.DoesNotExist:
             err = {"error": "No existe"}
             createLog(logModel, err, logExcepcion)

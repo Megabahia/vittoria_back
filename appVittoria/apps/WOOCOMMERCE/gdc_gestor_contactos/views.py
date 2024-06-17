@@ -488,7 +488,7 @@ def contacts_update(request, pk):
 
                 if 'Entregado' in serializer.data['estado']:
                     for articulo in serializer.data['articulos']:
-                        producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
+                        producto = Productos.objects.filter(codigoBarras=articulo['codigo'], canal=articulo['canal'], woocommerceId=articulo['woocommerceId'], state=1).first()
                         if producto:
                             producto.stock = producto.stock - int(articulo['cantidad'])
                             producto.save()

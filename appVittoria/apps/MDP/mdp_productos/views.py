@@ -78,11 +78,18 @@ def productos_list(request):
             if 'proveedor' in request.data and request.data['proveedor'] != '':
                 filters['proveedor'] = request.data['proveedor']
 
+            #Se realiza la exraccion de los canales de los productos por el motivo de
+            #que existen productos con el mismo codigo pero con diferente canal y para realziar el filtro
+            #al obtener un producto
+            queryCanal = list(Productos.objects.values_list('canal', flat=True).distinct())
+
             # Serializar los datos
+
             query = Productos.objects.filter(**filters).order_by('-created_at')
             serializer = ProductosListSerializer(query[offset:limit], many=True)
             new_serializer_data = {'cont': query.count(),
-                                   'info': serializer.data}
+                                   'info': serializer.data,
+                                   'canal': queryCanal}
             # envio de datos
             return Response(new_serializer_data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -266,11 +273,11 @@ def productos_update(request, pk):
     }
     try:
         logModel['dataEnviada'] = str(request.data)
-        query = Productos.objects.filter(codigoBarras=request.data['codigoBarras'], state=1).exclude(pk=pk).first()
-        if query is not None:
-            errorNoExiste = {'error': 'Ya existe el producto'}
-            createLog(logModel, errorNoExiste, logExcepcion)
-            return Response(errorNoExiste, status=status.HTTP_404_NOT_FOUND)
+        query = Productos.objects.filter(codigoBarras=request.data['codigoBarras'], canal=request.data['canal'], state=1).exclude(pk=pk).first()
+        #if query is not None:
+        #    errorNoExiste = {'error': 'Ya existe el producto'}
+        #    createLog(logModel, errorNoExiste, logExcepcion)
+        #    return Response(errorNoExiste, status=status.HTTP_404_NOT_FOUND)
         try:
             logModel['dataEnviada'] = str(request.data)
             query = Productos.objects.get(pk=pk, state=1)
@@ -436,13 +443,18 @@ def search_producto_codigo_list(request):
             filters = {
                 'codigoBarras': request.data['codigoBarras'],
                 'state': 1,
-                'estado': 'Activo'
+                'estado': 'Activo',
+                'canal': request.data['canalProducto']
+
             }
+
+            if request.data['canalProducto'] is None or request.data['canalProducto'] == '':
+                createLog(logModel, 'Seleccione un canal', logExcepcion)
+                return Response('Seleccione un canal', status=status.HTTP_404_NOT_FOUND)
+
             query = Productos.objects.filter(**filters).first()
-            print('REQUEST',query)
             # Verifica si el objeto existe antes de aplicar más filtros
             if query:
-                print('CANAL', request.data['canal'])
                 url_completa = request.data['canal']
                 valorUnitario = float(request.data['valorUnitario'])
 
