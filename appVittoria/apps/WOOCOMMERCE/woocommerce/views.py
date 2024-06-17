@@ -571,7 +571,7 @@ def orders_update(request, pk):
                     enviarCorreoCliente(serializer.data)
                     enviarCorreoVendedorEmpacado(serializer.data)
                     for articulo in serializer.data['articulos']:
-                        producto = Productos.objects.filter(codigoBarras=articulo['codigo'], canal=articulo['canal'], woocommerceId=articulo['woocommerceId'], state=1).first()
+                        producto = Productos.objects.filter(codigoBarras=articulo['codigo'], canal=articulo['canal'], state=1).first()
 
                         if producto:
                             producto.stock = producto.stock - int(articulo['cantidad'])
