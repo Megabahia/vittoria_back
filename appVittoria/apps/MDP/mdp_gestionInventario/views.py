@@ -580,7 +580,7 @@ def insertarDato_StockProductoMegabahia(dato, resetearStock):
         timezone_now = timezone.localtime(timezone.now())
         if dato[0] == None and dato[4] == None or dato[0] == 'None' and dato[4] == 'None':
             return 'Dato insertado correctamente'
-        facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=str(dato[0])).first()
+        facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=str(dato[0]), canal='megabahia.megadescuento.com').first()
         print('encontro', facturaEncabezadoQuery)
         if facturaEncabezadoQuery and None is not facturaEncabezadoQuery:
             print('Entro al if', resetearStock)
@@ -600,6 +600,7 @@ def insertarDato_StockProductoMegabahia(dato, resetearStock):
             facturaEncabezadoQuery.precioVentaE = round(float(
                 dato[9].replace('"', "") if dato[9] != "NULL" else 0), 2)
             facturaEncabezadoQuery.updated_at = str(timezone_now)
+            facturaEncabezadoQuery.canal = 'megabahia.megadescuento.com'
             facturaEncabezadoQuery.save()
             return 'Dato insertado correctamente'
         else:
