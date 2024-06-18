@@ -41,7 +41,7 @@ class Productos(models.Model):
     parametrizacion = models.ForeignKey(Parametrizaciones, null=True, blank=True,
                                         on_delete=models.DO_NOTHING)  # Relacion Con la categoria
 
-    woocommerceId = models.IntegerField(null=True, blank=True)
+    woocommerceId = models.CharField(max_length=150,null=True, blank=True)
     canal = models.CharField(max_length=150, null=True, blank=True)
 
     estado = models.CharField(max_length=150, null=True, default="Inactivo", blank=True)
