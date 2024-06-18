@@ -507,6 +507,10 @@ def orders_update(request, pk):
             if serializer.is_valid():
                 serializer.save()
                 if serializer.data['estado'] == 'Autorizado' and 'Previo-Pago' in serializer.data['metodoPago']:
+                    numero_guia = generar_numero_guia()
+
+                    print('NUM GUIA: ',numero_guia)
+
                     enviarCorreoCliente(serializer.data)
                     enviarCorreoVendedor(serializer.data)
                     facturaCreada = FacturasEncabezados.objects.create(**{
@@ -567,6 +571,8 @@ def orders_update(request, pk):
                             "imagen": articulo['imagen'] if 'imagen' in articulo else None,
                             "estado": 'Autorizado',
                         })
+
+
                 if serializer.data['estado'] == 'Empacado':
                     enviarCorreoCliente(serializer.data)
                     enviarCorreoVendedorEmpacado(serializer.data)
@@ -620,6 +626,26 @@ def orders_update(request, pk):
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+def generar_numero_guia():
+    last_year = None
+    last_month = None
+    counter = 0
+
+    today = datetime.datetime.now()
+    year_two_digits = today.year % 100
+    month = today.month
+    formatted_month = f"{month:02}"
+
+    # Verifica si es un nuevo mes o año para resetear el contador
+    if (last_month != month) or (last_year != today.year):
+        counter = 1
+        last_month = month
+        last_year = today.year
+    else:
+        counter += 1
+
+    return f"{year_two_digits}{formatted_month}{counter:04}"
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
