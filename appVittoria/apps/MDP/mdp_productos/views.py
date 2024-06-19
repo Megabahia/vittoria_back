@@ -1,5 +1,3 @@
-from idlelib import query
-
 from .models import (
     ProductoImagen,
     Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion, IngresoProductos

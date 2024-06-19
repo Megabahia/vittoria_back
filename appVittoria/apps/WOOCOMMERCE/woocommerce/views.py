@@ -632,10 +632,15 @@ def orders_update(request, pk):
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 def generar_numero_guia():
-    pedido=Pedidos.objects.exclude(numeroGuia__isnull=True).latest('created_at')
+    from django.db.models import Max
 
-    last_year = pedido.numeroGuia[:2]
-    last_month = pedido.numeroGuia[2:4]
+    # Obtén el valor máximo de numeroGuia
+    max_numero_guia = Pedidos.objects.aggregate(Max('numeroGuia'))['numeroGuia__max']
+    print(max_numero_guia)
+
+    # Encuentra el pedido que tiene ese numeroGuia
+    pedido = Pedidos.objects.filter(numeroGuia=max_numero_guia).first()
+
     counter = 0
 
     today = datetime.now()
@@ -643,7 +648,14 @@ def generar_numero_guia():
     month = today.month
     formatted_month = f"{month:02}"
 
+    if max_numero_guia is None:
+        return f"{year_two_digits}{formatted_month}{1:04}"
+
     if pedido is not None:
+        print('entro if')
+        last_year = pedido.numeroGuia[:2]
+        last_month = pedido.numeroGuia[2:4]
+
         if (last_month != formatted_month) or (last_year != str(today.year)[-2:]):
             counter = 1
         else:
