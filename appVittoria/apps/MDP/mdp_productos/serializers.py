@@ -23,7 +23,7 @@ class ProductosSerializer(serializers.ModelSerializer):
 class ProductosListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Productos
-        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor','idPadre']
+        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal']
 
     def to_representation(self, instance):
         data = super(ProductosListSerializer, self).to_representation(instance)

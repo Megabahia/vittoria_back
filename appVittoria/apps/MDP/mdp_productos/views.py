@@ -73,6 +73,9 @@ def productos_list(request):
             if 'codigoBarras' in request.data and request.data['codigoBarras'] != '':
                 filters['codigoBarras__icontains'] = request.data['codigoBarras']
 
+            if 'canalProducto' in request.data and request.data['canalProducto'] != '':
+                filters['canal__icontains'] = request.data['canalProducto']
+
             if 'proveedor' in request.data and request.data['proveedor'] != '':
                 filters['proveedor'] = request.data['proveedor']
 
