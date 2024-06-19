@@ -476,6 +476,7 @@ def orders_update_bodega(request, pk):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def orders_update(request, pk):
+    request.POST._mutable = True
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi + 'update/',
@@ -503,13 +504,16 @@ def orders_update(request, pk):
             # request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
+
+            if query.numeroGuia is None and 'estado' in request.data and request.data['estado'] == 'Autorizado':
+                numero_guia = generar_numero_guia()
+                request.data['numeroGuia'] = numero_guia
+
             serializer = PedidosSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                if serializer.data['estado'] == 'Autorizado' and 'Previo-Pago' in serializer.data['metodoPago']:
-                    numero_guia = generar_numero_guia()
 
-                    print('NUM GUIA: ',numero_guia)
+                if serializer.data['estado'] == 'Autorizado' and 'Previo-Pago' in serializer.data['metodoPago']:
 
                     enviarCorreoCliente(serializer.data)
                     enviarCorreoVendedor(serializer.data)
@@ -628,23 +632,25 @@ def orders_update(request, pk):
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 def generar_numero_guia():
-    last_year = None
-    last_month = None
+    pedido=Pedidos.objects.exclude(numeroGuia__isnull=True).latest('created_at')
+
+    last_year = pedido.numeroGuia[:2]
+    last_month = pedido.numeroGuia[2:4]
     counter = 0
 
-    today = datetime.datetime.now()
+    today = datetime.now()
     year_two_digits = today.year % 100
     month = today.month
     formatted_month = f"{month:02}"
 
-    # Verifica si es un nuevo mes o año para resetear el contador
-    if (last_month != month) or (last_year != today.year):
-        counter = 1
-        last_month = month
-        last_year = today.year
-    else:
-        counter += 1
+    if pedido is not None:
+        if (last_month != formatted_month) or (last_year != str(today.year)[-2:]):
+            counter = 1
+        else:
+            countNumGuia = pedido.numeroGuia[-4:]
+            counter = int(countNumGuia) + 1
 
+    # Verifica si es un nuevo mes o año para resetear el contador
     return f"{year_two_digits}{formatted_month}{counter:04}"
 
 @api_view(['GET'])
