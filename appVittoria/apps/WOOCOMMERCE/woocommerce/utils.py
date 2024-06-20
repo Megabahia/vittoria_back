@@ -143,13 +143,18 @@ def enviarCorreoVendedorDevolucion(data):
         sendEmail(subject, txt_content, from_email, to, html_content)
 
 def enviarCorreoAdminAutorizador(data):
-    usuario = Usuarios.objects.filter(username=(data['facturacion']['codigoVendedor'] or '').upper()).first()
+    # Obtener 'codigoVendedor' de forma segura
+    codigo_vendedor = data.get('facturacion', {}).get('codigoVendedor', '')
+
+    # Convertir el valor a mayúsculas (si es necesario)
+    codigo_vendedor_upper = codigo_vendedor.upper() if codigo_vendedor else ''
+    usuario = Usuarios.objects.filter(username=codigo_vendedor_upper).first()
 
     #if usuario and 'Asesor comercial' == usuario.idRol.nombre or usuario and 'Director GCN' == usuario.idRol.nombre:
-    subject, from_email, to = f"Su pedido {data['numeroPedido']} ha sido generado", "08d77fe1da-d09822@inbox.mailtrap.io", usuario.email
+    subject, from_email, to = f"Su pedido {data['numeroPedido']} ha sido generado", "08d77fe1da-d09822@inbox.mailtrap.io", (usuario.email if usuario else '')
     txt_content = f"""
             Registro de Pedido
-            Se ha generado un pedido a su nombre {usuario.nombres} {usuario.apellidos}
+            Se ha generado un pedido a su nombre {usuario.nombres if usuario else ''} {usuario.apellidos if usuario else ''}
             Atentamente,
             Equipo Vittoria.
     """
@@ -207,7 +212,7 @@ def enviarCorreoAdminAutorizador(data):
                                         <td valign="top" style="padding:48px 48px 32px">
                                             <div id="m_-2286063398718872391body_content_inner" align="left" style="font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:14px;line-height:150%;text-align:left;color:rgb(99,99,99)">
                                                 <p style="margin:0 0 16px;color:rgb(255,0,0)">Hemos recibido tu pedido, está por confirmar para ser procesado</p>
-                                                <p style="margin:0 0 16px">Hola {usuario.nombres} {usuario.apellidos},</p>
+                                                <p style="margin:0 0 16px">Hola {usuario.nombres if usuario else ''} {usuario.apellidos if usuario else ''},</p>
                                                 <p style="margin:0 0 16px">Hemos recibido correctamente tu pedido # {data['numeroPedido']} y lo estamos procesando:</p>
                                                 <p style="margin:0 0 16px">Está en espera hasta que confirmemos que se ha recibido el pago.</p>
                                                 <h2 style="display:block;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:18px;font-weight:bold;line-height:130%;margin:0px 0px 18px;text-align:left;color:rgb(35,85,225)">

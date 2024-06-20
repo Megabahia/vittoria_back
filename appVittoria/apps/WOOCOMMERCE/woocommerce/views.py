@@ -206,8 +206,8 @@ def orders_create(request):
                     ProspectosClientesDetalles.objects.create(
                         prospectoClienteEncabezado=prospectoEncabezado, **detalle)
 
-                if data['facturacion']['codigoVendedor']:
-                    enviarCorreoAdminAutorizador(data)
+                # if data['facturacion']['codigoVendedor']:
+                enviarCorreoAdminAutorizador(data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
