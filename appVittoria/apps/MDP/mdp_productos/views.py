@@ -184,7 +184,6 @@ def producto_images_delete(request, pk):
     try:
         try:
             query = ProductoImagen.objects.get(pk=pk, state=1).delete()
-            print(query)
         except ProductoImagen.DoesNotExist:
             err = {"error": "No existe"}
             createLog(logModel, err, logExcepcion)
@@ -275,10 +274,10 @@ def productos_update(request, pk):
     try:
         logModel['dataEnviada'] = str(request.data)
         query = Productos.objects.filter(codigoBarras=request.data['codigoBarras'], canal=request.data['canal'], state=1).exclude(pk=pk).first()
-        #if query is not None:
-        #    errorNoExiste = {'error': 'Ya existe el producto'}
-        #    createLog(logModel, errorNoExiste, logExcepcion)
-        #    return Response(errorNoExiste, status=status.HTTP_404_NOT_FOUND)
+        if query is not None:
+            errorNoExiste = {'error': 'Ya existe el producto'}
+            createLog(logModel, errorNoExiste, logExcepcion)
+            return Response(errorNoExiste, status=status.HTTP_404_NOT_FOUND)
         try:
             logModel['dataEnviada'] = str(request.data)
             query = Productos.objects.get(pk=pk, state=1)
@@ -1192,7 +1191,6 @@ def productos_exportar(request):
 
     nombre = request.GET.get('nombre', None)
     codigoBarras = request.GET.get('codigoBarras', None)
-    print(nombre, codigoBarras)
     if nombre is not None:
         filters['nombre__icontains'] = nombre
 

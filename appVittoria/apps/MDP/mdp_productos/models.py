@@ -43,6 +43,8 @@ class Productos(models.Model):
 
     woocommerceId = models.CharField(max_length=150,null=True, blank=True)
     canal = models.CharField(max_length=150, null=True, blank=True)
+    stockVirtual = models.JSONField(null=True)
+
 
     estado = models.CharField(max_length=150, null=True, default="Inactivo", blank=True)
     variableRefil = models.CharField(max_length=150, null=True, blank=True)
