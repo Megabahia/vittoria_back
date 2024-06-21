@@ -25,6 +25,17 @@ provincias = {
     "EC-Z": "Zamora-Chinchipe",
 }
 
+def capitalize_city(city_name):
+    # Palabras que no deberían capitalizarse completamente, excepto si son la primera palabra
+    exceptions = {"el", "la", "los", "las","un", "una", "unos", "unas", "de", "y"}
+
+    # Divide la ciudad en palabras y procesa cada una condicionalmente
+    words = city_name.lower().split()
+    capitalized_words = [word if word in exceptions and i != 0 else word.capitalize() for i, word in enumerate(words)]
+
+    # Une las palabras de nuevo en una cadena
+    return ' '.join(capitalized_words)
+
 
 def mapeoTodoMegaDescuento(request, articulos):
     total = request.data['total']
@@ -44,7 +55,7 @@ def mapeoTodoMegaDescuento(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm15'), None),
@@ -73,7 +84,7 @@ def mapeoTodoMegaDescuento(request, articulos):
                               objeto["key"] == '_shipping_wooccm15'), None),
             "pais": "Ecuador",
             "provincia": provincias[request.data['shipping']['state']],
-            "ciudad": request.data['shipping']['city'],
+            "ciudad": capitalize_city(request.data['shipping']['city']),
             "callePrincipal": request.data['shipping']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_shipping_wooccm9'), None),
@@ -113,7 +124,7 @@ def mapeoTodoMegaDescuentoSinEnvio(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm15'), None),
@@ -140,7 +151,7 @@ def mapeoTodoMegaDescuentoSinEnvio(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm15'), None),
@@ -175,7 +186,7 @@ def mapeoTodoMayorista(request, articulos):
     telefono = request.data['billing']['company']
     pais = "Ecuador"
     provincia = provincias[request.data['billing']['state']]
-    ciudad = request.data['billing']['city']
+    ciudad = capitalize_city(request.data['billing']['city'])
     callePrincipal = request.data['billing']['address_1']
     numero = next((objeto['value'] for objeto in request.data['meta_data'] if
                     objeto["key"] == '_billing_wooccm11'), None)
@@ -257,7 +268,7 @@ def mapeoTodoMayoristaSinEnvio(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm11'), None),
@@ -284,7 +295,7 @@ def mapeoTodoMayoristaSinEnvio(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm15'), None),
@@ -324,7 +335,7 @@ def mapeoMegaDescuento(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm13'), None),
@@ -350,7 +361,7 @@ def mapeoMegaDescuento(request, articulos):
                               objeto["key"] == '_shipping_wooccm15'), None),
             "pais": "Ecuador",
             "provincia": provincias[request.data['shipping']['state']],
-            "ciudad": request.data['shipping']['city'],
+            "ciudad": capitalize_city(request.data['shipping']['city']),
             "callePrincipal": request.data['shipping']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_shipping_wooccm9'), None),
@@ -385,7 +396,7 @@ def mapeoMegaDescuentoSinEnvio(request, articulos):
     telefono = request.data['billing']['company']
     pais = "Ecuador"
     provincia = provincias[request.data['billing']['state']]
-    ciudad = request.data['billing']['city']
+    ciudad = capitalize_city(request.data['billing']['city'])
     callePrincipal = request.data['billing']['address_1']
     numero = next((objeto['value'] for objeto in request.data['meta_data'] if
                     objeto["key"] == '_billing_wooccm13'), None)
@@ -464,7 +475,7 @@ def mapeoTodoContraEntrega(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm12'), None),
@@ -491,7 +502,7 @@ def mapeoTodoContraEntrega(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm12'), None),
@@ -531,7 +542,7 @@ def mapeoTodoTiendaMulticompras(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm12'), None),
@@ -560,7 +571,7 @@ def mapeoTodoTiendaMulticompras(request, articulos):
                               objeto["key"] == '_shipping_wooccm11'), None),
             "pais": "Ecuador",
             "provincia": provincias[request.data['shipping']['state']],
-            "ciudad": request.data['shipping']['city'],
+            "ciudad": capitalize_city(request.data['shipping']['city']),
             "callePrincipal": request.data['shipping']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_shipping_wooccm12'), None),
@@ -600,7 +611,7 @@ def mapeoTodoMaxiDescuento(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm18'), None),
@@ -625,7 +636,7 @@ def mapeoTodoMaxiDescuento(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm18'), None),
@@ -665,7 +676,7 @@ def mapeoTodoMegaBahia(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm12'), None),
@@ -690,7 +701,7 @@ def mapeoTodoMegaBahia(request, articulos):
             "telefono": request.data['billing']['company'],
             "pais": "Ecuador",
             "provincia": provincias[request.data['billing']['state']],
-            "ciudad": request.data['billing']['city'],
+            "ciudad": capitalize_city(request.data['billing']['city']),
             "callePrincipal": request.data['billing']['address_1'],
             "numero": next((objeto['value'] for objeto in request.data['meta_data'] if
                             objeto["key"] == '_billing_wooccm12'), None),
