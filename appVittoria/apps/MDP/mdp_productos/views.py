@@ -440,17 +440,16 @@ def search_producto_codigo_list(request):
     }
     try:
         try:
+            if request.data['canalProducto'] is None or request.data['canalProducto'] == '':
+                createLog(logModel, 'Seleccione un canal', logExcepcion)
+                return Response('Seleccione un canal', status=status.HTTP_404_NOT_FOUND)
+
             filters = {
                 'codigoBarras': request.data['codigoBarras'],
                 'state': 1,
                 'estado': 'Activo',
-                'canal': request.data['canalProducto']
-
+                'stockVirtual__contains': {'canal': request.data['canalProducto'], 'estado': True}
             }
-
-            if request.data['canalProducto'] is None or request.data['canalProducto'] == '':
-                createLog(logModel, 'Seleccione un canal', logExcepcion)
-                return Response('Seleccione un canal', status=status.HTTP_404_NOT_FOUND)
 
             query = Productos.objects.filter(**filters).first()
             # Verifica si el objeto existe antes de aplicar más filtros
@@ -539,7 +538,6 @@ def search_producto_codigo_list(request):
                         query.precio=0
                         query.mensaje ="NO EXISTE OFERTA SIMILAR AL PRECIO"
                         query.mensaje =''
-
 
                 query2 = Productos.objects.filter(id=query.id, envioNivelNacional=False).first()
                 # Este if sirve para validar que el producto que se configuro para una ciudad en especifico y no puede ser vendido a otra ciudad
