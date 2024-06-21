@@ -6,7 +6,8 @@ def upload_path(instance, filname):
 # Create your models here.
 class Clientes(models.Model):
     tipoCliente = models.CharField(max_length=150,null=True)
-    cedula = models.CharField(max_length=10,null=True,unique=True)
+    tipoIdentificacion = models.CharField(max_length=255,null=True, blank=True)
+    cedula = models.CharField(max_length=13,null=True,unique=False)
     nombreCompleto = models.CharField(max_length=255,null=True)
     nombres = models.CharField(max_length=150,null=True)
     apellidos = models.CharField(max_length=150,null=True)

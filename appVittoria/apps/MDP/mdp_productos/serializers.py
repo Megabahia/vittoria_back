@@ -23,7 +23,7 @@ class ProductosSerializer(serializers.ModelSerializer):
 class ProductosListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Productos
-        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado']
+        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal', 'stockVirtual']
 
     def to_representation(self, instance):
         data = super(ProductosListSerializer, self).to_representation(instance)
@@ -33,6 +33,11 @@ class ProductosListSerializer(serializers.ModelSerializer):
             data['categoria'] = Categorias.objects.filter(id=categoria).first().nombre
         if subCategoria:
             data['subCategoria'] = SubCategorias.objects.filter(id=subCategoria).first().nombre
+        images = ProductoImagen.objects.filter(producto=data['id'])
+        if images:
+            data['imagenes'] = ProductosImagenesSerializer(images, many=True).data
+        else:
+            data['imagenes'] = []
         return data
 
 
@@ -68,6 +73,33 @@ class ProductoCreateSerializer(serializers.ModelSerializer):
             producto = Productos.objects.create(**validated_data)
         return producto
 
+    # def to_representation(self, instance):
+    #     data = super(ProductoCreateSerializer, self).to_representation(instance)
+    #     categoria = data.pop('categoria')
+    #     subCategoria = data.pop('subCategoria')
+    #     if categoria:
+    #         data['categoria'] = Categorias.objects.filter(id=categoria).first().nombre
+    #     if subCategoria:
+    #         data['subCategoria'] = SubCategorias.objects.filter(id=subCategoria).first().nombre
+    #     return data
+
+# CREAR PRODUCTO
+class ListarProductoCreateSerializer(serializers.ModelSerializer):
+    imagenes = DetallesSerializer(many=True, required=False, allow_null=True, allow_empty=True)
+
+    class Meta:
+        model = Productos
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        data = super(ListarProductoCreateSerializer, self).to_representation(instance)
+        categoria = data.pop('categoria')
+        subCategoria = data.pop('subCategoria')
+        if categoria:
+            data['categoria'] = Categorias.objects.filter(id=categoria).first().nombre
+        if subCategoria:
+            data['subCategoria'] = SubCategorias.objects.filter(id=subCategoria).first().nombre
+        return data
 
 # ACTUALIZAR PRODUCTO
 class DetallesImagenesSerializer(serializers.ModelSerializer):
@@ -102,10 +134,10 @@ class ProductosActualizarSerializer(serializers.ModelSerializer):
             instance.save()
 
             # Eliminar los imagenes que no esté incluida en la solicitud de la productos imagenes
-            for detalle in instance.imagenes.all():
-                if detalle.id not in detalles_actualizar:
-                    detalle.imagen.delete()
-                    detalle.delete()
+            # for detalle in instance.imagenes.all():
+            #     if detalle.id not in detalles_actualizar:
+            #         detalle.imagen.delete()
+            #         detalle.delete()
 
             # Crear o actualizar instancias de imagenes que se encuentran en la solicitud de producto imagenes
             for detalle_id, data in detalles_actualizar.items():
@@ -119,6 +151,8 @@ class ProductosActualizarSerializer(serializers.ModelSerializer):
                 #     data['updated_at'] = str(now)
                 #     ProductoImagen.objects.filter(id=detalle.id).update(**data)
         else:
+            if 'parametrizacion' in validated_data:
+                instance.parametrizacion = validated_data['parametrizacion']
             # Actualiza el producto
             instance.__dict__.update(validated_data)
             instance.save()
@@ -311,15 +345,20 @@ class PrediccionRefilOneSerializer(serializers.ModelSerializer):
 
 # BUSQUEDA POR CODIGO
 class ProductoSearchSerializer(serializers.ModelSerializer):
+    precio=serializers.FloatField()
+    mensaje=serializers.CharField()
     class Meta:
         model = Productos
         fields = ['id', 'codigoBarras', 'nombre', 'precioVentaA', 'precioVentaB', 'precioVentaC', 'precioVentaD',
-                  'precioVentaE']
+                  'precioVentaE', 'precioOferta', 'stock', 'precioLandingOferta','precio','mensaje','canal','woocommerceId']
 
     def to_representation(self, instance):
         data = super(ProductoSearchSerializer, self).to_representation(instance)
-        imagen = ProductoImagen.objects.filter(producto=instance).first()
-        if imagen is not None:
-            print('entro al if', imagen['imagen'])
-            data['imagen'] = imagen['imagen']
+        data['imagen'] = ImagenSerializer(instance.imagenes.first()).data['imagen'] if instance.imagenes.first() else None
         return data
+
+
+class ProductosImagenesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductoImagen
+        fields = ['imagen']

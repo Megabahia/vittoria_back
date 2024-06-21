@@ -1,5 +1,5 @@
 from django.urls import path,include
-from apps.MDM.mdm_parametrizaciones.views import(
+from .views import(
 	parametrizaciones_list,parametrizaciones_create,parametrizaciones_findOne,parametrizaciones_update,parametrizaciones_delete,
 	estado_list, pais_list,tipo_list,parametrizaciones_list_hijo,parametrizaciones_list_hijoNombre,parametrizaciones_list_hijos,
 	canales_list, confirmacionProspecto_list, tipoCliente_list,parametrosTipo_list, nacionalidad_list, genero_list,

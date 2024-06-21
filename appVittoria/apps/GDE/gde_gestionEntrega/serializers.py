@@ -44,7 +44,7 @@ class OfertasListarSerializer(serializers.ModelSerializer):
 class OfertasListarTablaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Oferta
-       	fields = ['id','codigo','identificacion','fechaOferta','nombres','apellidos','telefono','correo','indicadorCliente','fechaCompra','entregoProducto','fechaEntrega','canalVentas','calificacion','total','estado']
+       	fields = ['id','codigo','identificacion','fechaOferta','nombres','apellidos','telefono','correo','indicadorCliente','fechaCompra','entregoProducto','fechaEntrega','canalVentas','calificacion','total','estado', 'lugarEnvio', 'courier']
 
 # Crear factura
 class DetallesSerializer(serializers.ModelSerializer):

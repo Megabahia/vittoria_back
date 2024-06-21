@@ -1,8 +1,16 @@
+from .constantes import mapeoProspectoCliente
 from .models import ProspectosClientes
 from .serializers import (
     ProspectosClientesSerializer,   ProspectosClientesListarSerializer, ProspectosClienteImagenSerializer,
-    ProspectosClientesSearchSerializer, ProspectosClientesResource
+    ProspectosClientesSearchSerializer, ProspectosClientesResource, ActualizarProspectosClientesSerializer
 )
+from .utils import enviarCorreoCliente
+from ..mdm_clientes.serializers import ClientesUpdateSerializer
+from ..mdm_clientes.models import Clientes
+from ...WOOCOMMERCE.woocommerce.models import Pedidos
+from ...config import config
+# TWILIO
+from twilio.rest import Client
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -163,7 +171,6 @@ def prospecto_cliente_findOne(request, pk):
 
 # CREAR
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def prospecto_cliente_create(request):
     request.POST._mutable = True
     timezone_now = timezone.localtime(timezone.now())
@@ -179,10 +186,6 @@ def prospecto_cliente_create(request):
     }
     if request.method == 'POST':
         try:
-            prospectoCliente = ProspectosClientes.objects.filter(identificacion=request.data['identificacion']).first()
-            if prospectoCliente is not None:
-                data = {'error': 'Ya existe un prospecto cliente con esa identificación.'}
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             logModel['dataEnviada'] = str(request.data)
             request.data['created_at'] = str(timezone_now)
             if 'updated_at' in request.data:
@@ -193,6 +196,7 @@ def prospecto_cliente_create(request):
             serializer = ProspectosClientesSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
+                enviarCorreoCliente(serializer.data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
@@ -219,11 +223,6 @@ def prospecto_cliente_update(request, pk):
         'dataRecibida': '{}'
     }
     try:
-        if 'identificacion' in request.data and request.data['identificacion'] != '':
-            prospectoCliente = ProspectosClientes.objects.filter(identificacion=request.data['identificacion']).first()
-            if prospectoCliente is not None:
-                data = {'error': 'Ya existe un prospecto cliente con esa identificación.'}
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
         try:
             logModel['dataEnviada'] = str(request.data)
             query = ProspectosClientes.objects.get(pk=pk, state=1)
@@ -238,9 +237,23 @@ def prospecto_cliente_update(request, pk):
                 request.data.pop('created_at')
             if 'nombres' in request.data and request.data['nombres'] != '' and 'apellidos' in request.data and request.data['apellidos'] != '':
                 request.data['nombreCompleto'] = request.data['nombres'] + ' ' + request.data['apellidos']
-            serializer = ProspectosClientesSerializer(query, data=request.data, partial=True)
+            serializer = ActualizarProspectosClientesSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
+                if request.data['confirmacionProspecto'] == 'Confirmado':
+                    articulos = []
+                    for articulo in serializer.data['detalles']:
+                        articulos.append({
+                            "codigo": articulo['codigo'],
+                            "articulo": articulo['articulo'],
+                            "valorUnitario": articulo['valorUnitario'],
+                            "cantidad": articulo['cantidad'],
+                            "precio": articulo['total'],
+                            "caracteristicas": ''
+                        })
+                    data = mapeoProspectoCliente(serializer.data, articulos)
+
+                    Pedidos.objects.create(**data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)

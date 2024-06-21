@@ -26,7 +26,7 @@ cambiar en el archivo config que variable de entorno compilar
 
 ## 1.Construir la imagen para windows y otro para mac
 ```shell
-sudo docker build -t james46007/vittoria:dev .
+docker build -t james46007/vittoria:dev .
 ```
 El siguiente comando sirve para computadoras mac
 ```shell
@@ -35,7 +35,7 @@ docker buildx build --platform linux/amd64 -t james46007/vittoria:dev .
 
 ## 2.Subir la imagen al Docker Hub (ejecutar "docker login" en caso de no estar logueado desde consola en dockerhub)
 ```shell
-sudo docker push james46007/vittoria:dev
+docker push james46007/vittoria:dev
 ```
 
 ## 3.En el servidor debe estar instalado y configurado Docker

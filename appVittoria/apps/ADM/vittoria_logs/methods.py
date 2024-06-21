@@ -9,14 +9,14 @@ def saveLog(logModel):
     try:
         logModel['fechaFin']=str(timezone.localtime(timezone.now()))
         serializer = LogsSerializer(data=logModel,partial=True)
-        
+
         if serializer.is_valid():
             serializer.save()
             return Response(status = status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e: 
-        err={"error":'Un error ha ocurrido: {}'.format(e)}  
+    except Exception as e:
+        err={"error":'Un error ha ocurrido: {}'.format(e)}
         return Response(err,status=status.HTTP_400_BAD_REQUEST)
 #ingresa los datos del log
 def createLog(logModel,logRecibida,logTransaccion):
@@ -33,8 +33,8 @@ def createLog(logModel,logRecibida,logTransaccion):
             return Response(err,status=status.HTTP_404_NOT_FOUND)
         if permiso.valor=='1':
             saveLog(logModel)
-    except Exception as e: 
-        err={"error":'Un error ha ocurrido: {}'.format(e)}  
+    except Exception as e:
+        err={"error":'Un error ha ocurrido: {}'.format(e)}
         return Response(err,status=status.HTTP_400_BAD_REQUEST)
 #TIPOS DE LOG
 def datosTipoLog():
@@ -76,49 +76,49 @@ def datosCatalogo():
         'modulo':'ADM',
         'api':'param/'
     }
-    return data  
+    return data
 #MODULO MDM-PARAMETRIZACIONES
 def datosParametrizaciones():
     data={
         'modulo':'MDM',
         'api':'param/'
     }
-    return data  
+    return data
 #MODULO MDM-CLIENTES
 def datosClientes():
     data={
         'modulo':'MDM',
         'api':'clientes/'
     }
-    return data  
+    return data
 #MODULO MDM-PROSPECTOS-CLIENTES
 def datosProspectosClientes():
     data={
         'modulo':'MDM',
         'api':'prospectosClientes/'
     }
-    return data  
+    return data
 #MODULO MDM-NEGOCIOS
 def datosNegocios():
     data={
         'modulo':'MDM',
         'api':'negocios/'
     }
-    return data  
+    return data
 #MODULO MDM-FACTURAS
 def datosFacturas():
     data={
         'modulo':'MDM',
         'api':'facturas/'
     }
-    return data  
+    return data
 #MODULO MDP-PARAMETRIZACIONES
 def datosParametrizacionesMDP():
     data={
         'modulo':'MDP',
         'api':'param/'
     }
-    return data  
+    return data
 
 #MODULO MDP-CATEGORIAS
 def datosCategoriasMDP():
@@ -126,7 +126,7 @@ def datosCategoriasMDP():
         'modulo':'MDP',
         'api':'categorias/'
     }
-    return data  
+    return data
 
 #MODULO MDP-SUBCATEGORIAS
 def datosSubCategoriasMDP():
@@ -134,7 +134,7 @@ def datosSubCategoriasMDP():
         'modulo':'MDP',
         'api':'subCategorias/'
     }
-    return data  
+    return data
 
 #MODULO MDP-PRODUCTOS
 def datosProductosMDP():
@@ -142,7 +142,7 @@ def datosProductosMDP():
         'modulo':'MDP',
         'api':'productos/'
     }
-    return data  
+    return data
 
 #MODULO MDP-FICHA TECNICA PRODUCTOS
 def datosFichaTecnicaProductosMDP():
@@ -150,7 +150,7 @@ def datosFichaTecnicaProductosMDP():
         'modulo':'MDP',
         'api':'fichaTecnicaProductos/'
     }
-    return data  
+    return data
 
 #MODULO MDO-PARAMETRIZACIONES
 def datosParametrizacionesMDO():
@@ -158,7 +158,7 @@ def datosParametrizacionesMDO():
         'modulo':'MDO',
         'api':'parametrizaciones/'
     }
-    return data  
+    return data
 
 #MODULO MDO-PARAMETRIZACIONES
 def datosPrediccionCrosselingMDO():
@@ -166,7 +166,7 @@ def datosPrediccionCrosselingMDO():
         'modulo':'MDO',
         'api':'prediccionCrosseling/'
     }
-    return data  
+    return data
 
 #MODULO MDO-PARAMETRIZACIONES
 def datosPrediccionProductosNuevosMDO():
@@ -174,7 +174,7 @@ def datosPrediccionProductosNuevosMDO():
         'modulo':'MDO',
         'api':'prediccionProductosNuevos/'
     }
-    return data  
+    return data
 
 #MODULO MDO-PARAMETRIZACIONES
 def datosParametrizacionesGDO():
@@ -182,7 +182,7 @@ def datosParametrizacionesGDO():
         'modulo':'GDO',
         'api':'parametrizaciones/'
     }
-    return data  
+    return data
 
 #MODULO MDO-PARAMETRIZACIONES
 def datosGestionOfertaGDO():
@@ -190,7 +190,7 @@ def datosGestionOfertaGDO():
         'modulo':'GDO',
         'api':'gestionOferta/'
     }
-    return data  
+    return data
 
 #MODULO MDO-PARAMETRIZACIONES
 def datosParametrizacionesGDE():
@@ -198,7 +198,7 @@ def datosParametrizacionesGDE():
         'modulo':'GDE',
         'api':'parametrizaciones/'
     }
-    return data  
+    return data
 
 #MODULO MDO-PARAMETRIZACIONES
 def datosGestionEntregaGDE():
@@ -206,4 +206,12 @@ def datosGestionEntregaGDE():
         'modulo':'GDE',
         'api':'gestionEntrega/'
     }
-    return data  
+    return data
+
+#MODULO GDP-PRODUCTOS
+def datosProductosGDP():
+    data={
+        'modulo':'GDP',
+        'api':'productos/'
+    }
+    return data

@@ -1,6 +1,6 @@
 from django.urls import path,include
 
-from apps.MDP.mdp_categorias.views import(
+from .views import(
 	categorias_list, categoria_create, categoria_findOne, categoria_update, categoria_delete,
 	buscar_categoria_list, list_categoria_combo
 )

@@ -34,7 +34,7 @@ environ.Env.read_env() # LEE ARCHIVO .ENV
 SECRET_KEY = ')+^!3q$nko9e_n0(x!qo24xbh8m%k#0&&r6^%4!4_bp+m%=9!v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -60,7 +60,8 @@ INSTALLED_APPS = [
     'apps.MDP.mdp_categorias',
     'apps.MDP.mdp_subCategorias',
     'apps.MDP.mdp_productos',
-    'apps.MDP.mdp_fichaTecnicaProductos',    
+    'apps.MDP.mdp_fichaTecnicaProductos',
+    'apps.MDP.mdp_gestionInventario',
     # apps Vittoria MDO
     'apps.MDO.mdo_parametrizaciones',
     'apps.MDO.mdo_prediccionCrosseling',
@@ -73,6 +74,16 @@ INSTALLED_APPS = [
     # apps vittoria GDE
     'apps.GDE.gde_parametrizaciones',
     'apps.GDE.gde_gestionEntrega',
+    # apps vittoria GDP
+    'apps.GDP.gdp_productos',
+    # apps vittoria SERVIENTREGA
+    'apps.SERVIENTREGA.servientrega',
+    # apps vittoria FACTURACION
+    'apps.FACTURACION.facturacion',
+    # apps vittoria FACTURACION
+    'apps.WOOCOMMERCE.mp_parametrizaciones',
+    'apps.WOOCOMMERCE.woocommerce',
+    'apps.WOOCOMMERCE.gdc_gestor_contactos',
     #CONFIG
     'apps.config',
     #Django external apps
@@ -88,6 +99,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'import_export',
+    'django_crontab',
 ]
 
 REST_FRAMEWORK = {
@@ -141,9 +153,11 @@ DATABASE_ROUTERS = [
     'apps.config.routersDB.MDMRouter',
     'apps.config.routersDB.MDPRouter',
     'apps.config.routersDB.MDORouter',
+    'apps.config.routersDB.MPRouter',
     'apps.config.routersDB.GDORouter',
     'apps.config.routersDB.GDERouter',
-    'apps.config.routersDB.USERRouter'
+    'apps.config.routersDB.USERRouter',
+    'apps.config.routersDB.FACTURACIONRouter'
 ]
 
 # Password validation
@@ -205,4 +219,11 @@ DEFAULT_FILE_STORAGE = env.str('DEFAULT_FILE_STORAGE')
 AWS_ACCESS_KEY_ID = env.str('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env.str('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = env.str('AWS_STORAGE_BUCKET_NAME')
-AWS_QUERYSTRING_AUTH = False 
+AWS_QUERYSTRING_AUTH = False
+
+
+CRONJOBS = [
+    # La función temporizada se ejecuta cada minuto
+    ('*/1 * * * *', "apps.FACTURACION.facturacion.cron_facturasExternas.verificarEstadoFactura"),
+    ('*/1 * * * *', "apps.FACTURACION.facturacion.cron_facturasLocales.verificarEstadoFacturaLocal"),
+]

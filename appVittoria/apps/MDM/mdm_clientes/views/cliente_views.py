@@ -1,11 +1,15 @@
 from ..models import Clientes, DatosVirtualesClientes
-from ...mdm_prospectosClientes.models import ProspectosClientes
-from ...mdm_facturas.models import FacturasEncabezados
+from ...mdm_prospectosClientes.models import ProspectosClientes, ProspectosClientesDetalles
+from ...mdm_prospectosClientes.serializers import ProspectosClientesDetallesSerializer
+from ...mdm_facturas.models import FacturasEncabezados, FacturasDetalles
 from ..serializers import (
     ClientesSerializer, ClientesListarSerializer, ClienteImagenSerializer,
     ClientesUpdateSerializer, ClientePrediccionSerializer, DatosVirtualesClientesSerializer,
     ClientesResource
 )
+from ...mdm_parametrizaciones.models import Parametrizaciones
+from ....MDP.mdp_productos.models import Productos
+from ....GDE.gde_gestionEntrega.models import Oferta
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -133,7 +137,9 @@ def cliente_findOne_cedula(request):
     }
     try:
         try:
-            query = Clientes.objects.get(cedula=str(request.data['cedula']), state=1)
+            query = Clientes.objects.filter(cedula=str(request.data['cedula']), state=1).first()
+            if query is None:
+                return Response('No existe el cliente', status=status.HTTP_404_NOT_FOUND)
         except Clientes.DoesNotExist:
             err = {"error": "No existe"}
             createLog(logModel, err, logExcepcion)
@@ -267,10 +273,21 @@ def cliente_update(request, pk):
             if serializer.is_valid():
                 serializer.save()
                 prospectoCliente = ProspectosClientes.objects.filter(identificacion=request.data['cedula'],
-                                                                     state=1).first()
-                if prospectoCliente is not None:
-                    prospectoCliente.state = 0
-                    prospectoCliente.save()
+                                                                     state=1).order_by('-created_at').first()
+                facturaDetalleJson = ProspectosClientesDetalles.objects.filter(
+                    prospectoClienteEncabezado=prospectoCliente.id)
+                detalles = ProspectosClientesDetallesSerializer(facturaDetalleJson, many=True).data
+                productosSinStock = []
+                for detalle in detalles:
+                    producto = Productos.objects.filter(codigoBarras=detalle['codigo'], state=1).values('stock').first()
+                    if int(detalle['cantidad']) > int(producto['stock']):
+                        productoSinStock = {}
+                        productoSinStock['codigo'] = detalle['codigo']
+                        productoSinStock['stock'] = producto['stock']
+                        productosSinStock.append(productoSinStock)
+
+                if len(productosSinStock) > 0:
+                    return Response(productosSinStock, status=status.HTTP_404_NOT_FOUND)
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)

@@ -2,12 +2,14 @@ from django.urls import path
 
 from .views import (
     productos_list, productos_create, productos_findOne, productos_update, productos_delete,
-    producto_images_findOne,
+    producto_images_findOne,productos_create_woocommerce,productos_update_woocommerce,
+    productos_delete_woocommerce,productos_restore_woocommerce,
     search_producto_list, abastecimiento_list, stock_list, caducidad_list, rotacion_list, refil_list,
     abastecimiento_create,
     uploadEXCEL_crearProductos, productoImagen_list, prediccion_crosseling_list,
     producto_refil_list, prediccion_refil_list, prediccion_productosNuevos_list,
-    search_producto_codigo_list, producto_images_delete
+    search_producto_codigo_list, producto_images_delete, productos_findOne_free,
+    productos_findOne_codigo_producto, productos_exportar,
 )
 
 app_name = 'productos'
@@ -16,7 +18,13 @@ urlpatterns = [
     # PRODUCTOS
     path('list/', productos_list, name="productos_list"),
     path('create/', productos_create, name="productos_create"),
+    path('create/woocommerce', productos_create_woocommerce, name="productos_create_woocommerce"),
+    path('update/woocommerce', productos_update_woocommerce, name="productos_update_woocommerce"),
+    path('delete/woocommerce', productos_delete_woocommerce, name="productos_delete_woocommerce"),
+    path('restore/woocommerce', productos_restore_woocommerce, name="productos_restore_woocommerce"),
     path('listOne/<int:pk>', productos_findOne, name="productos_findOne"),
+    path('listOne/free/<int:pk>', productos_findOne_free, name="productos_findOne_free"),
+    path('listOne/codigoProducto/<str:pk>', productos_findOne_codigo_producto, name="productos_findOne_codigo_producto"),
     path('update/<int:pk>', productos_update, name="productos_update"),
     path('delete/<int:pk>', productos_delete, name="productos_delete"),
     path('search/producto/', search_producto_list, name="search_producto_list"),
@@ -46,4 +54,6 @@ urlpatterns = [
     path('prediccionRefil/', prediccion_refil_list, name="prediccion_refil_list"),
     # OBTENER PREDICCION PRODUCTOS NUEVOS
     path('prediccionProductosNuevos/', prediccion_productosNuevos_list, name="prediccion_productosNuevos_list"),
+    # EXPORTAR PRODCUTOS
+    path('exportar', productos_exportar, name="productos_exportar"),
 ]

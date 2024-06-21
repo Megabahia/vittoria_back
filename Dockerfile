@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.8
+FROM --platform=linux/amd64 python:3.9
 RUN apt-get update && apt-get -y install cron vim
 WORKDIR /app
 
@@ -9,5 +9,6 @@ COPY . .
 
 WORKDIR /app/appVittoria
 EXPOSE 8003
+RUN python manage.py crontab add
 
-CMD ["sh", "-c", "python manage.py runserver 0.0.0.0:8003"]
+CMD ["sh", "-c", "cron && python manage.py runserver 0.0.0.0:8003"]

@@ -1,63 +1,72 @@
-from apps.MDM.mdm_facturas.models import FacturasEncabezados, FacturasDetalles
-from apps.MDM.mdm_facturas.serializers import FacturasSerializer, FacturasDetallesSerializer, FacturasListarSerializer, FacturaSerializer, FacturasListarTablaSerializer
-from apps.MDP.mdp_productos.models import Productos
-from apps.MDM.mdm_clientes.models import Clientes
-from apps.MDM.mdm_negocios.models import Negocios
-from apps.MDO.mdo_prediccionCrosseling.serializers import PrediccionCrosselingSerializer
-from apps.MDO.mdo_prediccionProductosNuevos.serializers import PrediccionProductosSerializer
-from apps.MDO.mdo_prediccionRefil.serializers import PrediccionRefilSerializer
+from django.db.models import Sum, Count
+from .serializers import ReporteProductosSerializer, ReporteClienteSerializer
+from ..mdm_facturas.models import FacturasEncabezados, FacturasDetalles
+from ..mdm_facturas.serializers import (
+    FacturasSerializer, FacturasDetallesSerializer, FacturasListarSerializer,
+    FacturaSerializer, FacturasListarTablaSerializer, FacturasParaCrearGDESerializer,
+    ReporteClientesCompradosSerializer,
+)
+from ...MDP.mdp_productos.models import Productos
+from ..mdm_clientes.models import Clientes
+from ..mdm_negocios.models import Negocios
+from ...MDO.mdo_prediccionCrosseling.serializers import PrediccionCrosselingSerializer
+from ...MDO.mdo_prediccionProductosNuevos.serializers import PrediccionProductosSerializer
+from ...MDO.mdo_prediccionRefil.serializers import PrediccionRefilSerializer
+from ...GDE.gde_gestionEntrega.serializers import GestionOfertaSerializer
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view,permission_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+# Sumar Fechas
 from datetime import datetime
-from django.core import serializers
-#excel
+from datetime import timedelta
+# excel
 import openpyxl
-#logs
-from apps.ADM.vittoria_logs.methods import createLog,datosTipoLog, datosFacturas
-#declaracion variables log
-datosAux=datosFacturas()
-datosTipoLogAux=datosTipoLog()
-#asignacion datos modulo
-logModulo=datosAux['modulo']
-logApi=datosAux['api']
-#asignacion tipo de datos
-logTransaccion=datosTipoLogAux['transaccion']
-logExcepcion=datosTipoLogAux['excepcion']
-#CRUD PROSPECTO CLIENTES
-#LISTAR TODOS
+# logs
+from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosFacturas
+
+# declaracion variables log
+datosAux = datosFacturas()
+datosTipoLogAux = datosTipoLog()
+# asignacion datos modulo
+logModulo = datosAux['modulo']
+logApi = datosAux['api']
+# asignacion tipo de datos
+logTransaccion = datosTipoLogAux['transaccion']
+logExcepcion = datosTipoLogAux['excepcion']
+
+
+# CRUD PROSPECTO CLIENTES
+# LISTAR TODOS
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def factura_list(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'list/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'LEER',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     if request.method == 'POST':
         try:
             logModel['dataEnviada'] = str(request.data)
-            #paginacion
-            page_size=int(request.data['page_size'])
-            page=int(request.data['page'])
-            offset = page_size* page
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
             limit = offset + page_size
-            #Filtros
-            filters={"state":"1"}            
-            if 'negocio' in request.data:
-                if request.data['negocio']!='':
-                    filters['negocio'] = request.data['negocio']
-            if 'cliente' in request.data:
-                if request.data['cliente']!='':
-                    filters['cliente'] = request.data['cliente']
+            # Filtros
+            filters = {"state": "1"}
+            if 'negocio' in request.data and request.data['negocio'] != '':
+                filters['negocio'] = request.data['negocio']
+            if 'cliente' in request.data and request.data['cliente'] != '':
+                filters['cliente'] = request.data['cliente']
             # if 'cedula' in request.data:
             #     if request.data['cedula']!='':
             #         filters['cedula'] = str(request.data['cedula'])
@@ -66,435 +75,468 @@ def factura_list(request):
             #     #     filters['created_at__startswith'] = str(request.data['inicio'])
             #     if request.data['inicio'] and request.data['fin'] !='':
             #         filters['created_at__range'] = [str(request.data['inicio']),str(request.data['fin'])]            
-          
-            #Serializar los datos
+
+            # Serializar los datos
             query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
             serializer = FacturasListarSerializer(query[offset:limit], many=True)
-            new_serializer_data={'cont': query.count(),
-            'info':serializer.data}
-            #envio de datos
-            return Response(new_serializer_data,status=status.HTTP_200_OK)
-        except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
-#LISTAR TODOS NEGOCIOS
+            new_serializer_data = {'cont': query.count(),
+                                   'info': serializer.data}
+            # envio de datos
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        # LISTAR TODOS NEGOCIOS
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def factura_list_negocio(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'list/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'LEER',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     if request.method == 'POST':
         try:
             logModel['dataEnviada'] = str(request.data)
-            #paginacion
-            page_size=int(request.data['page_size'])
-            page=int(request.data['page'])
-            offset = page_size* page
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
             limit = offset + page_size
-            #Filtros
-            filters={"state":"1"}     
-            filters['negocio__isnull'] = False       
+            # Filtros
+            filters = {"state": "1"}
+            filters['negocio__isnull'] = False
             if 'inicio' and 'fin' in request.data:
-                if request.data['inicio'] and request.data['fin'] !='':
-                    filters['created_at__range'] = [str(request.data['inicio']),str(request.data['fin'])]   
-          
-            #Serializar los datos
+                if request.data['inicio'] and request.data['fin'] != '':
+                    filters['created_at__range'] = [str(request.data['inicio']), str(request.data['fin'])]
+
+                    # Serializar los datos
             query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
             serializer = FacturasListarSerializer(query[offset:limit], many=True)
-            new_serializer_data={'cont': query.count(),
-            'info':serializer.data}
-            #envio de datos
-            return Response(new_serializer_data,status=status.HTTP_200_OK)
-        except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+            new_serializer_data = {'cont': query.count(),
+                                   'info': serializer.data}
+            # envio de datos
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-#LISTAR TODOS CLIENTES
+        # LISTAR TODOS CLIENTES
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def factura_list_cliente(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'list/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'LEER',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     if request.method == 'POST':
         try:
             logModel['dataEnviada'] = str(request.data)
-            #paginacion
-            page_size=int(request.data['page_size'])
-            page=int(request.data['page'])
-            offset = page_size* page
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
             limit = offset + page_size
-            #Filtros
-            filters={"state":"1"}     
-            filters['cliente__isnull'] = False    
+            # Filtros
+            filters = {"state": "1"}
+            filters['cliente__isnull'] = False
             if 'inicio' and 'fin' in request.data:
-                if request.data['inicio'] and request.data['fin'] !='':
-                    filters['created_at__range'] = [str(request.data['inicio']),str(request.data['fin'])]   
-          
-            #Serializar los datos
+                if request.data['inicio'] and request.data['fin'] != '':
+                    filters['fecha__range'] = [str(request.data['inicio'][:10]), str(request.data['fin'][:10])]
+
+            if 'estadoSRI' in request.data and request.data['estadoSRI'] != '':
+                filters['estadoSRI'] = request.data['estadoSRI']
+
+            if 'autorizada' in request.data:
+                filters['estadoSRI__isnull'] = request.data['autorizada']
+
+            if 'cliente' in request.data and request.data['cliente'] != '':
+                filters['cliente'] = request.data['cliente']
+
+            # Serializar los datos
             query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
             serializer = FacturasListarSerializer(query[offset:limit], many=True)
-            new_serializer_data={'cont': query.count(),
-            'info':serializer.data}
-            #envio de datos
-            return Response(new_serializer_data,status=status.HTTP_200_OK)
-        except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
-#LISTAR TODOS CLIENTE GRAFICA
+            new_serializer_data = {'cont': query.count(),
+                                   'info': serializer.data}
+            # envio de datos
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        # LISTAR TODOS CLIENTE GRAFICA
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def factura_list_todos_rango_fecha_cliente_grafica(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'list/cliente/grafica/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'LEER',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'list/cliente/grafica/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     if request.method == 'POST':
         try:
             logModel['dataEnviada'] = str(request.data)
-            #paginacion
-            page_size=int(request.data['page_size'])
-            page=int(request.data['page'])
-            offset = page_size* page
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
             limit = offset + page_size
-            #Filtros
-            
+            # Filtros
+
             query = FacturasEncabezados.objects.raw('''
             SELECT id,YEAR(created_at) anio,MONTH(created_at) mes , COUNT(*) cantidad FROM vittoria_mdm.mdm_facturas_facturasencabezados 
             WHERE  created_at between %s AND %s AND cliente_id is not null AND state = 1
-            GROUP BY MONTH (created_at), YEAR(created_at) ORDER BY MONTH (created_at);''',[str(request.data['inicio']),str(request.data['fin'])])
-            #Serializar los datos
+            GROUP BY MONTH (created_at), YEAR(created_at) ORDER BY MONTH (created_at);''',
+                                                    [str(request.data['inicio']), str(request.data['fin'])])
+            # Serializar los datos
             data = []
             for raw in query:
-                data.append({'anio': raw.anio,'mes': raw.mes,'cantidad': raw.cantidad})
-            #envio de datos
-            return Response(data,status=status.HTTP_200_OK)
-        except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
-#LISTAR TODOS CLIENTE EN ESPECIFICO
+                data.append({'anio': raw.anio, 'mes': raw.mes, 'cantidad': raw.cantidad})
+            # envio de datos
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        # LISTAR TODOS CLIENTE EN ESPECIFICO
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def factura_list_todos_rango_fecha_negocio_grafica(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'list/negocio/grafica',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'LEER',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'list/negocio/grafica',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     if request.method == 'POST':
         try:
             logModel['dataEnviada'] = str(request.data)
-            #paginacion
-            page_size=int(request.data['page_size'])
-            page=int(request.data['page'])
-            offset = page_size* page
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
             limit = offset + page_size
-            #Filtros
-            
+            # Filtros
+
             query = FacturasEncabezados.objects.raw('''
             SELECT id,YEAR(created_at) anio,MONTH(created_at) mes , COUNT(*) cantidad FROM vittoria_mdm.mdm_facturas_facturasencabezados 
             WHERE  created_at between %s AND %s AND negocio_id is not null AND state = 1
-            GROUP BY MONTH (created_at), YEAR(created_at) ORDER BY MONTH (created_at);''',[str(request.data['inicio']),str(request.data['fin'])])
-            #Serializar los datos
+            GROUP BY MONTH (created_at), YEAR(created_at) ORDER BY MONTH (created_at);''',
+                                                    [str(request.data['inicio']), str(request.data['fin'])])
+            # Serializar los datos
             data = []
             for raw in query:
-                data.append({'anio': raw.anio,'mes': raw.mes,'cantidad': raw.cantidad})
-            #envio de datos
-            return Response(data,status=status.HTTP_200_OK)
-        except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+                data.append({'anio': raw.anio, 'mes': raw.mes, 'cantidad': raw.cantidad})
+            # envio de datos
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-#LISTAR TODOS CLIENTE EN ESPECIFICO
+        # LISTAR TODOS CLIENTE EN ESPECIFICO
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def factura_list_rango_fecha_cliente(request,pk):
+def factura_list_rango_fecha_cliente(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'list/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'LEER',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     if request.method == 'POST':
         try:
             logModel['dataEnviada'] = str(request.data)
-            #paginacion
-            page_size=int(request.data['page_size'])
-            page=int(request.data['page'])
-            offset = page_size* page
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
             limit = offset + page_size
-            #Filtros
-            filters={"state":"1"}     
-            filters['cliente__isnull'] = False    
-            filters['cliente'] = pk    
-            if 'inicio' and 'fin' in request.data:                
+            # Filtros
+            filters = {"state": "1"}
+            filters['cliente__isnull'] = False
+            filters['cliente'] = pk
+            if 'inicio' and 'fin' in request.data:
                 # if request.data['inicio'] !='':
                 #     filters['created_at__startswith'] = str(request.data['inicio'])
-                if request.data['inicio'] and request.data['fin'] !='':
-                    filters['created_at__range'] = [str(request.data['inicio']),str(request.data['fin'])]    
-          
-            #Serializar los datos
+                if request.data['inicio'] and request.data['fin'] != '':
+                    filters['created_at__range'] = [str(request.data['inicio']), str(request.data['fin'])]
+
+                    # Serializar los datos
             query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
             serializer = FacturasListarTablaSerializer(query[offset:limit], many=True)
-            new_serializer_data={'cont': query.count(),
-            'info':serializer.data}
-            #envio de datos
-            return Response(new_serializer_data,status=status.HTTP_200_OK)
-        except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
-#LISTAR TODOS CLIENTE EN ESPECIFICO GRAFICA
+            new_serializer_data = {'cont': query.count(),
+                                   'info': serializer.data}
+            # envio de datos
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        # LISTAR TODOS CLIENTE EN ESPECIFICO GRAFICA
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def factura_list_rango_fecha_cliente_grafica(request,pk):
+def factura_list_rango_fecha_cliente_grafica(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'list/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'LEER',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     if request.method == 'POST':
         try:
             logModel['dataEnviada'] = str(request.data)
-            #paginacion
-            page_size=int(request.data['page_size'])
-            page=int(request.data['page'])
-            offset = page_size* page
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
             limit = offset + page_size
-            #Filtros
-            
+            # Filtros
+
             query = FacturasEncabezados.objects.raw('''
             SELECT id,YEAR(created_at) anio,MONTH(created_at) mes , COUNT(*) cantidad FROM vittoria_mdm.mdm_facturas_facturasencabezados 
             WHERE  created_at between %s AND %s AND cliente_id = %s AND cliente_id is not null AND state = 1
-            GROUP BY MONTH (created_at), YEAR(created_at) ORDER BY MONTH (created_at);''',[str(request.data['inicio']),str(request.data['fin']),pk])
-            #Serializar los datos
+            GROUP BY MONTH (created_at), YEAR(created_at) ORDER BY MONTH (created_at);''',
+                                                    [str(request.data['inicio']), str(request.data['fin']), pk])
+            # Serializar los datos
             data = []
             for raw in query:
-                data.append({'anio': raw.anio,'mes': raw.mes,'cantidad': raw.cantidad})
-            #envio de datos
-            return Response(data,status=status.HTTP_200_OK)
-        except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
-#LISTAR TODOS CLIENTE EN ESPECIFICO
+                data.append({'anio': raw.anio, 'mes': raw.mes, 'cantidad': raw.cantidad})
+            # envio de datos
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        # LISTAR TODOS CLIENTE EN ESPECIFICO
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def factura_list_rango_fecha_negocio_grafica(request,pk):
+def factura_list_rango_fecha_negocio_grafica(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'list/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'LEER',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     if request.method == 'POST':
         try:
             logModel['dataEnviada'] = str(request.data)
-            #paginacion
-            page_size=int(request.data['page_size'])
-            page=int(request.data['page'])
-            offset = page_size* page
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
             limit = offset + page_size
-            #Filtros
-            
+            # Filtros
+
             query = FacturasEncabezados.objects.raw('''
             SELECT id,YEAR(created_at) anio,MONTH(created_at) mes , COUNT(*) cantidad FROM vittoria_mdm.mdm_facturas_facturasencabezados 
             WHERE  created_at between %s AND %s AND negocio_id = %s AND negocio_id is not null AND state = 1
-            GROUP BY MONTH (created_at), YEAR(created_at) ORDER BY MONTH (created_at);''',[str(request.data['inicio']),str(request.data['fin']),pk])
-            #Serializar los datos
+            GROUP BY MONTH (created_at), YEAR(created_at) ORDER BY MONTH (created_at);''',
+                                                    [str(request.data['inicio']), str(request.data['fin']), pk])
+            # Serializar los datos
             data = []
             for raw in query:
-                data.append({'anio': raw.anio,'mes': raw.mes,'cantidad': raw.cantidad})
-            #envio de datos
-            return Response(data,status=status.HTTP_200_OK)
-        except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
-#LISTAR TODOS NEGOCIO EN ESPECIFICO
+                data.append({'anio': raw.anio, 'mes': raw.mes, 'cantidad': raw.cantidad})
+            # envio de datos
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        # LISTAR TODOS NEGOCIO EN ESPECIFICO
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def factura_list_rango_fecha_negocio(request,pk):
+def factura_list_rango_fecha_negocio(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'list/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'LEER',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     if request.method == 'POST':
         try:
             logModel['dataEnviada'] = str(request.data)
-            #paginacion
-            page_size=int(request.data['page_size'])
-            page=int(request.data['page'])
-            offset = page_size* page
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
             limit = offset + page_size
-            #Filtros
-            filters={"state":"1"}     
-            filters['negocio__isnull'] = False    
-            filters['negocio'] = pk    
-            if 'inicio' and 'fin' in request.data:                
+            # Filtros
+            filters = {"state": "1"}
+            filters['negocio__isnull'] = False
+            filters['negocio'] = pk
+            if 'inicio' and 'fin' in request.data:
                 # if request.data['inicio'] !='':
                 #     filters['created_at__startswith'] = str(request.data['inicio'])
-                if request.data['inicio'] and request.data['fin'] !='':
-                    filters['created_at__range'] = [str(request.data['inicio']),str(request.data['fin'])]    
-          
-            #Serializar los datos
+                if request.data['inicio'] and request.data['fin'] != '':
+                    filters['created_at__range'] = [str(request.data['inicio']), str(request.data['fin'])]
+
+                    # Serializar los datos
             query = FacturasEncabezados.objects.filter(**filters).order_by('-created_at')
             serializer = FacturasListarTablaSerializer(query[offset:limit], many=True)
-            new_serializer_data={'cont': query.count(),
-            'info':serializer.data}
-            #envio de datos
-            return Response(new_serializer_data,status=status.HTTP_200_OK)
-        except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+            new_serializer_data = {'cont': query.count(),
+                                   'info': serializer.data}
+            # envio de datos
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-#ENCONTRAR UNO
+        # ENCONTRAR UNO
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def factura_findOne(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'listOne/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'LEER',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'listOne/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     try:
         try:
             query = FacturasEncabezados.objects.get(pk=pk, state=1)
         except FacturasEncabezados.DoesNotExist:
-            err={"error":"No existe"}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err,status=status.HTTP_404_NOT_FOUND)
-        #tomar el dato
+            err = {"error": "No existe"}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+        # tomar el dato
         if request.method == 'GET':
             serializer = FacturasSerializer(query)
-            createLog(logModel,serializer.data,logTransaccion)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-    except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+            createLog(logModel, serializer.data, logTransaccion)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-#ENCONTRAR LA ULTIMA FACTURA
+
+# ENCONTRAR LA ULTIMA FACTURA
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def factura_list_latest(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'listLatest/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'LEER',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'listLatest/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     try:
         try:
-            filters={"state":"1"}  
-            if 'negocio' in request.data:                
-                if request.data['negocio'] !='':   
+            filters = {"state": "1"}
+            if 'negocio' in request.data:
+                if request.data['negocio'] != '':
                     filters['negocio__isnull'] = False
 
-            if 'cliente' in request.data:                
-                if request.data['cliente'] !='':   
+            if 'cliente' in request.data:
+                if request.data['cliente'] != '':
                     filters['cliente__isnull'] = False
-            
+
             query = FacturasEncabezados.objects.filter(**filters).order_by('-id')[0]
         except FacturasEncabezados.DoesNotExist:
-            err={"error":"No existe"}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err,status=status.HTTP_404_NOT_FOUND)
-        #tomar el dato
+            err = {"error": "No existe"}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+        # tomar el dato
         if request.method == 'GET':
             serializer = FacturasListarSerializer(query)
-            createLog(logModel,serializer.data,logTransaccion)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-    except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+            createLog(logModel, serializer.data, logTransaccion)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-#CREAR
+
+# CREAR
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def factura_create(request):
     request.POST._mutable = True
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'create/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'CREAR',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'create/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'CREAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     if request.method == 'POST':
         try:
@@ -506,28 +548,28 @@ def factura_create(request):
             detalles = request.data['detalles']
             productosSinStock = []
             for detalle in detalles:
-                producto = Productos.objects.filter(codigoBarras=detalle['codigo'],state=1).values('stock').first()
+                producto = Productos.objects.filter(codigoBarras=detalle['codigo'], state=1).values('stock').first()
                 if int(detalle['cantidad']) > int(producto['stock']):
-                    productoSinStock={}
-                    productoSinStock['codigo']=detalle['codigo']
-                    productoSinStock['stock']=producto['stock']
+                    productoSinStock = {}
+                    productoSinStock['codigo'] = detalle['codigo']
+                    productoSinStock['stock'] = producto['stock']
                     productosSinStock.append(productoSinStock)
 
-            if len(productosSinStock) >0:
-                return Response(productosSinStock,status=status.HTTP_404_NOT_FOUND)
-        
+            if len(productosSinStock) > 0:
+                return Response(productosSinStock, status=status.HTTP_404_NOT_FOUND)
+
             serializer = FacturaSerializer(data=request.data)
-            if serializer.is_valid():                
+            if serializer.is_valid():
                 serializer.save()
-                request.data["factura_id"]= int(serializer.data['id'])
+                request.data["factura_id"] = int(serializer.data['id'])
                 if serializer.data['negocio'] is None:
-                    cliente = Clientes.objects.filter(id=serializer.data['cliente'],state=1).first()
-                    request.data["nombres"]= cliente.nombres
-                    request.data["apellidos"]= cliente.apellidos
+                    cliente = Clientes.objects.filter(id=serializer.data['cliente'], state=1).first()
+                    request.data["nombres"] = cliente.nombres
+                    request.data["apellidos"] = cliente.apellidos
                 else:
-                    negocio = Negocios.objects.filter(id=serializer.data['negocio'],state=1).first()
-                    request.data["nombres"]= negocio.razonSocial
-                    request.data["apellidos"]= negocio.nombreComercial
+                    negocio = Negocios.objects.filter(id=serializer.data['negocio'], state=1).first()
+                    request.data["nombres"] = negocio.razonSocial
+                    request.data["apellidos"] = negocio.nombreComercial
 
                 prediccionCrosselingSerializer = PrediccionCrosselingSerializer(data=request.data)
                 prediccionProductosSerializer = PrediccionProductosSerializer(data=request.data)
@@ -536,16 +578,17 @@ def factura_create(request):
                     prediccionCrosselingSerializer.save()
                     prediccionProductosSerializer.save()
                     prediccionRefilSerializer.save()
-                    createLog(logModel,serializer.data,logTransaccion)
+                    createLog(logModel, serializer.data, logTransaccion)
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
-                createLog(logModel,serializer.errors,logExcepcion)
+                createLog(logModel, serializer.errors, logExcepcion)
                 return Response(prediccionCrosselingSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            createLog(logModel,serializer.errors,logExcepcion)
+            createLog(logModel, serializer.errors, logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e: 
-            err={"error":'Un error ha ocurrido: {}'.format(e)}  
-            createLog(logModel,err,logExcepcion)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 
 # ACTUALIZAR
 @api_view(['POST'])
@@ -553,14 +596,14 @@ def factura_create(request):
 def factura_update(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'update/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'ESCRIBIR',
-        'fechaInicio' : str(timezone_now),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'update/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'ESCRIBIR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
         'fechaFin': str(timezone_now),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     try:
         try:
@@ -568,59 +611,265 @@ def factura_update(request, pk):
             query = FacturasEncabezados.objects.get(pk=pk, state=1)
             # print(query.detalles.count())
         except FacturasEncabezados.DoesNotExist:
-            errorNoExiste={'error':'No existe'}
-            createLog(logModel,errorNoExiste,logExcepcion)
+            errorNoExiste = {'error': 'No existe'}
+            createLog(logModel, errorNoExiste, logExcepcion)
             return Response(status=status.HTTP_404_NOT_FOUND)
         if request.method == 'POST':
             now = timezone.localtime(timezone.now())
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
-            serializer = FacturasSerializer(query, data=request.data,partial=True)
+            serializer = FacturasSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                createLog(logModel,serializer.data,logTransaccion)
+                createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
-            createLog(logModel,serializer.errors,logExcepcion)
+            createLog(logModel, serializer.errors, logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e: 
-        err={"error":'Un error ha ocurrido: {}'.format(e)}  
-        createLog(logModel,err,logExcepcion)
-        return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-#ELIMINAR
+    # ELIMINAR
+
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def factura_delete(request, pk):
     nowDate = timezone.localtime(timezone.now())
     logModel = {
-        'endPoint': logApi+'delete/',
-        'modulo':logModulo,
-        'tipo' : logExcepcion,
-        'accion' : 'BORRAR',
-        'fechaInicio' : str(nowDate),
-        'dataEnviada' : '{}',
+        'endPoint': logApi + 'delete/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'BORRAR',
+        'fechaInicio': str(nowDate),
+        'dataEnviada': '{}',
         'fechaFin': str(nowDate),
-        'dataRecibida' : '{}'
+        'dataRecibida': '{}'
     }
     try:
         try:
             query = FacturasEncabezados.objects.get(pk=pk, state=1)
         except FacturasEncabezados.DoesNotExist:
-            err={"error":"No existe"}  
-            createLog(logModel,err,logExcepcion)
-            return Response(err,status=status.HTTP_404_NOT_FOUND)
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        #tomar el dato
+            err = {"error": "No existe"}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+        # tomar el dato
         if request.method == 'DELETE':
-            serializer = FacturasSerializer(query, data={'state': '0','updated_at':str(nowDate)},partial=True)
+            serializer = FacturasSerializer(query, data={'state': '0', 'updated_at': str(nowDate)}, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                createLog(logModel,serializer.data,logTransaccion)
-                return Response(serializer.data,status=status.HTTP_200_OK)
-            createLog(logModel,serializer.errors,logExcepcion)
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            createLog(logModel, serializer.errors, logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e: 
-        err={"error":'Un error ha ocurrido: {}'.format(e)}  
-        createLog(logModel,err,logExcepcion)
-        return Response(err, status=status.HTTP_400_BAD_REQUEST) 
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+    # ENCONTRAR UNO
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def factura_procesar_envio(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'listOne/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        try:
+            query = FacturasEncabezados.objects.get(pk=pk, state=1)
+        except FacturasEncabezados.DoesNotExist:
+            err = {"error": "No existe"}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+        # tomar el dato
+        if request.method == 'GET':
+            facturaSerializer = FacturasParaCrearGDESerializer(query)
+            # facturasDetalles = []
+            # for item in facturaSerializer.data['detalles']:
+            #     facturasDetalles.append(
+            #         {
+            #             "oferta", item['oferta'],
+            #             "codigo", item['codigo'],
+            #             "cantidad", item['cantidad'],
+            #             "producto", item['producto'],
+            #             "precio", item['precio'],
+            #             "descuento", item['descuento'],
+            #             "total", item['total'],
+            #         }
+            #     )
+            # facturaEnviar = {
+            #     "negocio": facturaSerializer.data['negocio']['id'],
+            #     "cliente": facturaSerializer.data['cliente']['id'],
+            #     "fechaOferta": "",
+            #     "nombres": facturaSerializer.data['cliente']['nombres'],
+            #     "apellidos": facturaSerializer.data['cliente']['apellidos'],
+            #     "identificacion": facturaSerializer.data['cliente']['cedula'],
+            #     "telefono": facturaSerializer.data['cliente']['telefono'],
+            #     "correo": facturaSerializer.data['cliente']['correo1'],
+            #     "vigenciaOferta": "",
+            #     "canalVentas": "",
+            #     "calificacionCliente": "",
+            #     "indicadorCliente": "",
+            #     "personaGenera": facturaSerializer.data['nombreVendedor'],
+            #     "descripcion": "",
+            #     "total": facturaSerializer.data['total'],
+            #     "detalles": facturasDetalles,
+            # }
+            serializer = GestionOfertaSerializer(data=facturaSerializer.data)
+            if serializer.is_valid():
+                serializer.save()
+                # Actualizar la fecha actualizacion de la factura
+                now = timezone.localtime(timezone.now())
+                query.updated_at = str(now)
+                query.save()
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            createLog(logModel, serializer.errors, logTransaccion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        print(err)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def factura_reporte_productos(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
+            limit = offset + page_size
+            # Filtros
+            filters = {"state": "1"}
+
+            if 'inicio' and 'fin' in request.data:
+                if request.data['inicio'] and request.data['fin'] != '':
+                    filters['created_at__range'] = [str(request.data['inicio']), str(request.data['fin'])]
+
+            # Serializar los datos
+            query = FacturasDetalles.objects.values('codigo').annotate(total_cantidad=Sum('cantidad')).filter(**filters)
+            serializer = ReporteProductosSerializer(query[offset:limit], many=True)
+            new_serializer_data = {'cont': query.count(),
+                                   'info': serializer.data}
+            # envio de datos
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        # LISTAR TODOS NEGOCIOS
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def factura_reporte_clientes(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
+            limit = offset + page_size
+            # Filtros
+            filters = {"state": "1"}
+
+            if 'inicio' and 'fin' in request.data:
+                if request.data['inicio'] and request.data['fin'] != '':
+                    filters['created_at__range'] = [str(request.data['inicio']), str(request.data['fin'])]
+
+            # Serializar los datos
+            query = FacturasEncabezados.objects.values('cliente').annotate(total_cantidad=Count('cliente_id')).filter(
+                **filters)
+            serializer = ReporteClienteSerializer(query[offset:limit], many=True)
+            new_serializer_data = {'cont': query.count(),
+                                   'info': serializer.data}
+            # envio de datos
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+        # LISTAR TODOS NEGOCIOS
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def factura_clientes_compradas(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'GET':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            # paginacion
+            # page_size = int(request.data['page_size'])
+            # page = int(request.data['page'])
+            # offset = page_size * page
+            # limit = offset + page_size
+            # Filtros
+            filters = {"state": "1"}
+
+            if 'inicio' and 'fin' in request.data:
+                if request.data['inicio'] and request.data['fin'] != '':
+                    filters['created_at__range'] = [str(request.data['inicio']), str(request.data['fin'])]
+
+            # Serializar los datos
+            query = FacturasDetalles.objects.filter(codigo=pk)
+
+            serializer = ReporteClientesCompradosSerializer(query, many=True)
+            new_serializer_data = {'cont': query.count(), 'info': serializer.data}
+            # envio de datos
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+

@@ -40,6 +40,7 @@ urlpatterns = [
     path('mdp/subCategorias/', include(('apps.MDP.mdp_subCategorias.urls', 'subCategorias'), namespace='subCategorias')),
     path('mdp/productos/', include(('apps.MDP.mdp_productos.urls', 'productos'), namespace='productos')),
     path('mdp/fichaTecnicaProductos/', include(('apps.MDP.mdp_fichaTecnicaProductos.urls', 'fichaTecnicaProductos'), namespace='fichaTecnicaProductos')),
+    path('mdp/gestion-inventario/', include(('apps.MDP.mdp_gestionInventario.urls', 'gestion-inventario'), namespace='gestion-inventario')),
     # Modulo MDO
     path('mdo/param/', include(('apps.MDO.mdo_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizacionesMDO')),
     path('mdo/prediccionCrosseling/', include(('apps.MDO.mdo_prediccionCrosseling.urls', 'prediccionCrosseling'), namespace='prediccionCrosseling')),
@@ -52,6 +53,16 @@ urlpatterns = [
     # Modulo GDE
     path('gde/param/', include(('apps.GDE.gde_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizacionesGDE')),
     path('gde/gestionEntrega/', include(('apps.GDE.gde_gestionEntrega.urls', 'gestionEntrega'), namespace='gestionEntrega')),
+    # Modulo GDP
+    path('gdp/productos/', include(('apps.GDP.gdp_productos.urls', 'gdp_productos'), namespace='gdp_productos')),
+    # Modulo SERVIENTREGA
+    path('servientrega/', include(('apps.SERVIENTREGA.servientrega.urls', 'servientrega'), namespace='servientrega')),
+    # Modulo FACTURACION
+    path('facturacion/', include(('apps.FACTURACION.facturacion.urls', 'facturacion'), namespace='facturacion')),
+    # Woocommerce
+    path('mp/param/', include(('apps.WOOCOMMERCE.mp_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizacionesMP')),
+    path('api/v3/', include(('apps.WOOCOMMERCE.woocommerce.urls', 'woocommerce'), namespace='woocommerce')),
+    path('gdc/contact/', include(('apps.WOOCOMMERCE.gdc_gestor_contactos.urls', 'gdc_gestor_contactos'), namespace='gdc_gestor_contactos')),
 
 ]
 

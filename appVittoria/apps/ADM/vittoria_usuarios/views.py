@@ -60,12 +60,22 @@ def usuario_list(request):
             limit = offset + page_size
             # Filtros
             filters = {}
-            if 'idRol' in request.data:
-                if request.data['idRol'] != 0:
-                    filters['idRol'] = int(request.data['idRol'])
-            if 'estado' in request.data:
-                if request.data['estado'] != '':
-                    filters['estado'] = str(request.data['estado'])
+            if 'idRol' in request.data and request.data['idRol'] != 0:
+                filters['idRol'] = request.data['idRol']
+            if 'pais' in request.data and '' != request.data['pais']:
+                filters['pais'] = request.data['pais']
+            if 'provincia' in request.data and '' != request.data['provincia']:
+                filters['provincia'] = request.data['provincia']
+            if 'ciudad' in request.data and '' != request.data['ciudad']:
+                filters['ciudad'] = request.data['ciudad']
+            if 'estado' in request.data and request.data['estado'] != '':
+                filters['estado'] = str(request.data['estado'])
+            if 'state' in request.data and request.data['state'] != '':
+                filters['state'] = str(request.data['state'])
+            if 'email' in request.data and request.data['email'] != '':
+                filters['email__icontains'] = str(request.data['email'])
+            if 'compania' in request.data and request.data['compania'] != '':
+                filters['compania'] = str(request.data['compania'])
             # toma de datos
             usuario = Usuarios.objects.filter(**filters).order_by('-created_at')
             serializer = UsuarioRolSerializer(usuario[offset:limit], many=True)
@@ -179,6 +189,10 @@ def usuario_update(request, pk):
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
+
+            if 'username' in request.data and '' != request.data['username']:
+                request.data['username'] = request.data['username'].upper()
+
             serializer = UsuarioSerializer(usuario, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
@@ -247,7 +261,7 @@ def usuario_create(request):
 
     try:
         if request.method == 'POST':
-            user = Usuarios.objects.filter(email=request.data['email'], state=1).first()
+            user = Usuarios.objects.filter(email=request.data['email'], state=1,estado='Activo').first()
             if user is not None:
                 data = {'error': 'Email ya existe.'}
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -257,6 +271,8 @@ def usuario_create(request):
             logModel['dataEnviada'] = str(request.data)
             # AGREGA CONTRASEÑA
             request.data['password'] = get_random_string(length=32)
+            if 'username' in request.data and '' != request.data['username']:
+                request.data['username'] = request.data['username'].upper()
             serializer = UsuarioCrearSerializer(data=request.data)
             data = {}
             if serializer.is_valid():
