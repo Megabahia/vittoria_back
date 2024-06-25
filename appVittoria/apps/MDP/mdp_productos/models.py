@@ -179,7 +179,7 @@ class HistorialAvisos(models.Model):
         product.stock -= self.productosVendidos
         product.updated_at = str(timezone_now)
         product.save()
-        if product.parametrizacion.valor == 'stock':
+        if product.parametrizacion.valor == 'stock' and product.parametrizacion is not None:
             if product.parametrizacion.minimo < product.stock and product.stock < product.parametrizacion.maximo:
                 datos = HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras, alerta=0).aggregate(
                     promedioProductos=Avg('productosVendidos'), fechaMinima=Min('fechaCompra'),
@@ -200,7 +200,7 @@ class HistorialAvisos(models.Model):
                     enviarEmailAvisoAbastecimiento(product, maxDate)
         else:
             diasAlerta = (product.fechaCaducidad - datetime.datetime.now().date()).days
-            if diasAlerta <= product.parametrizacion.maximo:
+            if diasAlerta <= product.parametrizacion.maximo and product.parametrizacion is not None:
                 datos = HistorialAvisos.objects.filter(codigoBarras=self.codigoBarras, alerta=0).aggregate(
                     promedioProductos=Avg('productosVendidos'), fechaMinima=Min('fechaCompra'),
                     fechaMaxima=Max('fechaCompra'), totalRegistros=Count('alerta'))
@@ -293,13 +293,13 @@ def createTablesReport(sender, instance, **kwargs):
     timezone_now = timezone.localtime(timezone.now())
     # CREAR INGRESO PRODUCTOS
     ingresoProductos = IngresoProductos.objects.filter(producto=instance, state=1).first()
-    if ingresoProductos is None:
+    if ingresoProductos is None and instance.fechaElaboracion is not None and instance.fechaCaducidad is not None:
         IngresoProductos.objects.create(cantidad=instance.stock, fechaElaboracion=str(instance.fechaElaboracion),
                                         fechaCaducidad=str(instance.fechaCaducidad), precioCompra=instance.costoCompra,
                                         producto=instance)
     # CREAR REPORTE STOCK
     reporteStock = ReporteStock.objects.filter(producto=instance, state=1).first()
-    if reporteStock is None:
+    if reporteStock is None and datetime.datetime.now().date() is not None:
         ReporteStock.objects.create(fechaUltimaStock=str(datetime.datetime.now().date()),
                                     montoCompra=instance.costoCompra, producto=instance)
     # CREAR REPORTE ABASTECIMIENTO
@@ -310,7 +310,7 @@ def createTablesReport(sender, instance, **kwargs):
     diasPeriodo = 7
     fechaFin = timezone_now + datetime.timedelta(days=diasPeriodo)
     reporteRotacion = ReporteRotacion.objects.filter(producto=instance, fechaFin__lte=fechaFin).first()
-    if reporteRotacion is None:
+    if reporteRotacion is None and timezone_now is not None and fechaFin is not None:
         ReporteRotacion.objects.create(fechaInicio=str(timezone_now)[0:10], fechaFin=str(fechaFin)[0:10],
                                        diasPeriodo=diasPeriodo, productosVendidos=0, tipoRotacion="Bajo", montoVenta=0,
                                        producto=instance)
@@ -328,7 +328,7 @@ def createTablesReport(sender, instance, **kwargs):
         diasParaCaducar = 0
     # CREAR REPORTE CADUCIDAD
     reporteCaducidad = ReporteCaducidad.objects.filter(producto=instance, state=1).first()
-    if reporteCaducidad is None:
+    if reporteCaducidad is None and instance.fechaCaducidad is not None:
         ReporteCaducidad.objects.create(fechaCaducidad=instance.fechaCaducidad,
                                         productosCaducados=ingresoProducto["productosCaducados"],
                                         diasParaCaducar=diasParaCaducar, producto=instance)
