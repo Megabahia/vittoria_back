@@ -30,7 +30,7 @@ class UsuarioCrearSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuarios
         fields = ['nombres', 'apellidos', 'username', 'email', 'compania', 'pais', 'telefono', 'whatsapp', 'idRol',
-                  'password', 'estado', 'imagen']
+                  'password', 'estado', 'imagen', 'canal']
         extra_kwargs = {
             'password': {'write_only': True},
         }
@@ -40,6 +40,7 @@ class UsuarioCrearSerializer(serializers.ModelSerializer):
             nombres=self.validated_data['nombres'],
             apellidos=self.validated_data['apellidos'],
             username=self.validated_data['username'],
+            canal=self.validated_data['canal'],
             email=self.validated_data['email'],
             compania=self.validated_data['compania'],
             pais=self.validated_data['pais'],

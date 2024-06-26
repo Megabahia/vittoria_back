@@ -74,7 +74,7 @@ def productos_list(request):
                 filters['codigoBarras__icontains'] = request.data['codigoBarras']
 
             if 'canalProducto' in request.data and request.data['canalProducto'] != '':
-                filters['canal__icontains'] = request.data['canalProducto']
+                filters['stockVirtual__contains'] = {'canal': request.data['canalProducto'], 'estado':True}
 
             if 'proveedor' in request.data and request.data['proveedor'] != '':
                 filters['proveedor'] = request.data['proveedor']
@@ -232,6 +232,8 @@ def productos_create(request):
             request.data['created_at'] = str(timezone_now)
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
+            if 'parametrizacion' in request.data and request.data['parametrizacion'] == '0':
+                request.data.pop('parametrizacion')
             serializer = ProductoCreateSerializer(data=request.data)
 
             if serializer.is_valid():
@@ -290,6 +292,8 @@ def productos_update(request, pk):
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
+            if 'parametrizacion' in request.data and request.data['parametrizacion'] == '0':
+                request.data.pop('parametrizacion')
             serializer = ProductosActualizarSerializer(query, data=request.data, partial=True)
             if ("idPadre" in request.data and request.data['idPadre'] != ''):
 
