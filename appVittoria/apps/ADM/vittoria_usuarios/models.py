@@ -12,6 +12,7 @@ class Usuarios(AbstractBaseUser):
     username = models.CharField(max_length=150, unique=False)
     imagen = models.ImageField(blank=True, null=True, upload_to=upload_path)
     nombres = models.CharField(max_length=150)
+    canal = models.CharField(max_length=250, blank=True, null=True)
     apellidos = models.CharField(max_length=250)
     email = models.EmailField(max_length=255, unique=False)
     estado = models.CharField(max_length=200)
