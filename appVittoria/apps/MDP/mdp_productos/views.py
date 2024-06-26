@@ -286,16 +286,13 @@ def productos_update(request, pk):
             createLog(logModel, errorNoExiste, logExcepcion)
             return Response(status=status.HTTP_404_NOT_FOUND)
         if request.method == 'POST':
-            print('ENTRA POST')
             now = timezone.localtime(timezone.now())
             request.data['updated_at'] = str(now)
             if 'created_at' in request.data:
                 request.data.pop('created_at')
-            print('INICIO SERIALIZER')
             serializer = ProductosActualizarSerializer(query, data=request.data, partial=True)
-            print('ANTES DEL IF')
             if ("idPadre" in request.data and request.data['idPadre'] != ''):
-                print('LUEGO DEL IF')
+
                 productoPadre = Productos.objects.filter(codigoBarras=request.data['idPadre']).first()
                 productoHijo = Productos.objects.filter(codigoBarras=request.data['codigoBarras']).first()
 
@@ -316,9 +313,8 @@ def productos_update(request, pk):
                         productoHijo.save()
                         productoPadre.stock = productoPadre.stock + diferenciaStock
                         productoPadre.save()
-            print('SALE DEL PRIMER IF')
+
             if serializer.is_valid():
-                print('ANTES DE GUARDAR')
                 serializer.save()
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)

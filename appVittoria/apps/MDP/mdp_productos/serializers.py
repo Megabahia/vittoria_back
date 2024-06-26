@@ -125,20 +125,13 @@ class ProductosActualizarSerializer(serializers.ModelSerializer):
         return producto
 
     def update(self, instance, validated_data):
-        print('PRODUCTO UPDATE SERIALIZER')
-
         if "imagenes" in validated_data:
-            print('ENTRA AL IF PRODUCTO UPDATE SERIALIZER')
-
             detalles_database = {detalle.id: detalle for detalle in instance.imagenes.all()}
             detalles_actualizar = {item['id']: item for item in validated_data['imagenes']}
-
-            print('ANTES DE ACTUALIZAR PRODUCTO UPDATE SERIALIZER')
 
             # Actualiza el producto
             instance.__dict__.update(validated_data)
             instance.save()
-            print('LUEGO DE ACTUALIZAR PRODUCTO UPDATE SERIALIZER')
 
             # Eliminar los imagenes que no esté incluida en la solicitud de la productos imagenes
             # for detalle in instance.imagenes.all():
@@ -158,10 +151,8 @@ class ProductosActualizarSerializer(serializers.ModelSerializer):
                 #     data['updated_at'] = str(now)
                 #     ProductoImagen.objects.filter(id=detalle.id).update(**data)
         else:
-            print('ELSE PRODUCT UPDATE SERIALIZER')
             if 'parametrizacion' in validated_data:
-                print('ENTRA A IF DE PARAMETRIZACION')
-                #instance.parametrizacion = validated_data['parametrizacion']
+                instance.parametrizacion = validated_data['parametrizacion']
             # Actualiza el producto
             instance.__dict__.update(validated_data)
             instance.save()

@@ -12,7 +12,7 @@ from ..mdp_parametrizaciones.models import Parametrizaciones
 
 
 def upload_path(instance, filname):
-    return '/'.join(['MDP/imgProductos', str(instance.producto.id) + "_" + filname])
+    return '/'.join(['MDP/imgProductos', str(instance.id) + "_" + filname])
 
 
 def upload_path_video(instance, filname):
