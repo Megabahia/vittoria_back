@@ -63,6 +63,8 @@ class Productos(models.Model):
     precioLandingOferta = models.FloatField(null=True, blank=True)
     proveedor = models.CharField(max_length=150, null=True, blank=True)
 
+    imagen_principal = models.FileField(blank=True, null=True, upload_to=upload_path)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)
@@ -80,7 +82,6 @@ class ProductoImagen(models.Model):
     producto = models.ForeignKey(Productos, related_name='imagenes', null=True, blank=True,
                                  on_delete=models.DO_NOTHING)  # Relacion Con producto
     imagen = models.FileField(blank=True, null=True, upload_to=upload_path)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)
