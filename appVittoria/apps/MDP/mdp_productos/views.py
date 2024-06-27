@@ -1,3 +1,5 @@
+import json
+
 from .models import (
     ProductoImagen,
     Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion, IngresoProductos
@@ -234,6 +236,9 @@ def productos_create(request):
                 request.data.pop('updated_at')
             if 'parametrizacion' in request.data and request.data['parametrizacion'] == '0':
                 request.data.pop('parametrizacion')
+            if 'stockVirtual' in request.data and type(request.data['stockVirtual']) == 'str':
+                stockVirtualTemporal = request.data.pop('stockVirtual')
+                request.data['stockVirtual'] = json.dumps(stockVirtualTemporal)
             serializer = ProductoCreateSerializer(data=request.data)
 
             if serializer.is_valid():
@@ -294,6 +299,9 @@ def productos_update(request, pk):
                 request.data.pop('created_at')
             if 'parametrizacion' in request.data and request.data['parametrizacion'] == '0':
                 request.data.pop('parametrizacion')
+            if 'stockVirtual' in request.data and type(request.data['stockVirtual']) == 'str':
+                stockVirtualTemporal = request.data.pop('stockVirtual')
+                request.data['stockVirtual'] = json.dumps(stockVirtualTemporal)
             serializer = ProductosActualizarSerializer(query, data=request.data, partial=True)
             if ("idPadre" in request.data and request.data['idPadre'] != ''):
 
