@@ -472,11 +472,12 @@ def search_producto_codigo_list(request):
                 indice_com = url_completa.find('.com')
 
                 url_cortada = url_completa[:indice_com + 4] if indice_com != -1 else url_completa
+
                 if url_cortada=='Landing-Producto' or url_cortada=='Landing-Page':
                     query.precio = query.precioLandingOferta if query.precioLandingOferta is None else 0
                     query.mensaje = ""
-                elif url_cortada=='https://todomegacentro.megadescuento.com':
-                    if valorUnitario ==0:
+                elif url_cortada=='todomegacentro.megadescuento.com':
+                    if valorUnitario == 0:
                         if(query.precioVentaA!=0):
                             query.precio = query.precioVentaA if query.precioVentaA is None else 0
                             query.mensaje = ""
@@ -490,9 +491,9 @@ def search_producto_codigo_list(request):
                         query.precio=query.precioVentaB
                         query.mensaje = ""
                     else:
-                        query.precio=0
+                        query.precio=valorUnitario
                         query.mensaje="NO COINCIDE CON OFERTA TODOMEGACENTRO"
-                elif url_cortada=='https://mayorista.megadescuento.com':
+                elif url_cortada=='mayorista.megadescuento.com':
                     if valorUnitario == 0:
                         if (query.precioVentaC != 0):
                             query.precio = query.precioVentaC if query.precioVentaC is None else 0
@@ -517,9 +518,10 @@ def search_producto_codigo_list(request):
                         query.precio = query.precioVentaE
                         query.mensaje = ""
                     else:
-                        query.precio = 0
+                        query.precio = valorUnitario
                         query.mensaje ="NO COINCIDE CON OFERTA MAYORISTA"
-                elif url_cortada=='https://contraentrega.megadescuento.com':
+                elif url_cortada=='contraentrega.megadescuento.com':
+
                     if valorUnitario == 0:
                         query.precio = query.precioVentaBultos if query.precioVentaBultos is None else 0
                         query.mensaje = ""
@@ -527,9 +529,9 @@ def search_producto_codigo_list(request):
                         query.precio = query.precioVentaBultos
                         query.mensaje = ""
                     else:
-                        query.precio = 0
+                        query.precio = valorUnitario
                         query.mensaje ="NO COINCIDE CON LA OFERTA CONTRAENTREGA"
-                elif url_cortada=='https://megadescuento.com':
+                elif url_cortada=='megadescuento.com':
                     if valorUnitario == 0:
                         query.precio = query.precioOferta if query.precioOferta is None else 0
                         query.mensaje = ""
@@ -537,7 +539,7 @@ def search_producto_codigo_list(request):
                         query.precio = query.precioOferta
                         query.mensaje = ""
                     else:
-                        query.precio = 0
+                        query.precio = valorUnitario
                         query.mensaje ="NO COINCIDE CON OFERTA MEGADESCUENTO"
                 else:
                     if valorUnitario == 0:
@@ -547,7 +549,7 @@ def search_producto_codigo_list(request):
                         query.precio = query.precioVentaF
                         query.mensaje = ""
                     else:
-                        query.precio=0
+                        query.precio=valorUnitario
                         query.mensaje ="NO EXISTE OFERTA SIMILAR AL PRECIO"
                         query.mensaje =''
 
