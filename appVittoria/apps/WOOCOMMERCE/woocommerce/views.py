@@ -6,10 +6,11 @@ from django.utils import timezone
 from urllib.parse import urlparse
 from django.db.models import Sum
 from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDescuentoSinEnvio, \
-    mapeoTodoMegaDescuentoSinEnvio,mapeoTodoMayoristaSinEnvio,mapeoTodoContraEntrega,mapeoTodoTiendaMulticompras, mapeoTodoMaxiDescuento, mapeoTodoMegaBahia
+    mapeoTodoMegaDescuentoSinEnvio,mapeoTodoMayoristaSinEnvio,mapeoTodoContraEntrega,mapeoTodoTiendaMulticompras, mapeoTodoMaxiDescuento, mapeoTodoMegaBahia, mapeoCrearProductoWoocommerce
 from .serializers import (
     CreateOrderSerializer, PedidosSerializer, ProductosBodegaListSerializer
 )
+from ...MDP.mdp_productos.serializers import ProductoCreateSerializer
 from django.db.models import Max
 
 from .models import (
@@ -71,17 +72,24 @@ def orders_create(request):
         try:
             logModel['dataEnviada'] = str(request.data)
 
-            dominio_completo = request.headers.get('X-Wc-Webhook-Source')
+            #dominio_completo = request.headers.get('X-Wc-Webhook-Source')
             #Utiliza urlparse para obtener la información de la URL
-            parsed_url = urlparse(dominio_completo)
+            #parsed_url = urlparse(dominio_completo)
             #Combina el nombre de host (dominio) y el esquema (protocolo)
-            domain = parsed_url.netloc
-            dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
-            if dominio_permitidos is None:
-                error = f"Llego un dominio: {domain}"
-                createLog(logModel, error, logTransaccion)
-                return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            #domain = parsed_url.netloc
+            #dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
+            #if dominio_permitidos is None:
+            #    error = f"Llego un dominio: {domain}"
+            #    createLog(logModel, error, logTransaccion)
+            #    return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            index = request.data['_links']['collection'][0]['href'].find('.com')
+            if index != -1:
+                canal_principal = request.data['_links']['collection'][0]['href'][:index + 4]
+            else:
+                canal_principal = request.data['_links']['collection'][0]['href']
 
+            canal_corto = canal_principal.replace('https://', '')
+            canal = request.data['_links']['collection'][0]['href']
             articulos = []
 
             for articulo in request.data['line_items']:
@@ -89,6 +97,13 @@ def orders_create(request):
                 for meta in articulo['meta_data']:
                     if meta['display_key'] != '_reduced_stock':
                         caracteristicas = caracteristicas + f"<strong>{meta['display_key']}</strong>: {meta['display_value']}<br>"
+
+                product_ped=Productos.objects.filter(codigoBarras=articulo['sku'], canal = canal_corto).first()
+                if product_ped is None:
+                    data_prod=mapeoCrearProductoWoocommerce(request.data['line_items'], canal, request.data['date_created'])
+                    serializer_prod = ProductoCreateSerializer(data = data_prod)
+                    if serializer_prod.is_valid():
+                        serializer_prod.save()
 
                 articulos.append({
                     "codigo": articulo['sku'],
@@ -99,7 +114,6 @@ def orders_create(request):
                     "caracteristicas": caracteristicas
                 })
 
-            canal = request.data['_links']['collection'][0]['href']
             codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
                                     objeto["key"] == '_billing_wooccm17'), None)
             nombreVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if

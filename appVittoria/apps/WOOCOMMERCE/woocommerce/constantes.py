@@ -1,3 +1,4 @@
+
 provincias = {
     "EC-A": "Azuay",
     "EC-C": "Carchi",
@@ -722,3 +723,47 @@ def mapeoTodoMegaBahia(request, articulos):
         "created_at": request.data['date_created'],
         "codigoVendedor": '',
     }
+
+def mapeoCrearProductoWoocommerce(request, canal_pedido, fecha):
+    productos_procesados={}
+    index = canal_pedido.find('.com')
+    if index != -1:
+        canal = canal_pedido[:index + 4]
+    else:
+        canal = canal_pedido
+
+    canal = canal.replace('https://', '')
+    # Lista de todos los canales disponibles en stockVirtual
+    canales_stock_virtual = [
+        "vittoria-test.netlify.app",
+        "maxidescuento.megadescuento.com",
+        "megabahia.megadescuento.com",
+        "tiendamulticompras.megadescuento.com",
+        "contraentrega.megadescuento.com",
+        "mayorista.megadescuento.com",
+        "megadescuento.com",
+        "todomegacentro.megadescuento.com"
+    ]
+
+    # Generar la lista stockVirtual comparando el canal extraído con la lista de canales
+    stock_virtual = [{"canal": sv_canal, "estado": sv_canal == canal} for sv_canal in canales_stock_virtual]
+    for prod in request:
+        productos_procesados = {
+            "woocommerceId": int(prod['product_id']),
+            "nombre": prod['name'],
+            "codigoBarras": prod['sku'],
+            "stock": int(prod['quantity']),
+            "costoCompra": float(prod['price']),
+            "precioVentaA": float(prod['price']),
+            "precioVentaB": float(prod['price']),
+            "precioVentaC": 0,
+            "precioVentaD": 0,
+            "precioVentaE": 0,
+            "precioVentaF": 0,
+            "canal": canal,
+            "estado": 'Activo',
+            "created_at": fecha,
+            "stockVirtual": stock_virtual,
+        }
+
+    return productos_procesados

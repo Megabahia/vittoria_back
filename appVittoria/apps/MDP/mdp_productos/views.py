@@ -1319,8 +1319,7 @@ def productos_update_woocommerce(request):
 
         canal = canal.replace('https://', '')
 
-        query = Productos.objects.filter(codigoBarras=request.data['sku'], woocommerceId=request.data['id'],
-                                         canal=canal, state=1).exclude(codigoBarras=request.data['sku'],
+        query = Productos.objects.filter(codigoBarras=request.data['sku'], canal=canal, state=1).exclude(codigoBarras=request.data['sku'],
                                                                        woocommerceId=request.data['id'],
                                                                        canal=canal).first()
 
@@ -1330,9 +1329,7 @@ def productos_update_woocommerce(request):
             return Response(errorNoExiste, status=status.HTTP_404_NOT_FOUND)
         try:
             logModel['dataEnviada'] = str(request.data)
-            query = Productos.objects.get(codigoBarras=request.data['sku'],
-                                                                       woocommerceId=request.data['id'],
-                                                                       canal=canal, state=1)
+            query = Productos.objects.get(codigoBarras=request.data['sku'], canal=canal, state=1)
         except Productos.DoesNotExist:
             errorNoExiste = {'error': 'No existe'}
             createLog(logModel, errorNoExiste, logExcepcion)
