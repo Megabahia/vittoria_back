@@ -399,9 +399,8 @@ def contacts_update(request, pk):
                 if Contactos.objects.filter(numTransaccionCredito=request.data['numTransaccionCredito']).exclude(pk=pk).first():
                     return Response(data='Ya existe el número de transacción para tarjeta de crédito', status=status.HTTP_404_NOT_FOUND)
 
-            if 'formaPago' in request.data and request.data['formaPago'] is not None:
-                lista_formas_pago = request.data['formaPago'].split(',')
-                request.data['formaPago'] = json.dumps(lista_formas_pago)
+            #if 'formaPago' in request.data and request.data['formaPago'] is not None:
+            #    request.data['formaPago'] = json.dumps(lista_formas_pago)
 
             queryClientes=None
             if 'facturacion' in request.data and request.data['facturacion']['identificacion'] != '':
