@@ -363,6 +363,7 @@ def gdc_validate_contact(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def contacts_update(request, pk):
+    request.POST._mutable = True
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi + 'update/',
