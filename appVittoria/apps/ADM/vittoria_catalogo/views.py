@@ -57,7 +57,6 @@ def catalogo_list(request):
 
             # Serializar los datos
             query = Catalogo.objects.filter(**filters).order_by('-created_at')
-            print(query)
             serializer = CatalogoListaSerializer(query[offset:limit], many=True)
             serializerAllDta= CatalogoListaSerializer(query,many=True)
             new_serializer_data = {'cont': query.count(),

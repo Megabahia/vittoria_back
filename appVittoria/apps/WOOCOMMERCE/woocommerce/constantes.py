@@ -724,7 +724,8 @@ def mapeoTodoMegaBahia(request, articulos):
         "codigoVendedor": '',
     }
 
-def mapeoCrearProductoWoocommerce(request, canal_pedido, fecha):
+def mapeoCrearProductoWoocommerce(request, stock_nuevo, canal_pedido, fecha):
+
     productos_procesados={}
     index = canal_pedido.find('.com')
     if index != -1:
@@ -744,7 +745,7 @@ def mapeoCrearProductoWoocommerce(request, canal_pedido, fecha):
         "megadescuento.com",
         "todomegacentro.megadescuento.com"
     ]
-
+    print('STOCK', stock_nuevo)
     # Generar la lista stockVirtual comparando el canal extraído con la lista de canales
     stock_virtual = [{"canal": sv_canal, "estado": sv_canal == canal} for sv_canal in canales_stock_virtual]
     for prod in request:
@@ -752,7 +753,7 @@ def mapeoCrearProductoWoocommerce(request, canal_pedido, fecha):
             "woocommerceId": int(prod['product_id']),
             "nombre": prod['name'],
             "codigoBarras": prod['sku'],
-            "stock": int(prod['quantity']),
+            "stock": stock_nuevo,
             "costoCompra": float(prod['price']),
             "precioVentaA": float(prod['price']),
             "precioVentaB": float(prod['price']),
@@ -760,6 +761,7 @@ def mapeoCrearProductoWoocommerce(request, canal_pedido, fecha):
             "precioVentaD": 0,
             "precioVentaE": 0,
             "precioVentaF": 0,
+            "precioVentaBultos":0,
             "canal": canal,
             "estado": 'Activo',
             "created_at": fecha,

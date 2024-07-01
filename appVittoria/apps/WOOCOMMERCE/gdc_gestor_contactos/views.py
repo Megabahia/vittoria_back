@@ -385,14 +385,22 @@ def contacts_update(request, pk):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if request.method == 'POST':
-
+            lista_formas_pago=[]
             if 'numeroComprobante' in request.data and request.data['numeroComprobante'] is not None:
                 if Contactos.objects.filter(numeroComprobante=request.data['numeroComprobante']).exclude(pk=pk).first():
                     return Response(data='Ya existe el número de comprobante', status=status.HTTP_404_NOT_FOUND)
 
             if 'numTransaccionTransferencia' in request.data and request.data['numTransaccionTransferencia'] is not None:
                 if Contactos.objects.filter(numTransaccionTransferencia=request.data['numTransaccionTransferencia']).exclude(pk=pk).first():
-                    return Response(data='Ya existe el número de transacción', status=status.HTTP_404_NOT_FOUND)
+                    return Response(data='Ya existe el número de transacción para transferencia', status=status.HTTP_404_NOT_FOUND)
+
+            if 'numTransaccionCredito' in request.data and request.data['numTransaccionCredito'] is not None:
+                if Contactos.objects.filter(numTransaccionCredito=request.data['numTransaccionCredito']).exclude(pk=pk).first():
+                    return Response(data='Ya existe el número de transacción para tarjeta de crédito', status=status.HTTP_404_NOT_FOUND)
+
+            if 'formaPago' in request.data and request.data['formaPago'] is not None:
+                lista_formas_pago = request.data['formaPago'].split(',')
+                request.data['formaPago'] = json.dumps(lista_formas_pago)
 
             queryClientes=None
             if 'facturacion' in request.data and request.data['facturacion']['identificacion'] != '':

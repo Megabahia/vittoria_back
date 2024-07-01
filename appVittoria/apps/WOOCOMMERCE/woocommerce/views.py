@@ -99,8 +99,10 @@ def orders_create(request):
                         caracteristicas = caracteristicas + f"<strong>{meta['display_key']}</strong>: {meta['display_value']}<br>"
 
                 product_ped=Productos.objects.filter(codigoBarras=articulo['sku'], canal = canal_corto).first()
+                query_param = Catalogo.objects.filter(tipo='STOCK').first()
                 if product_ped is None:
-                    data_prod=mapeoCrearProductoWoocommerce(request.data['line_items'], canal, request.data['date_created'])
+                    stock_nuevo = int(query_param.valor)
+                    data_prod=mapeoCrearProductoWoocommerce(request.data['line_items'], stock_nuevo, canal, request.data['date_created'])
                     serializer_prod = ProductoCreateSerializer(data = data_prod)
                     if serializer_prod.is_valid():
                         serializer_prod.save()

@@ -49,7 +49,7 @@ class CreateContactSerializer(serializers.Serializer):
         articulosModificado = []
         if articulos:
             for articulo in articulos:
-                url = articulo['imagen']
+                url = articulo['imagen_principal']
                 if url is not None:
                     response = requests.get(url)
                     b64_encoded = base64.b64encode(response.content)
@@ -60,7 +60,7 @@ class CreateContactSerializer(serializers.Serializer):
 
                 articulosModificado.append({
                     **articulo,
-                    "imagen": f"data:image/jpg;base64,{imagen}"
+                    "imagen_principal": f"data:image/jpg;base64,{imagen}"
                 })
         data['articulos'] = articulosModificado
         return data
