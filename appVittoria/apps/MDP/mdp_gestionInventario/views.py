@@ -156,6 +156,7 @@ def insertarDato_Factura(dato):
             facturaEncabezado['fechaElaboracion'] = str(timezone_now)[:10]
             facturaEncabezado['fechaCaducidad'] = str(timezone_now)[:10]
             facturaEncabezado['proveedor'] = dato[6].replace('"', "") if dato[6] != "NULL" else None
+            facturaEncabezado['canal'] = 'megabahia.megadescuento.com'
             producto = ProductosMDP.objects.create(**facturaEncabezado)
             if fotoOriginal:
                 ProductosImagenes.objects.create(**{
@@ -546,7 +547,24 @@ def insertarDato_StockProducto(dato, resetearStock):
         timezone_now = timezone.localtime(timezone.now())
         if dato[1] == None and dato[6] == None or dato[1] == 'None' and dato[6] == 'None':
             return 'Dato insertado correctamente'
-        facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=dato[1]).first()
+        facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=dato[1], canal= 'megadescuento.com').first()
+        ##############
+        # Lista de todos los canales disponibles en stockVirtual
+        canales_stock_virtual = [
+            "vittoria-test.netlify.app",
+            "maxidescuento.megadescuento.com",
+            "megabahia.megadescuento.com",
+            "tiendamulticompras.megadescuento.com",
+            "contraentrega.megadescuento.com",
+            "mayorista.megadescuento.com",
+            "megadescuento.com",
+            "todomegacentro.megadescuento.com"
+        ]
+
+        # Generar la lista stockVirtual comparando el canal extraído con la lista de canales
+        stock_virtual = [{"canal": sv_canal, "estado": sv_canal == 'megadescuento.com'} for sv_canal in
+                         canales_stock_virtual]
+        #############
         if facturaEncabezadoQuery and None is not facturaEncabezadoQuery:
             if resetearStock:
                 facturaEncabezadoQuery.stock = int(dato[4].replace('"', "") if dato[4] != "NULL" else 0)
@@ -564,11 +582,31 @@ def insertarDato_StockProducto(dato, resetearStock):
             facturaEncabezadoQuery.precioVentaE = round(float(
                 dato[11].replace('"', "") if dato[11] != "None" else 0), 2)
             facturaEncabezadoQuery.updated_at = str(timezone_now)
+            facturaEncabezadoQuery.stockVirtual = stock_virtual
             print('SALE IF', facturaEncabezadoQuery)
             facturaEncabezadoQuery.save()
             return 'Dato insertado correctamente'
         else:
-            return f'Error con el codigo: {dato[0]}'
+            facturaEncabezado = {}
+            facturaEncabezado['stock'] = int(dato[2].replace('"', "") if dato[2] != "NULL" else 0)
+            facturaEncabezado['precioVentaA'] = round(float(dato[5].replace('"', "") if dato[5] != "NULL" else 0), 2)
+            facturaEncabezado['precioVentaB'] = round(float(dato[6].replace('"', "") if dato[6] != "NULL" else 0), 2)
+            facturaEncabezado['precioVentaC'] = round(float(dato[7].replace('"', "") if dato[7] != "NULL" else 0), 2)
+            facturaEncabezado['precioVentaD'] = round(float(dato[8].replace('"', "") if dato[8] != "NULL" else 0), 2)
+            facturaEncabezado['precioVentaE'] = round(float(dato[9].replace('"', "") if dato[9] != "NULL" else 0), 2)
+            facturaEncabezado['codigoBarras'] = dato[0].replace('"', "") if dato[0] != "NULL" else None
+            facturaEncabezado['nombre'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
+            facturaEncabezado['descripcion'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
+            facturaEncabezado['estado'] = 'Activo'
+            facturaEncabezado['created_at'] = str(timezone_now)
+            facturaEncabezado['updated_at'] = str(timezone_now)
+            facturaEncabezado['precioOferta'] = round(float(dato[5].replace('"', "") if dato[5] != "NULL" else 0), 2)
+            facturaEncabezado['fechaElaboracion'] = str(timezone_now)[:10]
+            facturaEncabezado['fechaCaducidad'] = str(timezone_now)[:10]
+            facturaEncabezado['canal'] = 'megadescuento.com'
+            facturaEncabezado['stockVirtual'] = stock_virtual
+            ProductosMDP.objects.create(**facturaEncabezado)
+            return 'Dato creado correctamente'
     except Exception as e:
         print('error', e)
         return str(e)
@@ -582,6 +620,23 @@ def insertarDato_StockProductoMegabahia(dato, resetearStock):
             return 'Dato insertado correctamente'
         facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=str(dato[0]), canal='megabahia.megadescuento.com').first()
         print('encontro', facturaEncabezadoQuery)
+        ##############
+        # Lista de todos los canales disponibles en stockVirtual
+        canales_stock_virtual = [
+            "vittoria-test.netlify.app",
+            "maxidescuento.megadescuento.com",
+            "megabahia.megadescuento.com",
+            "tiendamulticompras.megadescuento.com",
+            "contraentrega.megadescuento.com",
+            "mayorista.megadescuento.com",
+            "megadescuento.com",
+            "todomegacentro.megadescuento.com"
+        ]
+
+        # Generar la lista stockVirtual comparando el canal extraído con la lista de canales
+        stock_virtual = [{"canal": sv_canal, "estado": sv_canal == 'megabahia.megadescuento.com'} for sv_canal in
+                         canales_stock_virtual]
+        #############
         if facturaEncabezadoQuery and None is not facturaEncabezadoQuery:
             print('Entro al if', resetearStock)
             if resetearStock:
@@ -601,10 +656,30 @@ def insertarDato_StockProductoMegabahia(dato, resetearStock):
                 dato[9].replace('"', "") if dato[9] != "NULL" else 0), 2)
             facturaEncabezadoQuery.updated_at = str(timezone_now)
             facturaEncabezadoQuery.canal = 'megabahia.megadescuento.com'
+            facturaEncabezadoQuery.stockVirtual = stock_virtual
             facturaEncabezadoQuery.save()
             return 'Dato insertado correctamente'
         else:
-            return f'Error con el codigo: {dato[0]}'
+            facturaEncabezado = {}
+            facturaEncabezado['stock'] = int(dato[2].replace('"', "") if dato[2] != "NULL" else 0)
+            facturaEncabezado['precioVentaA'] = round(float(dato[5].replace('"', "") if dato[5] != "NULL" else 0), 2)
+            facturaEncabezado['precioVentaB'] = round(float(dato[6].replace('"', "") if dato[6] != "NULL" else 0), 2)
+            facturaEncabezado['precioVentaC'] = round(float(dato[7].replace('"', "") if dato[7] != "NULL" else 0), 2)
+            facturaEncabezado['precioVentaD'] = round(float(dato[8].replace('"', "") if dato[8] != "NULL" else 0), 2)
+            facturaEncabezado['precioVentaE'] = round(float(dato[9].replace('"', "") if dato[9] != "NULL" else 0), 2)
+            facturaEncabezado['codigoBarras'] = dato[0].replace('"', "") if dato[0] != "NULL" else None
+            facturaEncabezado['nombre'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
+            facturaEncabezado['descripcion'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
+            facturaEncabezado['estado'] = 'Activo'
+            facturaEncabezado['created_at'] = str(timezone_now)
+            facturaEncabezado['updated_at'] = str(timezone_now)
+            facturaEncabezado['precioOferta'] = round(float(dato[5].replace('"', "") if dato[5] != "NULL" else 0), 2)
+            facturaEncabezado['fechaElaboracion'] = str(timezone_now)[:10]
+            facturaEncabezado['fechaCaducidad'] = str(timezone_now)[:10]
+            facturaEncabezado['canal'] = 'megabahia.megadescuento.com'
+            facturaEncabezado['stockVirtual'] = stock_virtual
+            ProductosMDP.objects.create(**facturaEncabezado)
+            return 'Dato insertado correctamente'
     except Exception as e:
         print('error', e)
         return str(e)
