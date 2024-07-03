@@ -55,6 +55,8 @@ urlpatterns = [
     path('gde/gestionEntrega/', include(('apps.GDE.gde_gestionEntrega.urls', 'gestionEntrega'), namespace='gestionEntrega')),
     # Modulo GDP
     path('gdp/productos/', include(('apps.GDP.gdp_productos.urls', 'gdp_productos'), namespace='gdp_productos')),
+    # Modulo GSB
+    path('gsb/superbarato/', include(('apps.WOOCOMMERCE.gsb_pedidos.urls', 'gsb_pedidos'), namespace='gsb_pedidos')),
     # Modulo SERVIENTREGA
     path('servientrega/', include(('apps.SERVIENTREGA.servientrega.urls', 'servientrega'), namespace='servientrega')),
     # Modulo FACTURACION

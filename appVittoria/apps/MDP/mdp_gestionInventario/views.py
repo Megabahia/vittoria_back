@@ -558,7 +558,8 @@ def insertarDato_StockProducto(dato, resetearStock):
             "contraentrega.megadescuento.com",
             "mayorista.megadescuento.com",
             "megadescuento.com",
-            "todomegacentro.megadescuento.com"
+            "todomegacentro.megadescuento.com",
+            "superbarato.megadescuento.com"
         ]
 
         # Generar la lista stockVirtual comparando el canal extraído con la lista de canales
@@ -630,7 +631,8 @@ def insertarDato_StockProductoMegabahia(dato, resetearStock):
             "contraentrega.megadescuento.com",
             "mayorista.megadescuento.com",
             "megadescuento.com",
-            "todomegacentro.megadescuento.com"
+            "todomegacentro.megadescuento.com",
+            "superbarato.megadescuento.com"
         ]
 
         # Generar la lista stockVirtual comparando el canal extraído con la lista de canales

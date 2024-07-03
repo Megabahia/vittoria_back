@@ -17,7 +17,8 @@ def mapeoCrearProducto(request):
         "contraentrega.megadescuento.com",
         "mayorista.megadescuento.com",
         "megadescuento.com",
-        "todomegacentro.megadescuento.com"
+        "todomegacentro.megadescuento.com",
+        "superbarato.megadescuento.com"
     ]
 
     # Generar la lista stockVirtual comparando el canal extraído con la lista de canales
@@ -46,6 +47,14 @@ def mapeoCrearProducto(request):
 
 
 def mapeoActualizarProducto(request):
+    index = request.data['permalink'].find('.com')
+    if index != -1:
+        canal = request.data['permalink'][:index + 4]
+    else:
+        canal = request.data['permalink']
+
+    canal = canal.replace('https://', '')
+
     # Lista de todos los canales disponibles en stockVirtual
     canales_stock_virtual = [
         "vittoria-test.netlify.app",
@@ -55,7 +64,8 @@ def mapeoActualizarProducto(request):
         "contraentrega.megadescuento.com",
         "mayorista.megadescuento.com",
         "megadescuento.com",
-        "todomegacentro.megadescuento.com"
+        "todomegacentro.megadescuento.com",
+        "superbarato.megadescuento.com"
     ]
 
     # Generar la lista stockVirtual comparando el canal extraído con la lista de canales

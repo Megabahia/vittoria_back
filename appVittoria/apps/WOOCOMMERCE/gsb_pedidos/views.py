@@ -6,14 +6,14 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from .serializers import (
-    CreateContactSerializer, ContactosSerializer,
+    SuperBaratoSerializer, CreateSuperBaratoSerializer,
 )
 from ...MDP.mdp_productos.models import Productos
 from ...WOOCOMMERCE.woocommerce.models import (
     Pedidos
 )
 from .models import (
-    Contactos
+    SuperBarato
 )
 from ..woocommerce.utils import (
     enviarCorreoAdministradorGDC
@@ -31,7 +31,7 @@ from ...ADM.vittoria_usuarios.models import Usuarios
 from ...ADM.vittoria_catalogo.models import Catalogo
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
-from ...MDM.mdm_prospectosClientes.models import ProspectosClientes,ProspectosClientesDetalles
+from ...MDM.mdm_prospectosClientes.models import ProspectosClientes, ProspectosClientesDetalles
 from ...MDM.mdm_facturas.models import FacturasEncabezados, FacturasDetalles
 from ...MDM.mdm_clientes.models import Clientes
 
@@ -45,9 +45,11 @@ logApi = datosAux['api']
 logTransaccion = datosTipoLogAux['transaccion']
 logExcepcion = datosTipoLogAux['excepcion']
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def gdc_create_contact(request):
+def gsb_create_order(request):
+    request.POST._mutable = True
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi + 'list/',
@@ -71,14 +73,15 @@ def gdc_create_contact(request):
                     Q(identificacion=request.data['facturacion']['identificacion'])).first()
                 queryClientes = Clientes.objects.filter(
                     Q(cedula=request.data['facturacion']['identificacion'])).first()
-            elif request.data['facturacion']['correo'] !='':
+            elif request.data['facturacion']['correo'] != '':
                 queryProspectos = ProspectosClientes.objects.filter(
                     Q(correo1=request.data['facturacion']['correo']) |
                     Q(correo2=request.data['facturacion']['correo'])).first()
                 queryClientes = Clientes.objects.filter(
                     Q(correo=request.data['facturacion']['correo'])).first()
             else:
-                queryProspectos = ProspectosClientes.objects.filter(Q(whatsapp=request.data['facturacion']['telefono'])).first()
+                queryProspectos = ProspectosClientes.objects.filter(
+                    Q(whatsapp=request.data['facturacion']['telefono'])).first()
                 queryClientes = Clientes.objects.filter(Q(telefono=request.data['facturacion']['telefono'])).first()
 
             if queryProspectos is not None or queryClientes is not None:
@@ -94,7 +97,7 @@ def gdc_create_contact(request):
                         "cantidad": articulo['cantidad'],
                     })
 
-                serializer = CreateContactSerializer(data=request.data)
+                serializer = CreateSuperBaratoSerializer(data=request.data)
                 if serializer.is_valid():
                     serializer.save()
 
@@ -178,69 +181,10 @@ def gdc_create_contact(request):
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def gdc_create_venta(request):
-    timezone_now = timezone.localtime(timezone.now())
-    logModel = {
-        'endPoint': logApi + 'list/',
-        'modulo': logModulo,
-        'tipo': logExcepcion,
-        'accion': 'CREAR',
-        'fechaInicio': str(timezone_now),
-        'dataEnviada': '{}',
-        'fechaFin': str(timezone_now),
-        'dataRecibida': '{}'
-    }
-    if request.method == 'POST':
-        try:
-            logModel['dataEnviada'] = str(request.data)
-            request.data['created_at'] = str(timezone_now)
-            if 'updated_at' in request.data:
-                request.data.pop('updated_at')
-
-            articulos = []
-
-            for articulo in request.data['articulos']:
-                articulos.append({
-                    "codigo": articulo['codigo'],
-                     "articulo": articulo['articulo'],
-                     "valorUnitario": articulo['valorUnitario'],
-                    "cantidad": articulo['cantidad'],
-                })
-
-            serializer = CreateContactSerializer(data=request.data)
-
-            if serializer.is_valid():
-                serializer.save()
-                dataPedidos = {**serializer.data, "codigoVendedor": serializer.data['facturacion']['codigoVendedor']}
-                Pedidos.objects.create(**dataPedidos)
-
-                #for articulo in serializer.data['articulos']:
-                #    producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
-                #    if producto:
-                #        producto.stock = producto.stock - int(articulo['cantidad'])
-                #        producto.save()
-                #        if producto.idPadre != '':
-                #            productoPadre = Productos.objects.filter(codigoBarras=producto.idPadre, state=1).first()
-                #            if productoPadre:
-                #                productoPadre.stock = productoPadre.stock - int(articulo['cantidad'])
-                #                productoPadre.save()
-                enviarCorreoAdministradorGDC(request.data)
-
-                createLog(logModel, serializer.data, logTransaccion)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            createLog(logModel, serializer.errors, logExcepcion)
-            return Response(status=status.HTTP_200_OK)
-
-        except Exception as e:
-            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
-            createLog(logModel, err, logExcepcion)
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def contacts_list(request):
+def gsb_orders_list(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi + 'list/',
@@ -283,15 +227,13 @@ def contacts_list(request):
             if 'canal' in request.data and request.data['canal'] != '':
                 filters['canal'] = request.data['canal'].upper()
 
-
-
             # Serializar los datos
-            query = Contactos.objects.filter(**filters).order_by('-created_at')
+            query = SuperBarato.objects.filter(**filters).order_by('-created_at')
 
-            suma_total = Contactos.objects.filter(**filters).aggregate(Sum('total'))
+            suma_total = SuperBarato.objects.filter(**filters).aggregate(Sum('total'))
 
-            serializer = ContactosSerializer(query[offset:limit], many=True)
-            new_serializer_data = {'cont': query.count(), 'info': serializer.data,'suma_total':suma_total}
+            serializer = SuperBaratoSerializer(query[offset:limit], many=True)
+            new_serializer_data = {'cont': query.count(), 'info': serializer.data, 'suma_total': suma_total}
             # envio de datos
             return Response(new_serializer_data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -299,9 +241,10 @@ def contacts_list(request):
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def contact_listOne(request, pk):
+def gsb_orders_listOne(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi + 'listOne/',
@@ -315,14 +258,14 @@ def contact_listOne(request, pk):
     }
     try:
         try:
-            query = Contactos.objects.get(pk=pk, state=1)
-        except Contactos.DoesNotExist:
+            query = SuperBarato.objects.get(pk=pk, state=1)
+        except SuperBarato.DoesNotExist:
             err = {"error": "No existe"}
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_404_NOT_FOUND)
         # tomar el dato
         if request.method == 'GET':
-            serializer = ContactosSerializer(query)
+            serializer = SuperBaratoSerializer(query)
             createLog(logModel, serializer.data, logTransaccion)
             return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
@@ -330,38 +273,41 @@ def contact_listOne(request, pk):
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def gdc_validate_contact(request):
-        try:
-
-            if request.data['facturacion']['identificacion'] != '':
-                queryProspectos = ProspectosClientes.objects.filter(
-                    Q(identificacion=request.data['facturacion']['identificacion'])).first()
-                queryClientes = Clientes.objects.filter(
-                    Q(cedula=request.data['facturacion']['identificacion'])).first()
-            elif request.data['facturacion']['correo'] !='':
-                queryProspectos = ProspectosClientes.objects.filter(
-                    Q(correo1=request.data['facturacion']['correo']) |
-                    Q(correo2=request.data['facturacion']['correo'])).first()
-                queryClientes = Clientes.objects.filter(
-                    Q(correo=request.data['facturacion']['correo'])).first()
-            else:
-                queryProspectos = ProspectosClientes.objects.filter(Q(whatsapp=request.data['facturacion']['telefono'])).first()
-                queryClientes = Clientes.objects.filter(Q(telefono=request.data['facturacion']['telefono'])).first()
-
-            if queryProspectos is not None or queryClientes is not None:
-                return Response('Contacto ya existe', status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response(status=status.HTTP_200_OK)
-
-        except Exception as e:
-            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def contacts_update(request, pk):
+def gsb_validate_order(request):
+    try:
+
+        if request.data['facturacion']['identificacion'] != '':
+            queryProspectos = ProspectosClientes.objects.filter(
+                Q(identificacion=request.data['facturacion']['identificacion'])).first()
+            queryClientes = Clientes.objects.filter(
+                Q(cedula=request.data['facturacion']['identificacion'])).first()
+        elif request.data['facturacion']['correo'] != '':
+            queryProspectos = ProspectosClientes.objects.filter(
+                Q(correo1=request.data['facturacion']['correo']) |
+                Q(correo2=request.data['facturacion']['correo'])).first()
+            queryClientes = Clientes.objects.filter(
+                Q(correo=request.data['facturacion']['correo'])).first()
+        else:
+            queryProspectos = ProspectosClientes.objects.filter(
+                Q(whatsapp=request.data['facturacion']['telefono'])).first()
+            queryClientes = Clientes.objects.filter(Q(telefono=request.data['facturacion']['telefono'])).first()
+
+        if queryProspectos is not None or queryClientes is not None:
+            return Response('Contacto ya existe', status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(status=status.HTTP_200_OK)
+
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def gsb_update_order(request, pk):
     request.POST._mutable = True
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
@@ -377,31 +323,37 @@ def contacts_update(request, pk):
     try:
         try:
             logModel['dataEnviada'] = str(request.data)
-            query = Contactos.objects.get(pk=pk, state=1)
+            query = SuperBarato.objects.get(pk=pk, state=1)
 
-        except Contactos.DoesNotExist:
+        except SuperBarato.DoesNotExist:
             errorNoExiste = {'error': 'No existe'}
             createLog(logModel, errorNoExiste, logExcepcion)
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if request.method == 'POST':
-            lista_formas_pago=[]
+            lista_formas_pago = []
             if 'numeroComprobante' in request.data and request.data['numeroComprobante'] is not None:
-                if Contactos.objects.filter(numeroComprobante=request.data['numeroComprobante']).exclude(pk=pk).first():
+                if SuperBarato.objects.filter(numeroComprobante=request.data['numeroComprobante']).exclude(
+                        pk=pk).first():
                     return Response(data='Ya existe el número de comprobante', status=status.HTTP_404_NOT_FOUND)
 
-            if 'numTransaccionTransferencia' in request.data and request.data['numTransaccionTransferencia'] is not None:
-                if Contactos.objects.filter(numTransaccionTransferencia=request.data['numTransaccionTransferencia']).exclude(pk=pk).first():
-                    return Response(data='Ya existe el número de transacción para transferencia', status=status.HTTP_404_NOT_FOUND)
+            if 'numTransaccionTransferencia' in request.data and request.data[
+                'numTransaccionTransferencia'] is not None:
+                if SuperBarato.objects.filter(
+                        numTransaccionTransferencia=request.data['numTransaccionTransferencia']).exclude(pk=pk).first():
+                    return Response(data='Ya existe el número de transacción para transferencia',
+                                    status=status.HTTP_404_NOT_FOUND)
 
             if 'numTransaccionCredito' in request.data and request.data['numTransaccionCredito'] is not None:
-                if Contactos.objects.filter(numTransaccionCredito=request.data['numTransaccionCredito']).exclude(pk=pk).first():
-                    return Response(data='Ya existe el número de transacción para tarjeta de crédito', status=status.HTTP_404_NOT_FOUND)
+                if SuperBarato.objects.filter(numTransaccionCredito=request.data['numTransaccionCredito']).exclude(
+                        pk=pk).first():
+                    return Response(data='Ya existe el número de transacción para tarjeta de crédito',
+                                    status=status.HTTP_404_NOT_FOUND)
 
-            #if 'formaPago' in request.data and request.data['formaPago'] is not None:
+            # if 'formaPago' in request.data and request.data['formaPago'] is not None:
             #    request.data['formaPago'] = json.dumps(lista_formas_pago)
 
-            queryClientes=None
+            queryClientes = None
             if 'facturacion' in request.data and request.data['facturacion']['identificacion'] != '':
                 queryClientes = Clientes.objects.filter(
                     Q(cedula=request.data['facturacion']['identificacion'])).first()
@@ -411,45 +363,48 @@ def contacts_update(request, pk):
             elif 'facturacion' in request.data and request.data['facturacion']['telefono'] != '':
                 queryClientes = Clientes.objects.filter(Q(telefono=request.data['facturacion']['telefono'])).first()
 
-            serializer = ContactosSerializer(query, data=request.data, partial=True)
+            print('REQUEST', request.data)
+            serializer = SuperBaratoSerializer(query, data=request.data, partial=True)
 
             if serializer.is_valid():
 
                 serializer.save()
-                fotoCupon=serializer.data['fotoCupon'].split(".com/")[1] if serializer.data['fotoCupon'] is not None else None
-                query2 = Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
-                dataPedidos = {**serializer.data, "codigoVendedor": serializer.data['facturacion']['codigoVendedor'], 'fotoCupon':None}
-                serializerPedido = PedidosSerializer(query2, data=dataPedidos, partial=True)
-                if serializerPedido.is_valid():
-                    serializerPedido.save()
-                    query2.fotoCupon=fotoCupon
-                    query2.save()
-                else:
-                    print(serializerPedido.errors)
+                #fotoCupon = serializer.data['fotoCupon'].split(".com/")[1] if serializer.data[
+                #                                                                  'fotoCupon'] is not None else None
+                #query2 = Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
+                #dataPedidos = {**serializer.data, "codigoVendedor": serializer.data['facturacion']['codigoVendedor'],
+                #               'fotoCupon': None}
+                #serializerPedido = PedidosSerializer(query2, data=dataPedidos, partial=True)
+                #if serializerPedido.is_valid():
+                #    serializerPedido.save()
+                #    query2.fotoCupon = fotoCupon
+                #    query2.save()
+                #else:
+                #    print(serializerPedido.errors)
 
                 if 'Entregado' in serializer.data['estado']:
                     Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).update(estado='Entregado')
 
-                #Obtener id cliente
-                datosCliente=Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion']).first()
-                #CREAR FACTURACION ELECTRONICA
+                # Obtener id cliente
+                datosCliente = Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion']).first()
+                # CREAR FACTURACION ELECTRONICA
                 if serializer.data['tipoPago'] is not None and 'facturaElectronica' in serializer.data['tipoPago']:
-                    serializerFacturacionElectronica={
-                        'cliente':datosCliente,
-                        'fecha':serializer.data['created_at'][:10],
-                        'tipoIdentificacion':'Cedula',
-                        'identificacion':serializer.data['facturacion']['identificacion'],
-                        'telefono':serializer.data['facturacion']['telefono'],
-                        'correo':serializer.data['facturacion']['correo'],
-                        'nombreVendedor':serializer.data['facturacion']['nombreVendedor'],
-                        'total':serializer.data['total'],
-                        'subTotal':serializer.data['subtotal'],
-                        'canal':serializer.data['canal'],
-                        'pais':serializer.data['facturacion']['pais'],
-                        'provincia':serializer.data['facturacion']['provincia'],
-                        'ciudad':serializer.data['facturacion']['ciudad'],
-                        'numeroProductosComprados':len(serializer.data['articulos']),
-                        'state':1,
+                    serializerFacturacionElectronica = {
+                        'cliente': datosCliente,
+                        'fecha': serializer.data['created_at'][:10],
+                        'tipoIdentificacion': 'Cedula',
+                        'identificacion': serializer.data['facturacion']['identificacion'],
+                        'telefono': serializer.data['facturacion']['telefono'],
+                        'correo': serializer.data['facturacion']['correo'],
+                        'nombreVendedor': serializer.data['facturacion']['nombreVendedor'],
+                        'total': serializer.data['total'],
+                        'subTotal': serializer.data['subtotal'],
+                        'canal': serializer.data['canal'],
+                        'pais': serializer.data['facturacion']['pais'],
+                        'provincia': serializer.data['facturacion']['provincia'],
+                        'ciudad': serializer.data['facturacion']['ciudad'],
+                        'numeroProductosComprados': len(serializer.data['articulos']),
+                        'state': 1,
                     }
                     facturaEncabezado = FacturasEncabezados.objects.create(**serializerFacturacionElectronica)
 
@@ -457,20 +412,20 @@ def contacts_update(request, pk):
 
                     for articuloFDetalle in serializer.data['articulos']:
                         detalleFactura.append({
-                            'articulo':articuloFDetalle['articulo'],
-                            'valorUnitario':articuloFDetalle['valorUnitario'],
-                            'cantidad':articuloFDetalle['cantidad'],
-                            'precio':articuloFDetalle['precio'],
-                            'codigo':articuloFDetalle['codigo'],
-                            'total':articuloFDetalle['precio'],
-                            'state':1,
+                            'articulo': articuloFDetalle['articulo'],
+                            'valorUnitario': articuloFDetalle['valorUnitario'],
+                            'cantidad': articuloFDetalle['cantidad'],
+                            'precio': articuloFDetalle['precio'],
+                            'codigo': articuloFDetalle['codigo'],
+                            'total': articuloFDetalle['precio'],
+                            'state': 1,
                         })
 
                     for detalle in detalleFactura:
                         FacturasDetalles.objects.create(
                             facturaEncabezado_id=facturaEncabezado.id, **detalle)
 
-                #CLIENT
+                # CLIENT
                 serializerClient = {
                     "tipoCliente": "Consumidor final",
                     "tipoIdentificacion": "Cédula",
@@ -495,7 +450,8 @@ def contacts_update(request, pk):
 
                 if 'Entregado' in serializer.data['estado']:
                     for articulo in serializer.data['articulos']:
-                        producto = Productos.objects.filter(codigoBarras=articulo['codigo'], canal=articulo['canal'], state=1).first()
+                        producto = Productos.objects.filter(codigoBarras=articulo['codigo'], canal=articulo['canal'],
+                                                            state=1).first()
                         if producto:
                             producto.stock = producto.stock - int(articulo['cantidad'])
                             producto.save()

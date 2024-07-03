@@ -743,7 +743,8 @@ def mapeoCrearProductoWoocommerce(request, stock_nuevo, canal_pedido, fecha):
         "contraentrega.megadescuento.com",
         "mayorista.megadescuento.com",
         "megadescuento.com",
-        "todomegacentro.megadescuento.com"
+        "todomegacentro.megadescuento.com",
+        "superbarato.megadescuento.com"
     ]
     print('STOCK', stock_nuevo)
     # Generar la lista stockVirtual comparando el canal extraído con la lista de canales

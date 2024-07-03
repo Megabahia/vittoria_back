@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     'apps.WOOCOMMERCE.mp_parametrizaciones',
     'apps.WOOCOMMERCE.woocommerce',
     'apps.WOOCOMMERCE.gdc_gestor_contactos',
+    'apps.WOOCOMMERCE.gsb_pedidos',
     #CONFIG
     'apps.config',
     #Django external apps
