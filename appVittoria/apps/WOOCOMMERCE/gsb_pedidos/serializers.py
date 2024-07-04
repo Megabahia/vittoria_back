@@ -33,7 +33,7 @@ class CreateSuperBaratoSerializer(serializers.Serializer):
     metodoPago = serializers.CharField(max_length=255, )
     numeroPedido = serializers.CharField(max_length=255, )
     articulos = serializers.JSONField()
-    envios = serializers.JSONField()
+    productoExtra = serializers.JSONField()
     envios = serializers.JSONField()
     json = serializers.JSONField()
     canal = serializers.CharField(max_length=255)

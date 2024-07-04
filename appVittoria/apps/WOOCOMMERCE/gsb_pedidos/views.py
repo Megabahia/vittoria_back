@@ -84,22 +84,21 @@ def gsb_create_order(request):
                     Q(whatsapp=request.data['facturacion']['telefono'])).first()
                 queryClientes = Clientes.objects.filter(Q(telefono=request.data['facturacion']['telefono'])).first()
 
-            if queryProspectos is not None or queryClientes is not None:
-                return Response('Contacto ya existe', status=status.HTTP_400_BAD_REQUEST)
-            else:
-                articulos = []
+            articulos = []
 
-                for articulo in request.data['articulos']:
-                    articulos.append({
-                        "codigo": articulo['codigo'],
-                        "articulo": articulo['articulo'],
-                        "valorUnitario": articulo['valorUnitario'],
-                        "cantidad": articulo['cantidad'],
-                    })
+            for articulo in request.data['articulos']:
+                articulos.append({
+                    "codigo": articulo['codigo'],
+                    "articulo": articulo['articulo'],
+                    "valorUnitario": articulo['valorUnitario'],
+                    "cantidad": articulo['cantidad'],
+                })
 
-                serializer = CreateSuperBaratoSerializer(data=request.data)
-                if serializer.is_valid():
-                    serializer.save()
+            serializer = CreateSuperBaratoSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+
+                if queryProspectos is None or queryClientes is None:
 
                     serializerProspect = {
                         "nombres": serializer.data['facturacion']['nombres'],
@@ -145,11 +144,10 @@ def gsb_create_order(request):
                         "envio": '',
                         "state": 1
                     }
-                    Pedidos.objects.create(**serializer.data)
+                    # Pedidos.objects.create(**serializer.data)
 
                     prospectoEncabezado = ProspectosClientes.objects.create(**serializerProspect)
                     detalleProspecto = []
-
                     for articuloP in request.data['articulos']:
                         detalleProspecto.append({
                             'articulo': articuloP['articulo'],
@@ -164,17 +162,19 @@ def gsb_create_order(request):
                             'total': 0,
                             'state': 1
                         })
-
                     for detalle in detalleProspecto:
                         ProspectosClientesDetalles.objects.create(
                             prospectoClienteEncabezado=prospectoEncabezado, **detalle)
                     enviarCorreoAdministradorGDC(request.data)
 
-                    createLog(logModel, serializer.data, logTransaccion)
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-                createLog(logModel, serializer.errors, logExcepcion)
-                return Response(status=status.HTTP_200_OK)
+            '''if queryProspectos is not None or queryClientes is not None:
+                return Response('Contacto ya existe', status=status.HTTP_400_BAD_REQUEST)'''
+
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(status=status.HTTP_200_OK)
 
         except Exception as e:
             err = {"error": 'Un error ha ocurrido: {}'.format(e)}
@@ -363,7 +363,6 @@ def gsb_update_order(request, pk):
             elif 'facturacion' in request.data and request.data['facturacion']['telefono'] != '':
                 queryClientes = Clientes.objects.filter(Q(telefono=request.data['facturacion']['telefono'])).first()
 
-            print('REQUEST', request.data)
             serializer = SuperBaratoSerializer(query, data=request.data, partial=True)
 
             if serializer.is_valid():
@@ -468,5 +467,5 @@ def gsb_update_order(request, pk):
     except Exception as e:
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
-        print('error', err)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+

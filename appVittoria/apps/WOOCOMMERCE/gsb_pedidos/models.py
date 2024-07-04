@@ -62,3 +62,5 @@ class SuperBarato(models.Model):
     totalCobroEfectivo=models.FloatField(null=True)
 
     fotoCupon = models.FileField(blank=True, null=True, upload_to=upload_path)
+
+    productoExtra = models.JSONField(null=True)
