@@ -4,7 +4,7 @@ class MDMRouter:
     auth and contenttypes applications.
     """
     route_app_labels = {'mdm_parametrizaciones', 'mdm_clientes', 'mdm_facturas', 'mdm_negocios',
-                        'mdm_prospectosClientes'}
+                        'mdm_prospectosClientes', 'mdm_contactos'}
 
     def db_for_read(self, model, **hints):
         """

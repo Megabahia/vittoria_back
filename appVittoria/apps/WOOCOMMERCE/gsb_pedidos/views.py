@@ -495,14 +495,14 @@ def inventario_list(request):
             if 'codigoBarras' in request.data and request.data['codigoBarras'] != '':
                 filters['codigoBarras__icontains'] = request.data['codigoBarras']
 
-            if 'canalProducto' in request.data and request.data['canalProducto'] != '':
-                filters['canal'] = request.data['canalProducto']
+            if 'canalStockVirtual' in request.data and request.data['canalStockVirtual'] != '':
+                filters['canal'] = request.data['canalStockVirtual']
 
             if 'proveedor' in request.data and request.data['proveedor'] != '':
                 filters['proveedor'] = request.data['proveedor']
 
-            if 'canalStockVirtual' in request.data and request.data['canalStockVirtual'] != '':
-                filters['canal'] = request.data['canalStockVirtual']
+            if 'canalProducto' in request.data and request.data['canalProducto'] != '':
+                #filters['canal'] = request.data['canalStockVirtual']
                 filters['stockVirtual__contains'] = {'canal': request.data['canalProducto'], 'estado': True}
 
             #Se realiza la exraccion de los canales de los productos por el motivo de
