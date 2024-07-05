@@ -1,12 +1,14 @@
 import json
-
+from openpyxl import Workbook
+from django.http import HttpResponse
+import json
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from .serializers import (
-    SuperBaratoSerializer, CreateSuperBaratoSerializer,
+    SuperBaratoSerializer, CreateSuperBaratoSerializer, InventarioListSerializer
 )
 from ...MDP.mdp_productos.models import Productos
 from ...WOOCOMMERCE.woocommerce.models import (
@@ -18,17 +20,9 @@ from .models import (
 from ..woocommerce.utils import (
     enviarCorreoAdministradorGDC
 )
-from ..woocommerce.serializers import (
-    PedidosSerializer
-)
 from django.db.models import Sum
 from django.db.models import Q
 
-from datetime import datetime
-from datetime import timedelta
-
-from ...ADM.vittoria_usuarios.models import Usuarios
-from ...ADM.vittoria_catalogo.models import Catalogo
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
 from ...MDM.mdm_prospectosClientes.models import ProspectosClientes, ProspectosClientesDetalles
@@ -469,3 +463,133 @@ def gsb_update_order(request, pk):
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def inventario_list(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
+            limit = offset + page_size
+            # Filtros
+            filters = {"state": "1"}
+
+            if 'nombre' in request.data and request.data['nombre'] != '':
+                filters['nombre__icontains'] = request.data['nombre']
+
+            if 'codigoBarras' in request.data and request.data['codigoBarras'] != '':
+                filters['codigoBarras__icontains'] = request.data['codigoBarras']
+
+            if 'canalProducto' in request.data and request.data['canalProducto'] != '':
+                filters['canal'] = request.data['canalProducto']
+
+            if 'proveedor' in request.data and request.data['proveedor'] != '':
+                filters['proveedor'] = request.data['proveedor']
+
+            if 'canalStockVirtual' in request.data and request.data['canalStockVirtual'] != '':
+                filters['canal'] = request.data['canalStockVirtual']
+                filters['stockVirtual__contains'] = {'canal': request.data['canalProducto'], 'estado': True}
+
+            #Se realiza la exraccion de los canales de los productos por el motivo de
+            #que existen productos con el mismo codigo pero con diferente canal y para realziar el filtro
+            #al obtener un producto
+            queryCanal = list(Productos.objects.values_list('canal', flat=True).distinct())
+
+            # Serializar los datos
+
+            query = Productos.objects.filter(**filters).order_by('-created_at')
+            serializer = InventarioListSerializer(query[offset:limit], many=True)
+            new_serializer_data = {'cont': query.count(),
+                                   'info': serializer.data,
+                                   'canal': queryCanal}
+            # envio de datos
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+        # ENCONTRAR UNO
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def inventar_exportar(request):
+    """
+    Este metodo realiza una exportacion de todos los productos en excel de la tabla productos, de la base de datos mdp
+    @rtype: DEvuelve un archivo excel
+    """
+    # Obtener los datos que deseas incluir en el archivo Excel
+    filters = {"state": "1"}
+
+    nombre = request.GET.get('nombre', None)
+    codigoBarras = request.GET.get('codigoBarras', None)
+    canal = request.GET.get('canalProducto', None)
+    stockVirtual = request.GET.get('canalStockVirtual', None)
+
+
+    if nombre is not None:
+        filters['nombre__icontains'] = nombre
+
+    if codigoBarras is not None:
+        filters['codigoBarras__icontains'] = codigoBarras
+
+    if canal is not None:
+        filters['canal'] = canal
+
+    if stockVirtual is not None:
+        filters['canal'] = stockVirtual
+        filters['stockVirtual__contains'] = {'canal': canal, 'estado': True}
+
+    # Serializar los datos
+    query = Productos.objects.filter(**filters).order_by('-created_at')
+    # Crear un libro de trabajo de Excel
+    wb = Workbook()
+    ws = wb.active
+
+    # Definir los encabezados
+    ws.append(['CÓDIGO DE BARRAS', 'NOMBRE', 'CANAL (DUEÑO STOCK REAL)', 'CANALES ASIGNADOS STOCK VIRTUAL', 'STOCK', 'ESTADO'])
+
+    # Agregar datos de productos a las filas siguientes
+    for producto in query:
+        productoSerializer = InventarioListSerializer(producto).data
+
+        # Verificar si los campos están vacíos antes de acceder a ellos
+        codigo_barras = productoSerializer.get('codigoBarras', '')
+        nombre = productoSerializer.get('nombre', '')
+        canal = productoSerializer.get('canal', '')
+        stockVirtual = productoSerializer.get('stockVirtual', '')
+        stock = productoSerializer.get('stock', '')
+        estado = productoSerializer.get('estado', '')
+
+        # Agregar datos a la hoja de trabajo
+        ws.append([codigo_barras, nombre, canal, obtener_canales_activos(stockVirtual), stock, estado])
+
+    # Crear una respuesta HTTP con el contenido del libro de trabajo
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="reporte_productos.xlsx"'
+    wb.save(response)
+    return response
+
+
+def obtener_canales_activos(stock_virtual):
+    # Filtrar los canales con estado true
+    canales_activos = {item['canal'] for item in stock_virtual if item['estado']}
+
+    # Convertir el set a un formato de string que imite un objeto JSON
+    resultado = ', '.join(f"{canal}" for canal in canales_activos)
+    return resultado

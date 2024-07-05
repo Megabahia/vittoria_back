@@ -4,7 +4,11 @@ import base64
 
 from .models import SuperBarato
 from ...ADM.vittoria_usuarios.models import Usuarios
-
+from ...MDP.mdp_productos.models import (
+    Productos, ProductoImagen,
+)
+from ...MDP.mdp_categorias.models import Categorias
+from ...MDP.mdp_subCategorias.models import SubCategorias
 
 class SuperBaratoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -65,3 +69,29 @@ class CreateSuperBaratoSerializer(serializers.Serializer):
                 })
         data['articulos'] = articulosModificado
         return data
+
+
+class InventarioListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Productos
+        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal', 'stockVirtual']
+
+    def to_representation(self, instance):
+        data = super(InventarioListSerializer, self).to_representation(instance)
+        categoria = data.pop('categoria')
+        subCategoria = data.pop('subCategoria')
+        if categoria:
+            data['categoria'] = Categorias.objects.filter(id=categoria).first().nombre
+        if subCategoria:
+            data['subCategoria'] = SubCategorias.objects.filter(id=subCategoria).first().nombre
+        images = ProductoImagen.objects.filter(producto=data['id'])
+        if images:
+            data['imagenes'] = ProductosImagenesSerializer(images, many=True).data
+        else:
+            data['imagenes'] = []
+        return data
+
+class ProductosImagenesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductoImagen
+        fields = ['imagen']
