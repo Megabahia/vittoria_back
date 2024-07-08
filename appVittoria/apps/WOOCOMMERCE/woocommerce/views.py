@@ -332,8 +332,6 @@ def orders_list(request):
             if 'rol' in request.data and 1 == request.data['rol']:
                 if 'codigoVendedor' in request.data:
                     filters.pop('codigoVendedor')
-                elif 'compania' in request.data:
-                    filters.pop('codigoVendedor__in')
 
 
             companiaUsuario=Usuarios.objects.filter(email=request.user).values_list('compania', flat=True).first()

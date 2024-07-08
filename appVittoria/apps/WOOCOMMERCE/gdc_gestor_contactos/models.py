@@ -64,3 +64,6 @@ class Contactos(models.Model):
     totalCobroEfectivo=models.FloatField(null=True)
 
     fotoCupon = models.FileField(blank=True, null=True, upload_to=upload_path)
+
+    montoTransferencia = models.FloatField(null=True)
+    montoCredito = models.FloatField(null=True)
