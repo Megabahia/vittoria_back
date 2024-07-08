@@ -22,45 +22,10 @@ class ActualizarContactosDetallesSerializer(serializers.ModelSerializer):
 
 # UTILIZO CREATE, UPDATE, RETRIEVE
 class ContactosSerializer(serializers.ModelSerializer):
-    detalles = ContactosDetallesSerializer(many=True, allow_empty=False)
-
     class Meta:
         model = Contactos
         fields = '__all__'
 
-    def create(self, validated_data):
-        detalles_data = validated_data.pop('detalles')
-        contactoEncabezado = Contactos.objects.create(**validated_data)
-        for detalle_data in detalles_data:
-            ContactosDetalles.objects.create(contactoEncabezado=contactoEncabezado, **detalle_data)
-        return contactoEncabezado
-
-    def update(self, instance, validated_data):
-        detalles_database = {detalle.id: detalle for detalle in instance.detalles.all()}
-        detalles_actualizar = {item['id']: item for item in validated_data['detalles']}
-        # data_mapping = {item['id']: item for item in validated_data.pop('detalles')}
-
-        # Actualiza la factura cabecera
-        instance.__dict__.update(validated_data)
-        instance.save()
-
-        # Eliminar los detalles que no esté incluida en la solicitud de la factura detalles
-        for detalle in instance.detalles.all():
-            if detalle.id not in detalles_actualizar:
-                detalle.delete()
-
-        # Crear o actualizar instancias de detalles que se encuentran en la solicitud de factura detalles
-        for detalle_id, data in detalles_actualizar.items():
-            detalle = detalles_database.get(detalle_id, None)
-            if detalle is None:
-                data.pop('id')
-                ContactosDetalles.objects.create(**data)
-            else:
-                # now = timezone.localtime(timezone.now())
-                # data['updated_at'] = str(now)
-                ContactosDetalles.objects.filter(id=detalle.id).update(**data)
-
-        return instance
 
 # UTILIZO CREATE, UPDATE, RETRIEVE
 
@@ -112,8 +77,7 @@ class ContactosSearchSerializer(serializers.ModelSerializer):
 class ContactosListarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contactos
-        fields = ['id', 'nombres', 'apellidos', 'whatsapp', 'correo1', 'correo2', 'ciudad', 'codigoProducto',
-                  'created_at', 'confirmacionProspecto','canalOrigen','identificacion']
+        fields = ['id', 'nombres', 'apellidos', 'whatsapp', 'created_at', 'canal', 'articulos']
 
 
 class ContactoImagenSerializer(serializers.HyperlinkedModelSerializer):

@@ -62,13 +62,6 @@ def contacto_list(request):
                 if request.data['created_at'] != '':
                     s = request.data['created_at']
                     filters['created_at__startswith'] = datetime.strptime(s, "%Y-%m-%d").date()
-            if 'nombreVendedor' in request.data:
-                if request.data['nombreVendedor'] != '':
-                    filters['nombreVendedor'] = str(request.data['nombreVendedor'])
-            if 'confirmacionProspecto' in request.data:
-                if request.data['confirmacionProspecto'] != '':
-                    filters['confirmacionProspecto'] = str(request.data['confirmacionProspecto'])
-
             # Serializar los datos
             query = Contactos.objects.filter(**filters).order_by('-created_at')
             serializer = ContactosListarSerializer(query[offset:limit], many=True)
@@ -191,7 +184,6 @@ def contacto_create(request):
             serializer = ContactosSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                enviarCorreoCliente(serializer.data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
