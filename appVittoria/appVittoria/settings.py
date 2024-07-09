@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     'apps.WOOCOMMERCE.mp_parametrizaciones',
     'apps.WOOCOMMERCE.woocommerce',
     'apps.WOOCOMMERCE.gdc_gestor_contactos',
+    'apps.WOOCOMMERCE.gmb_despachos',
     'apps.WOOCOMMERCE.gsb_pedidos',
     #CONFIG
     'apps.config',

@@ -66,6 +66,7 @@ urlpatterns = [
     path('mp/param/', include(('apps.WOOCOMMERCE.mp_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizacionesMP')),
     path('api/v3/', include(('apps.WOOCOMMERCE.woocommerce.urls', 'woocommerce'), namespace='woocommerce')),
     path('gdc/contact/', include(('apps.WOOCOMMERCE.gdc_gestor_contactos.urls', 'gdc_gestor_contactos'), namespace='gdc_gestor_contactos')),
+    path('gmb/megabahia', include(('apps.WOOCOMMERCE.gmb_despachos.urls', 'gmb_despachos'), namespace='gmb_despachos')),
 
 ]
 

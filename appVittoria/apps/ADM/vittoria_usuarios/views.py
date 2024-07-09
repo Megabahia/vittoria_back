@@ -78,9 +78,12 @@ def usuario_list(request):
                 filters['compania'] = str(request.data['compania'])
             # toma de datos
             usuario = Usuarios.objects.filter(**filters).order_by('-created_at')
+            serializerAllDta = UsuarioRolSerializer(usuario, many=True)
             serializer = UsuarioRolSerializer(usuario[offset:limit], many=True)
             new_serializer_data = {'cont': usuario.count(),
-                                   'info': serializer.data}
+                                   'info': serializer.data,
+                                   'usuarios': serializerAllDta.data
+                                   }
             # envio de datos
             return Response(new_serializer_data, status=status.HTTP_200_OK)
     except Exception as e:
