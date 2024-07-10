@@ -31,7 +31,7 @@ class CreateMegabahiaSerializer(serializers.Serializer):
     facturacion = serializers.JSONField()
     envio = serializers.JSONField()
     metodoPago = serializers.CharField(max_length=255, )
-    numeroPedido = serializers.CharField(max_length=255, )
+    numeroDespacho = serializers.CharField(max_length=255, )
     articulos = serializers.JSONField()
     envios = serializers.JSONField()
     json = serializers.JSONField()
@@ -44,7 +44,7 @@ class CreateMegabahiaSerializer(serializers.Serializer):
         return Megabahia.objects.create(**validated_data)
 
     def to_representation(self, instance):
-        data = super(CreateContactSerializer, self).to_representation(instance)
+        data = super(CreateMegabahiaSerializer, self).to_representation(instance)
         articulos = data.pop('articulos')
         articulosModificado = []
         if articulos:

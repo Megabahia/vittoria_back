@@ -48,8 +48,6 @@ logExcepcion = datosTipoLogAux['excepcion']
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def gmb_create_megabahia(request):
-    print('ENTRA METODO')
-
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi + 'list/',
@@ -63,6 +61,14 @@ def gmb_create_megabahia(request):
     }
     if request.method == 'POST':
         try:
+
+            if 'facturacion' in request.data and type(request.data['facturacion']) == 'str':
+                facturacionTemporal = request.data.pop('facturacion')
+                request.data['facturacion'] = json.dumps(facturacionTemporal)
+            if 'articulos' in request.data and type(request.data['articulos']) == 'str':
+                articulosTemporal = request.data.pop('articulos')
+                request.data['articulos'] = json.dumps(articulosTemporal)
+
             logModel['dataEnviada'] = str(request.data)
             request.data['created_at'] = str(timezone_now)
             if 'updated_at' in request.data:
