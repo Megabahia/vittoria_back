@@ -3,7 +3,7 @@ from django.urls import path
 from .views import (
     orders_create, orders_list, orders_listOne, orders_update,
     orders_devolucion, orders_notificacion, orders_list_bodega,
-    orders_listOne_bodega, orders_update_bodega
+    orders_listOne_bodega, orders_update_bodega, pedidos_exportar
 )
 
 app_name = 'woocommerce'
@@ -19,4 +19,6 @@ urlpatterns = [
     path('orders/listOne/<str:pk>', orders_listOne, name="orders_listOne"),
     path('orders/listOne/bodega/<str:pk>', orders_listOne_bodega, name="orders_listOne_bodega"),
     path('orders/notificacion/<str:pk>', orders_notificacion, name="orders_notificacion"),
+    # EXPORTAR PRODCUTOS
+    path('orders/exportar', pedidos_exportar, name="pedidos_exportar"),
 ]

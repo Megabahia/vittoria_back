@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from urllib.parse import urlparse
 from django.db.models import Sum
+from openpyxl import Workbook
+from django.http import HttpResponse
 from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDescuentoSinEnvio, \
     mapeoTodoMegaDescuentoSinEnvio,mapeoTodoMayoristaSinEnvio,mapeoTodoContraEntrega,mapeoTodoTiendaMulticompras, mapeoTodoMaxiDescuento, mapeoTodoMegaBahia, mapeoCrearProductoWoocommerce
 from .serializers import (
@@ -784,3 +786,105 @@ def orders_notificacion(request, pk):
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def pedidos_exportar(request):
+    """
+    Este metodo realiza una exportacion de todos los productos en excel de la tabla productos, de la base de datos mdp
+    @rtype: DEvuelve un archivo excel
+    """
+    # Obtener los datos que deseas incluir en el archivo Excel
+    filters = {"state": "1"}
+
+    estado = request.GET.get('estado', None)
+    usuarioVendedor = request.GET.get('usuarioVendedor', None)
+    inicio = request.GET.get('inicio', None)
+    fin = request.GET.get('fin', None)
+    codigoVendedor = request.GET.get('codigoVendedor', None)
+    compania = request.GET.get('compania', None)
+    canalEnvio = request.GET.get('canalEnvio', None)
+    canal = request.GET.get('canal', None)
+    rol = request.GET.get('rol', None)
+
+    if estado is not None:
+        filters['estado__in'] = estado
+
+    if usuarioVendedor is not None:
+        filters['facturacion__contains'] = {"codigoVendedor": usuarioVendedor}
+
+    if inicio is not   None:
+        fecha_inicio = datetime.strptime(inicio, "%Y-%m-%d").date()
+        fecha_inicio_con_zona = timezone.make_aware(datetime.combine(fecha_inicio, datetime.min.time()))
+        filters['created_at__gte'] = fecha_inicio_con_zona
+
+    if fin is not None:
+        fecha_fin = datetime.strptime(fin, "%Y-%m-%d").date()
+        fecha_fin_con_zona = timezone.make_aware(datetime.combine(fecha_fin, datetime.min.time()),
+                                                 timezone.get_default_timezone())
+        filters['created_at__lte'] = fecha_fin_con_zona
+
+    if codigoVendedor is not None:
+        filters['codigoVendedor'] = codigoVendedor.upper()
+
+    if compania is not None:
+        vendedores = list(
+            Usuarios.objects.filter(compania=compania).values_list('username', flat=True))
+        filters['codigoVendedor__in'] = vendedores
+
+    if canalEnvio is not None:
+        filters['canalEnvio'] = canalEnvio.upper()
+
+    if canal is not None:
+        filters['canal'] = canal.upper()
+
+    if rol is not None:
+        if 'codigoVendedor' in request.data:
+            filters.pop('codigoVendedor')
+
+    # Serializar los datos
+    query = Pedidos.objects.filter(**filters).order_by('-created_at')
+
+    # Crear un libro de trabajo de Excel
+    wb = Workbook()
+    ws = wb.active
+
+    # Definir los encabezados
+    ws.append(['FECHA PEDIDO', 'CANAL PEDIDO', 'NUMERO PEDIDO', 'NOMBRES FACTURACION', 'APELLIDOS FACTURACION', 'METODO', 'TELEFONO', 'ESTADO', 'COMISION', 'CODIGO VENDEDOR', 'NOMBRE VENDEDOR', 'CENTRO DE NEGOCIO'])
+
+    # Agregar datos de productos a las filas siguientes
+    for pedido in query:
+        pedidoSerializer = PedidosSerializer(pedido).data
+        facturacion = pedidoSerializer.get('facturacion', {})
+
+        # Verificar si los campos están vacíos antes de acceder a ellos
+        fecha_pedido = pedidoSerializer.get('created_at', '').split('T')[0]
+        canal_pedido = pedidoSerializer.get('canal', '')
+        numero_pedido = pedidoSerializer.get('numeroPedido', '')
+
+        nombres = facturacion.get('nombres', '')
+        apellidos = facturacion.get('apellidos', '')
+        metodo_pago = pedidoSerializer.get('metodoPago', '')
+        telefono = facturacion.get('telefono', '')
+
+        estado = pedidoSerializer.get('estado', '')
+        codigo_vendedor = facturacion.get('codigoVendedor', '')
+        nombre_vendedor = facturacion.get('nombreVendedor', '')
+        centro_negocio = pedidoSerializer.get('companiaVendedor', '')
+
+        if estado == 'Entregado':
+            total_pedido = float(pedidoSerializer.get('total', 0))
+            comision = (total_pedido / 1.15) * 0.1
+        else:
+            comision = 0
+
+
+        # Agregar datos a la hoja de trabajo
+        ws.append([fecha_pedido, canal_pedido, numero_pedido, nombres, apellidos, metodo_pago, telefono, estado, comision, codigo_vendedor, nombre_vendedor, centro_negocio])
+
+    # Crear una respuesta HTTP con el contenido del libro de trabajo
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="reporte_productos.xlsx"'
+    wb.save(response)
+    return response
