@@ -24,18 +24,11 @@ class MegabahiaSerializer(serializers.ModelSerializer):
         return data
 
 
-class CreateMegabahiaSerializer(serializers.Serializer):
-    estado = serializers.CharField(max_length=255)
-    envioTotal = serializers.FloatField()
-    total = serializers.FloatField()
-    facturacion = serializers.JSONField()
-    envio = serializers.JSONField()
-    metodoPago = serializers.CharField(max_length=255, )
-    numeroDespacho = serializers.CharField(max_length=255, )
-    articulos = serializers.JSONField()
-    envios = serializers.JSONField()
-    json = serializers.JSONField()
-    canal = serializers.CharField(max_length=255)
+class CreateMegabahiaSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Megabahia
+        fields = '__all__'
 
     def create(self, validated_data):
         """
