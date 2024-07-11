@@ -27,6 +27,7 @@ urlpatterns = [
     path('adm/auth/', include(('apps.ADM.vittoria_autenticacion.urls', 'autenticacion'), namespace='autenticacion')),
     path('adm/acciones/', include(('apps.ADM.vittoria_acciones.urls', 'acciones'), namespace='acciones')),
     path('adm/param/', include(('apps.ADM.vittoria_catalogo.urls', 'catalogo'), namespace='catalogo')),
+    path('adm/integraciones/', include(('apps.ADM.vittoria_integraciones.urls', 'integraciones'), namespace='integraciones')),
     url(r'^adm/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     #Modulo MDM
     path('mdm/param/', include(('apps.MDM.mdm_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizacionesMDM')),

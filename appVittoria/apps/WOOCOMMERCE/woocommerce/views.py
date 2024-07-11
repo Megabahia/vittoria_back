@@ -74,16 +74,16 @@ def orders_create(request):
         try:
             logModel['dataEnviada'] = str(request.data)
 
-            dominio_completo = request.headers.get('X-Wc-Webhook-Source')
+            #dominio_completo = request.headers.get('X-Wc-Webhook-Source')
             #Utiliza urlparse para obtener la información de la URL
-            parsed_url = urlparse(dominio_completo)
+            #parsed_url = urlparse(dominio_completo)
             #Combina el nombre de host (dominio) y el esquema (protocolo)
-            domain = parsed_url.netloc
-            dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
-            if dominio_permitidos is None:
-                error = f"Llego un dominio: {domain}"
-                createLog(logModel, error, logTransaccion)
-                return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            #domain = parsed_url.netloc
+            #dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
+            #if dominio_permitidos is None:
+            #    error = f"Llego un dominio: {domain}"
+            #    createLog(logModel, error, logTransaccion)
+            #    return Response(error, status=status.HTTP_400_BAD_REQUEST)
             index = request.data['_links']['collection'][0]['href'].find('.com')
             if index != -1:
                 canal_principal = request.data['_links']['collection'][0]['href'][:index + 4]

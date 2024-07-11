@@ -1,0 +1,13 @@
+from django.db import models
+
+# Create your models here.
+class Integraciones(models.Model):
+    nombre = models.CharField(max_length=250,null=True)
+    valor = models.CharField(max_length=250,null=True)
+    pedidos_local = models.JSONField(null=True)
+    pedidos_omniglobal = models.SmallIntegerField(default=0, null=True)
+    despachos_local = models.JSONField(null=True)
+    despachos_omniglobal = models.SmallIntegerField(default=0, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True)
+    state = models.SmallIntegerField(default=1)
