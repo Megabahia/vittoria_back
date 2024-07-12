@@ -58,6 +58,8 @@ class Pedidos(models.Model):
 
     fotoCupon = models.FileField(blank=True, null=True, upload_to=upload_path)
 
+    gestion_pedido = models.CharField(max_length=155, blank=True, null=True)
+    gestion_despacho = models.CharField(max_length=155, blank=True, null=True)
 
 class Productos(models.Model):
 

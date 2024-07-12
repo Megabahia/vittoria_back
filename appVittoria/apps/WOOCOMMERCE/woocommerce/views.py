@@ -18,6 +18,7 @@ from django.db.models import Max
 from .models import (
     Pedidos
 )
+from ...ADM.vittoria_integraciones.models import Integraciones
 from ...FACTURACION.facturacion.models import FacturasEncabezados, FacturasDetalles
 from ...MDM.mdm_clientes.models import Clientes
 from ...MDM.mdm_clientes.serializers import ClientesUpdateSerializer
@@ -84,6 +85,7 @@ def orders_create(request):
             #    error = f"Llego un dominio: {domain}"
             #    createLog(logModel, error, logTransaccion)
             #    return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
             index = request.data['_links']['collection'][0]['href'].find('.com')
             if index != -1:
                 canal_principal = request.data['_links']['collection'][0]['href'][:index + 4]
@@ -92,6 +94,11 @@ def orders_create(request):
 
             canal_corto = canal_principal.replace('https://', '')
             canal = request.data['_links']['collection'][0]['href']
+
+            #INTEGRACIONES
+            integraciones = Integraciones.objects.all()
+
+            #ARITUCULOS
             articulos = []
 
             for articulo in request.data['line_items']:
@@ -146,12 +153,7 @@ def orders_create(request):
             elif 'https://megabahia.megadescuento.com/' in canal:
                 data = mapeoTodoMegaBahia(request, articulos)
             elif 'https://tiendamulticompras.megadescuento.com' in canal:
-                #validarDatosEnvio = next((objeto['value'] for objeto in request.data['meta_data'] if
-                #                          objeto["key"] == '_shipping_wooccm13'), None)
-                #if '@' in validarDatosEnvio:
                 data = mapeoTodoTiendaMulticompras(request, articulos)
-                #else:
-                #    data = mapeoTodoTiendaMulticompras(request, articulos)
 
             serializer = CreateOrderSerializer(data=data)
 
@@ -304,6 +306,7 @@ def orders_list(request):
             page = int(request.data['page'])
             offset = page_size * page
             limit = offset + page_size
+
             # Filtros
             filters = {"state": "1"}
             if 'estado' in request.data and request.data['estado'] != '':
@@ -329,12 +332,16 @@ def orders_list(request):
 
             if 'canalEnvio' in request.data and request.data['canalEnvio'] != '':
                 filters['canalEnvio'] = request.data['canalEnvio'].upper()
+
             if 'canal' in request.data and request.data['canal'] != '':
-                filters['canal'] = request.data['canal'].upper()
+                filters['canal__icontains'] = request.data['canal'].upper()
+
             if 'rol' in request.data and 1 == request.data['rol']:
                 if 'codigoVendedor' in request.data:
                     filters.pop('codigoVendedor')
 
+            if 'gestion_pedido' in request.data and request.data['gestion_pedido'] != '':
+                filters['gestion_pedido'] = request.data['gestion_pedido'].upper()
 
             companiaUsuario=Usuarios.objects.filter(email=request.user).values_list('compania', flat=True).first()
             usuarios=Usuarios.objects.filter(compania=companiaUsuario).values('username','email','nombres','apellidos')

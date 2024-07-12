@@ -35,6 +35,7 @@ class CreateOrderSerializer(serializers.Serializer):
     envios = serializers.JSONField()
     json = serializers.JSONField()
     canal = serializers.CharField(max_length=255)
+    gestion_pedido = serializers.CharField(max_length=155)
 
     def create(self, validated_data):
         """

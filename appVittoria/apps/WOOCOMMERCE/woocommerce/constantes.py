@@ -1,3 +1,5 @@
+from ...ADM.vittoria_integraciones.models import Integraciones
+from urllib.parse import urlparse
 
 provincias = {
     "EC-A": "Azuay",
@@ -42,6 +44,10 @@ def mapeoTodoMegaDescuento(request, articulos):
     total = request.data['total']
     codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
           objeto["key"] == '_billing_wooccm17'), None)
+    canal = request.data['_links']['collection'][0]['href']
+
+    tipoPedido = obtener_tipo_pedido(canal)
+
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
@@ -102,15 +108,21 @@ def mapeoTodoMegaDescuento(request, articulos):
         "articulos": articulos,
         "envios": request.data['shipping_lines'],
         "json": request.data,
-        "canal": request.data['_links']['collection'][0]['href'],
+        "canal": canal,
         "created_at": request.data['date_created'],
         "codigoVendedor": codigoVendedor,
+        "gestion_pedido": tipoPedido
     }
 
 def mapeoTodoMegaDescuentoSinEnvio(request, articulos):
     total = request.data['total']
     codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
           objeto["key"] == '_billing_wooccm17'), None)
+
+    canal = request.data['_links']['collection'][0]['href']
+
+    tipoPedido = obtener_tipo_pedido(canal)
+
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
@@ -169,9 +181,10 @@ def mapeoTodoMegaDescuentoSinEnvio(request, articulos):
         "articulos": articulos,
         "envios": request.data['shipping_lines'],
         "json": request.data,
-        "canal": request.data['_links']['collection'][0]['href'],
+        "canal": canal,
         "created_at": request.data['date_created'],
         "codigoVendedor": codigoVendedor,
+        "gestion_pedido": tipoPedido
     }
 
 def mapeoTodoMayorista(request, articulos):
@@ -255,6 +268,11 @@ def mapeoTodoMayoristaSinEnvio(request, articulos):
     total = request.data['total']
     codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
           objeto["key"] == '_billing_wooccm16'), None)
+
+    canal = request.data['_links']['collection'][0]['href']
+
+    tipoPedido = obtener_tipo_pedido(canal)
+
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
@@ -313,12 +331,16 @@ def mapeoTodoMayoristaSinEnvio(request, articulos):
         "articulos": articulos,
         "envios": request.data['shipping_lines'],
         "json": request.data,
-        "canal": request.data['_links']['collection'][0]['href'],
+        "canal": canal,
         "created_at": request.data['date_created'],
         "codigoVendedor": codigoVendedor,
+        "gestion_pedido": tipoPedido
     }
 
 def mapeoMegaDescuento(request, articulos):
+    canal = next((objeto['value'] for objeto in request.data['meta_data'] if
+                       objeto["key"] == '_wc_order_attribution_session_entry'), None)
+    tipoPedido = obtener_tipo_pedido(canal)
     total = request.data['total']
     codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
           objeto["key"] == ''), None)
@@ -378,10 +400,10 @@ def mapeoMegaDescuento(request, articulos):
         "articulos": articulos,
         "envios": request.data['shipping_lines'],
         "json": request.data,
-        "canal": next((objeto['value'] for objeto in request.data['meta_data'] if
-                       objeto["key"] == '_wc_order_attribution_session_entry'), None),
+        "canal": canal,
         "created_at": request.data['date_created'],
         "codigoVendedor": '',
+        "gestion_pedido": tipoPedido,
     }
 
 def mapeoMegaDescuentoSinEnvio(request, articulos):
@@ -407,6 +429,11 @@ def mapeoMegaDescuentoSinEnvio(request, articulos):
                         objeto["key"] == '_billing_wooccm14'), None)
     gps = next((objeto['value'] for objeto in request.data['meta_data'] if
                  objeto["key"] == '_billing_wooccm15'), None)
+
+    canal = next((objeto['value'] for objeto in request.data['meta_data'] if
+                       objeto["key"] == '_wc_order_attribution_session_entry'), None)
+
+    tipoPedido = obtener_tipo_pedido(canal)
 
     return {
         "estado": 'Pendiente',
@@ -452,16 +479,20 @@ def mapeoMegaDescuentoSinEnvio(request, articulos):
         "articulos": articulos,
         "envios": request.data['shipping_lines'],
         "json": request.data,
-        "canal": next((objeto['value'] for objeto in request.data['meta_data'] if
-                       objeto["key"] == '_wc_order_attribution_session_entry'), None),
+        "canal": canal,
         "created_at": request.data['date_created'],
         "codigoVendedor": '',
+        "gestion_pedido": tipoPedido
     }
 
 def mapeoTodoContraEntrega(request, articulos):
     total = request.data['total']
     codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
           objeto["key"] == '_billing_wooccm16'), None)
+
+    canal = request.data['_links']['collection'][0]['href']
+    tipoPedido = obtener_tipo_pedido(canal)
+    print(tipoPedido)
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
@@ -520,15 +551,20 @@ def mapeoTodoContraEntrega(request, articulos):
         "articulos": articulos,
         "envios": request.data['shipping_lines'],
         "json": request.data,
-        "canal": request.data['_links']['collection'][0]['href'],
+        "canal": canal,
         "created_at": request.data['date_created'],
         "codigoVendedor": codigoVendedor,
+        "gestion_pedido": tipoPedido
     }
 
 def mapeoTodoTiendaMulticompras(request, articulos):
     total = request.data['total']
     codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
           objeto["key"] == '_billing_wooccm16'), None)
+
+    canal = request.data['_links']['collection'][0]['href']
+    tipoPedido = obtener_tipo_pedido(canal)
+
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
@@ -589,15 +625,21 @@ def mapeoTodoTiendaMulticompras(request, articulos):
         "articulos": articulos,
         "envios": request.data['shipping_lines'],
         "json": request.data,
-        "canal": request.data['_links']['collection'][0]['href'],
+        "canal": canal,
         "created_at": request.data['date_created'],
         "codigoVendedor": codigoVendedor,
+        "gestion_pedido": tipoPedido
     }
 
 def mapeoTodoMaxiDescuento(request, articulos):
     total = request.data['total']
     codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
           objeto["key"] == '_billing_wooccm17'), None)
+
+    canal = request.data['_links']['collection'][0]['href']
+
+    tipoPedido = obtener_tipo_pedido(canal)
+
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
@@ -654,15 +696,21 @@ def mapeoTodoMaxiDescuento(request, articulos):
         "articulos": articulos,
         "envios": request.data['shipping_lines'],
         "json": request.data,
-        "canal": request.data['_links']['collection'][0]['href'],
+        "canal": canal,
         "created_at": request.data['date_created'],
         "codigoVendedor": codigoVendedor,
+        "gestion_pedido": tipoPedido
     }
 
 def mapeoTodoMegaBahia(request, articulos):
     total = request.data['total']
     codigoVendedor = next((objeto['value'] for objeto in request.data['meta_data'] if
           objeto["key"] == '_billing_wooccm17'), None)
+
+    canal = request.data['_links']['collection'][0]['href']
+
+    tipoPedido = obtener_tipo_pedido(canal)
+
     return {
         "estado": 'Pendiente',
         "envioTotal": request.data['shipping_total'],
@@ -719,9 +767,10 @@ def mapeoTodoMegaBahia(request, articulos):
         "articulos": articulos,
         "envios": request.data['shipping_lines'],
         "json": request.data,
-        "canal": request.data['_links']['collection'][0]['href'],
+        "canal": canal,
         "created_at": request.data['date_created'],
         "codigoVendedor": '',
+        "gestion_pedido": tipoPedido
     }
 
 def mapeoCrearProductoWoocommerce(request, stock_nuevo, canal_pedido, fecha):
@@ -770,3 +819,25 @@ def mapeoCrearProductoWoocommerce(request, stock_nuevo, canal_pedido, fecha):
         }
 
     return productos_procesados
+
+
+def obtener_tipo_pedido(canal_buscado):
+    parsed_url = urlparse(canal_buscado)
+    dominio = parsed_url.netloc
+
+    print('CANAL METODO PEDIDO', dominio)
+    integraciones = Integraciones.objects.filter(valor=dominio)
+    for integracion in integraciones:
+        estado = integracion.pedidos_local.get('estado') if integracion.pedidos_local else None
+        pedidosOmniglobal = integracion.pedidos_omniglobal
+
+        # Condicionales para determinar el tipo de pedido
+        if estado == 1 and (pedidosOmniglobal is None or pedidosOmniglobal == 0):
+            return "local"
+        elif pedidosOmniglobal == 1 and (estado is None or estado == 0):
+            return "omniglobal"
+        else:
+            return None
+
+    # En caso de que no se encuentre una integración que coincida con el canal buscado
+    return "No se encontró el canal especificado"
