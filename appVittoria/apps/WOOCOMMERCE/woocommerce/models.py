@@ -50,6 +50,7 @@ class Pedidos(models.Model):
     fechaEmpacado = models.CharField(max_length=255, null=True, blank=True)
     guiServiEntrega = models.FileField(blank=True, null=True, upload_to=upload_path)
     tipoPago = models.CharField(max_length=255, null=True, blank=True)
+    tipoEnvio = models.CharField(max_length=255, null=True, blank=True)
     evidenciaPago=models.FileField(blank=True, null=True, upload_to=upload_path)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -60,6 +61,8 @@ class Pedidos(models.Model):
 
     gestion_pedido = models.CharField(max_length=155, blank=True, null=True)
     gestion_despacho = models.CharField(max_length=155, blank=True, null=True)
+
+
 
 class Productos(models.Model):
 
