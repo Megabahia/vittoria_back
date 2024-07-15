@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'apps.ADM.vittoria_acciones',
     'apps.ADM.vittoria_catalogo',
     'apps.ADM.vittoria_integraciones',
+    'apps.ADM.vittoria_integraciones_envios',
     #apps vittoria MDM+
     'apps.MDM.mdm_clientes',
     'apps.MDM.mdm_facturas',
