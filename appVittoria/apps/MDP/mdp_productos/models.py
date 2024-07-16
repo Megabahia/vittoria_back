@@ -65,6 +65,9 @@ class Productos(models.Model):
 
     imagen_principal = models.FileField(blank=True, null=True, upload_to=upload_path)
 
+    tamanio = models.FloatField(null=True, blank=True)
+    peso = models.FloatField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)

@@ -795,7 +795,6 @@ def mapeoCrearProductoWoocommerce(request, stock_nuevo, canal_pedido, fecha):
         "todomegacentro.megadescuento.com",
         "superbarato.megadescuento.com"
     ]
-    print('STOCK', stock_nuevo)
     # Generar la lista stockVirtual comparando el canal extraído con la lista de canales
     stock_virtual = [{"canal": sv_canal, "estado": sv_canal == canal} for sv_canal in canales_stock_virtual]
     for prod in request:
