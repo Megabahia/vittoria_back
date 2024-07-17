@@ -626,7 +626,7 @@ def search_producto_codigo_canal_list(request):
                                    'integraciones_canal': serializer_canal.data}
 
             createLog(logModel, new_serializer_data, logTransaccion)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
     except Exception as e:
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
