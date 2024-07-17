@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -12,16 +14,17 @@ from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDes
 from .serializers import (
     CreateOrderSerializer, PedidosSerializer, ProductosBodegaListSerializer
 )
+
 from ...MDP.mdp_productos.serializers import ProductoCreateSerializer
 from django.db.models import Max
 
 from .models import (
-    Pedidos
+    Pedidos, UniqueCode
 )
 from ...ADM.vittoria_integraciones.models import Integraciones
 from ...FACTURACION.facturacion.models import FacturasEncabezados, FacturasDetalles
 from ...MDM.mdm_clientes.models import Clientes
-from ...MDM.mdm_clientes.serializers import ClientesUpdateSerializer
+from ...MDM.mdm_clientes.serializers import ClientesUpdateSerializer, ClientesSerializer
 
 from ...MDP.mdp_productos.models import Productos
 from ...WOOCOMMERCE.woocommerce.models import Productos as ProductosBodega
@@ -35,10 +38,13 @@ from datetime import timedelta
 from .utils import (
     enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoClienteDespacho, enviarCorreoCourierDespacho,
     enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado,
-    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes,enviarCorreoVendedorEmpacado,enviarCorreoAdminAutorizador,
+    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes,enviarCorreoVendedorEmpacado,enviarCorreoAdminAutorizador, enviarCodigoCorreo
 )
 from ...ADM.vittoria_usuarios.models import Usuarios
 from ...ADM.vittoria_catalogo.models import Catalogo
+
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
 
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
@@ -75,16 +81,18 @@ def orders_create(request):
         try:
             logModel['dataEnviada'] = str(request.data)
 
-            #dominio_completo = request.headers.get('X-Wc-Webhook-Source')
+            dominio_completo = request.headers.get('X-Wc-Webhook-Source')
             #Utiliza urlparse para obtener la información de la URL
-            #parsed_url = urlparse(dominio_completo)
+            parsed_url = urlparse(dominio_completo)
             #Combina el nombre de host (dominio) y el esquema (protocolo)
-            #domain = parsed_url.netloc
-            #dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
-            #if dominio_permitidos is None:
-            #    error = f"Llego un dominio: {domain}"
-            #    createLog(logModel, error, logTransaccion)
-            #    return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            domain = parsed_url.netloc
+            dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
+            if dominio_permitidos is None:
+                error = f"Llego un dominio: {domain}"
+                createLog(logModel, error, logTransaccion)
+                return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
+
 
             index = request.data['_links']['collection'][0]['href'].find('.com')
             if index != -1:
@@ -153,6 +161,8 @@ def orders_create(request):
             elif 'https://megabahia.megadescuento.com/' in canal:
                 data = mapeoTodoMegaBahia(request, articulos)
             elif 'https://tiendamulticompras.megadescuento.com' in canal:
+                data = mapeoTodoTiendaMulticompras(request, articulos)
+            elif 'superbarato.megadescuento.com' in canal:
                 data = mapeoTodoTiendaMulticompras(request, articulos)
 
             serializer = CreateOrderSerializer(data=data)
@@ -236,6 +246,157 @@ def orders_create(request):
             err = {"error": 'Un error ha ocurrido: {}'.format(e)}
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def orders_create_super_barato(request):
+    timezone_now = timezone.localtime(timezone.now())
+    request.POST._mutable = True
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+
+        try:
+
+            if 'facturacion' in request.data and isinstance(request.data['facturacion'], str):
+                facturacionTemporal = request.data.pop('facturacion')[0]
+                request.data['facturacion'] = json.loads(facturacionTemporal)
+            if 'articulos' in request.data and isinstance(request.data['articulos'], str):
+                articulosTemporal = request.data.pop('articulos')[0]
+                request.data['articulos'] = json.loads(articulosTemporal)
+
+            logModel['dataEnviada'] = str(request.data)
+
+            # dominio_completo = request.headers.get('X-Wc-Webhook-Source')
+            # Utiliza urlparse para obtener la información de la URL
+            # parsed_url = urlparse(dominio_completo)
+            # Combina el nombre de host (dominio) y el esquema (protocolo)
+            # domain = parsed_url.netloc
+            # dominio_permitidos = Catalogo.objects.filter(tipo='INTEGRACION_WOOCOMMERCE', valor=domain).first()
+            # if dominio_permitidos is None:
+            #    error = f"Llego un dominio: {domain}"
+            #    createLog(logModel, error, logTransaccion)
+            #    return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
+
+            canal = request.data['canal']
+
+            # ARITUCULOS
+            articulos = []
+            for articulo in request.data['articulos']:
+                caracteristicas = ""
+
+                product_ped = Productos.objects.filter(codigoBarras=articulo['codigo'], canal=articulo['canal']).first()
+                query_param = Catalogo.objects.filter(tipo='STOCK').first()
+                if product_ped is None:
+                    stock_nuevo = int(query_param.valor)
+                    data_prod = mapeoCrearProductoWoocommerce(articulo, stock_nuevo, canal,
+                                                              request.data['created_at'])
+                    serializer_prod = ProductoCreateSerializer(data=data_prod)
+                    if serializer_prod.is_valid():
+                        serializer_prod.save()
+
+                articulos.append({
+                    "codigo": articulo['codigo'],
+                    "articulo": articulo['articulo'],
+                    "valorUnitario": round(float(articulo['valorUnitario']), 2),
+                    "cantidad": articulo['cantidad'],
+                    "precio": round(float(articulo['precio']), 2),
+                    "caracteristicas": caracteristicas
+                })
+
+            request.data['facturacion'] = json.dumps(request.data.pop('facturacion')[0])
+            request.data['articulos'] = json.dumps(request.data.pop('articulos')[0])
+            serializer = CreateOrderSerializer(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+
+                serializerProspect = {
+                    "nombres": serializer.data['facturacion']['nombres'],
+                    "apellidos": serializer.data['facturacion']['apellidos'],
+                    "telefono": serializer.data['facturacion']['telefono'],
+                    "tipoCliente": '',
+                    "whatsapp": serializer.data['facturacion']['telefono'],
+                    "facebook": '',
+                    "twitter": '',
+                    "instagram": '',
+                    "correo1": serializer.data['facturacion']['correo'],
+                    "correo2": '',
+                    "pais": serializer.data['facturacion']['pais'],
+                    "provincia": serializer.data['facturacion']['provincia'],
+                    "ciudad": serializer.data['facturacion']['ciudad'],
+                    "canal": serializer.data['canal'],
+                    "canalOrigen": '',
+                    "metodoPago": '',
+                    "codigoProducto": '',
+                    "nombreProducto": '',
+                    "precio": 0,
+                    "tipoPrecio": '',
+                    "nombreVendedor": serializer.data['facturacion']['nombreVendedor'],
+                    "confirmacionProspecto": '',
+                    "imagen": '',
+                    "tipoIdentificacion": "Cédula",
+                    "identificacion": serializer.data['facturacion']['identificacion'],
+                    "nombreCompleto": '',
+                    "callePrincipal": '',
+                    "numeroCasa": '',
+                    "calleSecundaria": '',
+                    "referencia": '',
+                    "comentarios": '',
+                    "comentariosVendedor": '',
+                    "cantidad": 0,
+                    "subTotal": 0,
+                    "descuento": 0,
+                    "iva": 0,
+                    "total": 0,
+                    "courier": "",
+                    "articulos": '',
+                    "facturacion": '',
+                    "envio": '',
+                    "state": 1
+                }
+                prospectoEncabezado = ProspectosClientes.objects.create(**serializerProspect)
+                detalleProspecto = []
+
+                for articuloP in serializer.data['articulos']:
+                    detalleProspecto.append({
+                        'articulo': articuloP['articulo'],
+                        'valorUnitario': articuloP['valorUnitario'],
+                        'cantidad': articuloP['cantidad'],
+                        'precio': articuloP['precio'],
+                        'codigo': articuloP['codigo'],
+                        'informacionAdicional': '',
+                        'descuento': 0,
+                        'impuesto': 0,
+                        'valorDescuento': 0,
+                        'total': 0,
+                        'state': 1
+                    })
+
+                for detalle in detalleProspecto:
+                    ProspectosClientesDetalles.objects.create(
+                        prospectoClienteEncabezado=prospectoEncabezado, **detalle)
+
+                # if data['facturacion']['codigoVendedor']:
+                enviarCorreoAdminAutorizador(data)
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -654,7 +815,6 @@ def orders_update(request, pk):
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 def generar_numero_guia():
-    from django.db.models import Max
 
     # Obtén el valor máximo de numeroGuia
     max_numero_guia = Pedidos.objects.aggregate(Max('numeroGuia'))['numeroGuia__max']
@@ -895,3 +1055,89 @@ def pedidos_exportar(request):
     response['Content-Disposition'] = 'attachment; filename="reporte_productos.xlsx"'
     wb.save(response)
     return response
+
+
+@api_view(['POST'])
+def orders_send_code(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            email = request.data['email']
+            if not email:
+                return Response({'error': 'Email es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+
+            cliente = Clientes.objects.filter(correo=email).first()
+            if cliente:
+                serializer = ClientesSerializer(cliente)
+                # Generar un código de 6 dígitos
+                code = get_random_string(length=6, allowed_chars='0123456789')
+
+                # Guardar el código en la base de datos
+                UniqueCode.objects.create(email_cliente=email, code=code)
+
+                # Enviar correo electrónico
+                enviarCodigoCorreo(serializer.data, code)
+                return Response({'message': 'Correo enviado correctamente'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def orders_verify_code(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+
+            email_cliente = request.data['correo']
+            code = request.data['codigo']
+
+            if not email_cliente or not code:
+                return Response('Email y código son requeridos', status=status.HTTP_400_BAD_REQUEST)
+
+            # Verificar el código y el email
+            unique_code = UniqueCode.objects.filter(email_cliente=email_cliente, code=code, state=1).first()
+            if unique_code:
+                # Cambiar el estado del código para indicar que ya ha sido usado o verificado
+                unique_code.state = 0
+                unique_code.save()
+
+                # Recuperar y devolver los datos del cliente asociados al correo
+                cliente = Clientes.objects.filter(correo=email_cliente).first()
+                if cliente:
+                    serializer = ClientesSerializer(cliente)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
+                    return Response('Cliente no encontrado', status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response('Código no válido', status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)

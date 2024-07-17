@@ -62,7 +62,15 @@ class Pedidos(models.Model):
     gestion_pedido = models.CharField(max_length=155, blank=True, null=True)
     gestion_despacho = models.CharField(max_length=155, blank=True, null=True)
 
+class UniqueCode(models.Model):
+    email_cliente = models.CharField(max_length=255, null=True, blank=True)
+    code = models.CharField(max_length=6, null=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    state = models.SmallIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.code}"
 
 class Productos(models.Model):
 

@@ -62,7 +62,39 @@ def integraciones_envios_list(request):
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-        # CREAR
+
+@api_view(['POST'])
+def integraciones_envios_list_noAuth(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            # paginacion
+            filters = request.data
+
+            # Serializar los datos
+            query = IntegracionesEnvios.objects.filter(**filters).order_by('-created_at')
+            serializer = IntegracionesEnviosListaSerializer(query, many=True)
+            new_serializer_data = {'cont': query.count(),
+                                   'info': serializer.data}
+            # envio de datos
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 @api_view(['POST'])
