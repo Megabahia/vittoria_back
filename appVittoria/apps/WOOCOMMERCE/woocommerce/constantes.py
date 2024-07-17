@@ -822,8 +822,10 @@ def mapeoCrearProductoWoocommerce(request, stock_nuevo, canal_pedido, fecha):
 
 def obtener_tipo_pedido(canal_buscado):
     parsed_url = urlparse(canal_buscado)
-    dominio = parsed_url.netloc
-
+    if 'netloc' in parsed_url:
+        dominio = parsed_url.netloc
+    else:
+        dominio = canal_buscado
     print('CANAL METODO PEDIDO', dominio)
     integraciones = Integraciones.objects.filter(valor=dominio)
     for integracion in integraciones:

@@ -10,9 +10,10 @@ from django.db.models import Sum
 from openpyxl import Workbook
 from django.http import HttpResponse
 from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDescuentoSinEnvio, \
-    mapeoTodoMegaDescuentoSinEnvio,mapeoTodoMayoristaSinEnvio,mapeoTodoContraEntrega,mapeoTodoTiendaMulticompras, mapeoTodoMaxiDescuento, mapeoTodoMegaBahia, mapeoCrearProductoWoocommerce
+    mapeoTodoMegaDescuentoSinEnvio, mapeoTodoMayoristaSinEnvio, mapeoTodoContraEntrega, mapeoTodoTiendaMulticompras, \
+    mapeoTodoMaxiDescuento, mapeoTodoMegaBahia, mapeoCrearProductoWoocommerce, obtener_tipo_pedido
 from .serializers import (
-    CreateOrderSerializer, PedidosSerializer, ProductosBodegaListSerializer
+    CreateOrderSerializer, PedidosSerializer, ProductosBodegaListSerializer, CreateOrderSuperBaratoSerializer
 )
 
 from ...MDP.mdp_productos.serializers import ProductoCreateSerializer
@@ -266,8 +267,11 @@ def orders_create_super_barato(request):
 
         try:
 
+            if 'created_at' in request.data:
+                request.data.pop('created_at')
             if 'facturacion' in request.data and isinstance(request.data['facturacion'], str):
                 facturacionTemporal = request.data.pop('facturacion')[0]
+                print('entro if', facturacionTemporal)
                 request.data['facturacion'] = json.loads(facturacionTemporal)
             if 'articulos' in request.data and isinstance(request.data['articulos'], str):
                 articulosTemporal = request.data.pop('articulos')[0]
@@ -294,16 +298,6 @@ def orders_create_super_barato(request):
             for articulo in request.data['articulos']:
                 caracteristicas = ""
 
-                product_ped = Productos.objects.filter(codigoBarras=articulo['codigo'], canal=articulo['canal']).first()
-                query_param = Catalogo.objects.filter(tipo='STOCK').first()
-                if product_ped is None:
-                    stock_nuevo = int(query_param.valor)
-                    data_prod = mapeoCrearProductoWoocommerce(articulo, stock_nuevo, canal,
-                                                              request.data['created_at'])
-                    serializer_prod = ProductoCreateSerializer(data=data_prod)
-                    if serializer_prod.is_valid():
-                        serializer_prod.save()
-
                 articulos.append({
                     "codigo": articulo['codigo'],
                     "articulo": articulo['articulo'],
@@ -315,9 +309,11 @@ def orders_create_super_barato(request):
 
             request.data['facturacion'] = json.dumps(request.data.pop('facturacion')[0])
             request.data['articulos'] = json.dumps(request.data.pop('articulos')[0])
-            serializer = CreateOrderSerializer(data=request.data)
+            request.data['gestion_pedido'] = obtener_tipo_pedido(canal)
+            serializer = CreateOrderSuperBaratoSerializer(data=request.data)
 
             if serializer.is_valid():
+                print('entro al valid')
                 serializer.save()
 
                 serializerProspect = {
@@ -386,8 +382,6 @@ def orders_create_super_barato(request):
                     ProspectosClientesDetalles.objects.create(
                         prospectoClienteEncabezado=prospectoEncabezado, **detalle)
 
-                # if data['facturacion']['codigoVendedor']:
-                enviarCorreoAdminAutorizador(data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)

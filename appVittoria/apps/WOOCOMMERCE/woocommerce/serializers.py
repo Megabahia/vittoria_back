@@ -43,6 +43,11 @@ class CreateOrderSerializer(serializers.Serializer):
         """
         return Pedidos.objects.create(**validated_data)
 
+class CreateOrderSuperBaratoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pedidos
+        fields = '__all__'
+
 class ProductosBodegaListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductosBodega
