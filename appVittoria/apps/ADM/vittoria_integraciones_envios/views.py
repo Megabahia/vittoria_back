@@ -242,3 +242,51 @@ def integraciones_envios_delete(request, pk):
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
     # GET ESTADOS
+
+
+# CRUD IntegracionesEnvios
+@api_view(['POST'])
+def integraciones_envios_buscar_metodos_envio(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'search/delevery-method',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            # Filtros
+            filters = {"state": "1"}
+
+            if 'sectorDestino' in request.data and 'sector' in request.data:
+                if request.data['sectorDestino'] != '' and request.data['sector'] != '':
+                    filters['sector'] = request.data['sector']
+                    filters['sectorDestino'] = request.data['sectorDestino']
+
+            if 'ciudad' in request.data and 'ciudadDestino' in request.data:
+                if request.data['ciudad'] != '' and request.data['ciudadDestino'] != '':
+                    filters['ciudad'] = request.data['ciudad']
+                    filters['ciudadDestino'] = request.data['ciudadDestino']
+
+            if len(filters) > 2:
+                query = IntegracionesEnvios.objects.filter(**filters).order_by('-created_at')
+                # Serializar los datos
+                serializer = IntegracionesEnviosListaSerializer(query, many=True)
+                new_serializer_data = {'cont': query.count(),
+                                       'info': serializer.data}
+            else:
+                new_serializer_data = {'cont': 0,
+                                       'info': []}
+
+            # envio de datos
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
