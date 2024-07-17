@@ -4,6 +4,10 @@ from .models import (
     ProductoImagen,
     Productos, ReporteAbastecimiento, ReporteStock, ReporteCaducidad, ReporteRotacion, IngresoProductos
 )
+
+from ...ADM.vittoria_integraciones.models import Integraciones
+from ...ADM.vittoria_integraciones.serializers import IntegracionesSerializer
+
 from .serializers import (
     DetallesSerializer, ProductosActualizarSerializer,
     ProductoCreateSerializer,
@@ -30,6 +34,7 @@ from django.http import HttpResponse
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
 from .constantes import mapeoCrearProducto,mapeoActualizarProducto
+from ...GDP.gdp_productos.serializers import ProductosSerializer
 
 # declaracion variables log
 datosAux = datosProductosMDP()
@@ -579,6 +584,53 @@ def search_producto_codigo_list(request):
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def search_producto_codigo_canal_list(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'search/producto/codigo/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        try:
+            filters = {
+                'codigoBarras': request.data['codigoBarras'],
+                'state': 1,
+                'estado': 'Activo',
+                #'stockVirtual__contains': {'canal': request.data['canalProducto'], 'estado': True}
+            }
+
+            query = Productos.objects.filter(**filters).first()
+            # Verifica si el objeto existe antes de aplicar más filtros
+
+        except Productos.DoesNotExist:
+            err = {"error": "No existe"}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_404_NOT_FOUND)
+        # tomar el dato
+        if request.method == 'POST':
+            serializer = ProductosListSerializer(query)
+            print(serializer.data)
+            queryParamsCanal = Integraciones.objects.filter(valor = serializer.data['canal']).first()
+            serializer_canal = IntegracionesSerializer(queryParamsCanal)
+
+            new_serializer_data = {'producto': serializer.data,
+                                   'integraciones_canal': serializer_canal.data}
+
+            createLog(logModel, new_serializer_data, logTransaccion)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 # ABASTECIMIENTO
 @api_view(['POST'])

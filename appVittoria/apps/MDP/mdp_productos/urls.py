@@ -9,7 +9,7 @@ from .views import (
     uploadEXCEL_crearProductos, productoImagen_list, prediccion_crosseling_list,
     producto_refil_list, prediccion_refil_list, prediccion_productosNuevos_list,
     search_producto_codigo_list, producto_images_delete, productos_findOne_free,
-    productos_findOne_codigo_producto, productos_exportar,
+    productos_findOne_codigo_producto, productos_exportar, search_producto_codigo_canal_list
 )
 
 app_name = 'productos'
@@ -29,6 +29,7 @@ urlpatterns = [
     path('delete/<int:pk>', productos_delete, name="productos_delete"),
     path('search/producto/', search_producto_list, name="search_producto_list"),
     path('search/producto/codigo/', search_producto_codigo_list, name="search_producto_codigo_list"),
+    path('search/producto/codigo/canal/', search_producto_codigo_canal_list, name="search_producto_codigo_canal_list"),
     path('upload/excel/', uploadEXCEL_crearProductos, name="uploadEXCEL_crearProductos"),
     # IMAGENES PRODUCTOS
     path('imagen/<int:pk>', producto_images_findOne, name="producto_images_findOne"),
