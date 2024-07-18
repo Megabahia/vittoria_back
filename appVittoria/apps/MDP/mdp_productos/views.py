@@ -601,14 +601,31 @@ def search_producto_codigo_canal_list(request):
     }
     try:
         try:
-            filters = {
+            '''filters = {
                 'codigoBarras': request.data['codigoBarras'],
                 'state': 1,
                 'estado': 'Activo',
                 #'stockVirtual__contains': {'canal': request.data['canalProducto'], 'estado': True}
-            }
+            }'''
+
+            filters = {}
+
+            if 'canal' in request.data and request.data['canal'] != '':
+                filters['canal'] = request.data['canal']
+
+            if 'state' in request.data and request.data['state'] != '':
+                filters['state'] = request.data['state']
+
+            if 'estado' in request.data and request.data['estado'] != '':
+                filters['estado'] = request.data['estado']
+
+            if 'codigoBarras' in request.data and request.data['codigoBarras'] != '':
+                filters['codigoBarras'] = request.data['codigoBarras']
 
             query = Productos.objects.filter(**filters).first()
+
+            if(query is None):
+                return Response('El producto no existe', status=status.HTTP_404_NOT_FOUND)
             # Verifica si el objeto existe antes de aplicar más filtros
 
         except Productos.DoesNotExist:
@@ -618,7 +635,6 @@ def search_producto_codigo_canal_list(request):
         # tomar el dato
         if request.method == 'POST':
             serializer = ProductosListSerializer(query)
-            print(serializer.data)
             queryParamsCanal = Integraciones.objects.filter(valor = serializer.data['canal']).first()
             serializer_canal = IntegracionesSerializer(queryParamsCanal)
 
