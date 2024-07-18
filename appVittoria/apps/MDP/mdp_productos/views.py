@@ -586,7 +586,6 @@ def search_producto_codigo_list(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def search_producto_codigo_canal_list(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
