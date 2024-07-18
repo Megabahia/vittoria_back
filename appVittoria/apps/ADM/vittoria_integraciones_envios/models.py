@@ -25,6 +25,11 @@ class IntegracionesEnvios(models.Model):
     tiempo_entrega = models.IntegerField(null=True, blank=True)
     latitud = models.CharField(max_length=255, null=True, blank=True)
     longitud = models.CharField(max_length=255, null=True, blank=True)
+    latitudDestino = models.CharField(max_length=255, null=True, blank=True)
+    longitudDestino = models.CharField(max_length=255, null=True, blank=True)
+
+    nombreCuenta = models.CharField(max_length=255, null=True, blank=True)
+    numeroCuenta = models.CharField(max_length=255, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
