@@ -17,6 +17,8 @@ class Integraciones(models.Model):
     latitud = models.CharField(max_length=250,null=True)
     longitud = models.CharField(max_length=250,null=True)
 
+    prefijo = models.CharField(max_length=100,null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)

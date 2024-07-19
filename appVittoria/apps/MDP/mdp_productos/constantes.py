@@ -1,3 +1,4 @@
+from ...ADM.vittoria_integraciones.models import Integraciones
 
 def mapeoCrearProducto(request):
     index = request.data['permalink'].find('.com')
@@ -24,6 +25,8 @@ def mapeoCrearProducto(request):
     # Generar la lista stockVirtual comparando el canal extraído con la lista de canales
     stock_virtual = [{"canal": sv_canal, "estado": sv_canal == canal} for sv_canal in canales_stock_virtual]
 
+    integraciones = Integraciones.objects.filter(valor=canal).first()
+    print('INTEGRACIONES', integraciones)
     return {
         "woocommerceId":request.data['id'],
         "nombre":request.data['name'],
@@ -42,7 +45,8 @@ def mapeoCrearProducto(request):
         'fechaElaboracion':request.data['date_created'][:10],
         'fechaCaducidad':request.data['date_created'][:10],
         "created_at":request.data['date_created'],
-        "stockVirtual": stock_virtual
+        "stockVirtual": stock_virtual,
+        "prefijo": integraciones.prefijo
     }
 
 
@@ -71,6 +75,8 @@ def mapeoActualizarProducto(request):
     # Generar la lista stockVirtual comparando el canal extraído con la lista de canales
     stock_virtual = [{"canal": sv_canal, "estado": sv_canal == canal} for sv_canal in canales_stock_virtual]
 
+    integraciones = Integraciones.objects.filter(valor=canal).first()
+
     return {
         "nombre":request.data['name'],
         "descripcion":request.data['description'],
@@ -86,8 +92,8 @@ def mapeoActualizarProducto(request):
         'fechaElaboracion':request.data['date_created'][:10],
         'fechaCaducidad':request.data['date_created'][:10],
         "updated_at":request.data['date_modified'],
-        "stockVirtual": stock_virtual
-
+        "stockVirtual": stock_virtual,
+        "prefijo": integraciones.prefijo
     }
 
 

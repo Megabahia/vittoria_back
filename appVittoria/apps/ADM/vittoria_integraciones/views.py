@@ -24,7 +24,6 @@ logExcepcion = datosTipoLogAux['excepcion']
 
 # CRUD Integraciones
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def integraciones_list(request):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
@@ -50,9 +49,10 @@ def integraciones_list(request):
             if 'nombre' in request.data:
                 if request.data['nombre'] != '':
                     filters['nombre__startswith'] = str(request.data['nombre'])
-            if 'tipo' in request.data:
-                if request.data['tipo'] != '':
-                    filters['tipo'] = str(request.data['tipo'])
+
+            if 'valor' in request.data:
+                if request.data['valor'] != '':
+                    filters['valor'] = str(request.data['valor'])
 
             # Serializar los datos
             query = Integraciones.objects.filter(**filters).order_by('-created_at')
