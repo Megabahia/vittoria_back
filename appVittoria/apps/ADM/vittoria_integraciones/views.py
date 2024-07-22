@@ -42,7 +42,7 @@ def integraciones_list(request):
             # paginacion
             page_size = int(request.data['page_size'])
             page = int(request.data['page'])
-            offset = page_size * page
+            offset = page_size * (page - 1)
             limit = offset + page_size
             # Filtros
             filters = {"state": "1"}
@@ -67,8 +67,6 @@ def integraciones_list(request):
             err = {"error": 'Un error ha ocurrido: {}'.format(e)}
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
-
-        # CREAR
 
 
 @api_view(['POST'])
