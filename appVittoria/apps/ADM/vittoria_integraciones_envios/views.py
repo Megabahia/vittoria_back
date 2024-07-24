@@ -264,6 +264,14 @@ def integraciones_envios_buscar_metodos_envio(request):
             # Filtros
             filters = {"state": "1"}
 
+            if 'sector' in request.data:
+                if request.data['sector'] != '':
+                    filters['sector'] = request.data['sector']
+
+            if 'ciudad' in request.data:
+                if request.data['ciudad'] != '':
+                    filters['ciudad'] = request.data['ciudad']
+
             if 'sectorDestino' in request.data and 'sector' in request.data:
                 if request.data['sectorDestino'] != '' and request.data['sector'] != '':
                     filters['sector'] = request.data['sector']
@@ -275,7 +283,7 @@ def integraciones_envios_buscar_metodos_envio(request):
                     filters['ciudadDestino'] = request.data['ciudadDestino']
 
             if len(filters) > 2:
-                query = IntegracionesEnvios.objects.filter(**filters).order_by('-created_at')
+                query = IntegracionesEnvios.objects.filter(**filters).order_by('-distancia')
                 # Serializar los datos
                 serializer = IntegracionesEnviosListaSerializer(query, many=True)
                 new_serializer_data = {'cont': query.count(),

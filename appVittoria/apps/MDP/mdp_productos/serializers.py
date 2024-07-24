@@ -11,8 +11,8 @@ from django.utils import timezone
 
 from ..mdp_categorias.models import Categorias
 from ..mdp_subCategorias.models import SubCategorias
-
-
+from ...ADM.vittoria_integraciones.models import Integraciones
+from ...ADM.vittoria_integraciones_envios.models import IntegracionesEnvios
 class ProductosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Productos
@@ -40,6 +40,53 @@ class ProductosListSerializer(serializers.ModelSerializer):
             data['imagenes'] = []
         return data
 
+
+class ProductosIntegracionesListSerializer(serializers.ModelSerializer):
+    ciudad = serializers.SerializerMethodField()
+    sector = serializers.SerializerMethodField()
+    courier = serializers.SerializerMethodField()
+    costo = serializers.SerializerMethodField()
+    tienda = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Productos
+        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal', 'stockVirtual', 'descripcion', 'precioVentaA', 'precioVentaB', 'precioOferta', 'imagen_principal', 'prefijo', 'ciudad', 'sector', 'costo', 'courier', 'tienda']
+
+    def get_integracion(self, obj):
+        # Cachear la integración para evitar múltiples consultas
+        if not hasattr(obj, '_integracion_cache'):
+            obj._integracion_cache = Integraciones.objects.filter(valor=obj.canal).first()
+        return obj._integracion_cache
+
+    def get_ciudad(self, obj):
+        integracion = self.get_integracion(obj)
+        return integracion.ciudad if integracion else None
+
+    def get_tienda(self, obj):
+        integracion = self.get_integracion(obj)
+        return integracion.nombre if integracion else None
+
+    def get_sector(self, obj):
+        integracion = self.get_integracion(obj)
+        return integracion.sector if integracion else None
+
+    def get_courier(self, obj):
+        integracion = self.get_integracion(obj)
+        # Asegúrate de que integracion no es None antes de continuar
+        if integracion:
+            integracion_envio = IntegracionesEnvios.objects.filter(ciudad=integracion.ciudad,
+                                                                   sector=integracion.sector).first()
+            return integracion_envio.courier if integracion_envio else None
+        return None
+
+    def get_costo(self, obj):
+        integracion = self.get_integracion(obj)
+        # Asegúrate de que integracion no es None antes de continuar
+        if integracion:
+            integracion_envio = IntegracionesEnvios.objects.filter(ciudad=integracion.ciudad,
+                                                                   sector=integracion.sector).first()
+            return integracion_envio.costo if integracion_envio else None
+        return None
 
 # DETALLES IMAGENES
 class DetallesSerializer(serializers.ModelSerializer):

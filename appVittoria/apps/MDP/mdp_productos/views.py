@@ -16,7 +16,7 @@ from .serializers import (
     StockListSerializer, CaducidadListSerializer, RotacionListSerializer, RefilListSerializer,
     HistorialAvisosSerializer, ImagenSerializer, PrediccionCrosselingSerializer,
     PrediccionRefilSerializer, PrediccionRefilOneSerializer, ProductoSearchSerializer,
-    ListarProductoCreateSerializer,
+    ListarProductoCreateSerializer, ProductosIntegracionesListSerializer
 )
 from rest_framework import status
 from urllib.parse import urlparse
@@ -622,8 +622,9 @@ def search_producto_codigo_canal_list(request):
                 filters['codigoBarras'] = request.data['codigoBarras']
 
             query = Productos.objects.filter(**filters).first()
+            query2 = Productos.objects.filter(codigoBarras = request.data['codigoBarras'])
 
-            if(query is None):
+            if(query is None or query2 is None):
                 return Response('El producto no existe', status=status.HTTP_404_NOT_FOUND)
             # Verifica si el objeto existe antes de aplicar más filtros
 
@@ -633,11 +634,16 @@ def search_producto_codigo_canal_list(request):
             return Response(err, status=status.HTTP_404_NOT_FOUND)
         # tomar el dato
         if request.method == 'POST':
+
+
             serializer = ProductosListSerializer(query)
+            serializer2 = ProductosIntegracionesListSerializer(query2, many=True)
+
             queryParamsCanal = Integraciones.objects.filter(valor = serializer.data['canal']).first()
             serializer_canal = IntegracionesSerializer(queryParamsCanal)
 
             new_serializer_data = {'producto': serializer.data,
+                                   'productos': serializer2.data,
                                    'integraciones_canal': serializer_canal.data}
 
             createLog(logModel, new_serializer_data, logTransaccion)
