@@ -585,6 +585,26 @@ def inventar_exportar(request):
     wb.save(response)
     return response
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def gsb_validate_contact(request):
+        try:
+            print(request.data['whatsapp'])
+            if 'whatsapp' in request.data and request.data['whatsapp'] != '':
+                queryProspectos = ProspectosClientes.objects.filter(
+                    Q(whatsapp=request.data['whatsapp'])).first()
+                queryClientes = Clientes.objects.filter(
+                    Q(telefono=request.data['whatsapp'])).first()
+
+            if queryProspectos is not None or queryClientes is not None:
+                return Response('Contacto duplicado, ya existe', status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(status=status.HTTP_200_OK)
+
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 
 def obtener_canales_activos(stock_virtual):
     # Filtrar los canales con estado true
@@ -593,3 +613,4 @@ def obtener_canales_activos(stock_virtual):
     # Convertir el set a un formato de string que imite un objeto JSON
     resultado = ', '.join(f"{canal}" for canal in canales_activos)
     return resultado
+

@@ -1,7 +1,6 @@
 from django.urls import path
 
-from .views import gsb_create_order, gsb_orders_list, gsb_orders_listOne, gsb_validate_order, gsb_update_order, inventario_list, inventar_exportar
-
+from .views import gsb_create_order, gsb_orders_list, gsb_orders_listOne, gsb_validate_order, gsb_update_order, inventario_list, inventar_exportar, gsb_validate_contact
 app_name = 'gsb_super_barato'
 
 urlpatterns = [
@@ -14,4 +13,7 @@ urlpatterns = [
     path('validate/contact', gsb_validate_order, name="gsb_validate_order"),
     # EXPORTAR PRODCUTOS
     path('exportar', inventar_exportar, name="inventar_exportar"),
+    # VALIDACION DE DATOS
+    path('validate/contact/available', gsb_validate_contact, name="gsb_validate_contact"),
+
 ]

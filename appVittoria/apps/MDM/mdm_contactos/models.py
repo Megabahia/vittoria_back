@@ -44,6 +44,10 @@ class Contactos(models.Model):
     facturacion = models.JSONField(null=True)
     envio = models.JSONField(null=True)
 
+    estado = models.CharField(max_length=100, null=True, blank=True)
+    usuario = models.CharField(max_length=200, null=True, blank=True)
+
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)
