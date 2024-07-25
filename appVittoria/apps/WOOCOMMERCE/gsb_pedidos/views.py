@@ -14,6 +14,7 @@ from ...MDP.mdp_productos.models import Productos
 from ...WOOCOMMERCE.woocommerce.models import (
     Pedidos
 )
+from ...MDM.mdm_contactos.models import Contactos
 from .models import (
     SuperBarato
 )
@@ -589,14 +590,15 @@ def inventar_exportar(request):
 @permission_classes([IsAuthenticated])
 def gsb_validate_contact(request):
         try:
-            print(request.data['whatsapp'])
             if 'whatsapp' in request.data and request.data['whatsapp'] != '':
                 queryProspectos = ProspectosClientes.objects.filter(
                     Q(whatsapp=request.data['whatsapp'])).first()
                 queryClientes = Clientes.objects.filter(
                     Q(telefono=request.data['whatsapp'])).first()
+                queryContactos = Contactos.objects.filter(
+                    Q(whatsapp=request.data['whatsapp'])).first()
 
-            if queryProspectos is not None or queryClientes is not None:
+            if queryProspectos is not None or queryClientes is not None or queryContactos is not None:
                 return Response('Contacto duplicado, ya existe', status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response(status=status.HTTP_200_OK)
