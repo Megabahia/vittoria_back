@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     'apps.FACTURACION.facturacion',
     # apps vittoria FACTURACION
     'apps.WOOCOMMERCE.mp_parametrizaciones',
+    'apps.WOOCOMMERCE.gd_parametrizaciones',
     'apps.WOOCOMMERCE.woocommerce',
     'apps.WOOCOMMERCE.gdc_gestor_contactos',
     'apps.WOOCOMMERCE.gmb_despachos',

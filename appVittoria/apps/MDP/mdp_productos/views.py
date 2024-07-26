@@ -621,8 +621,11 @@ def search_producto_codigo_canal_list(request):
             if 'codigoBarras' in request.data and request.data['codigoBarras'] != '':
                 filters['codigoBarras'] = request.data['codigoBarras']
 
+            if 'nombre' in request.data and request.data['nombre'] != '':
+                filters['nombre__icontains'] = request.data['nombre']
+
             query = Productos.objects.filter(**filters).first()
-            query2 = Productos.objects.filter(codigoBarras = request.data['codigoBarras'])
+            query2 = Productos.objects.filter(**filters)
 
             if(query is None or query2 is None):
                 return Response('El producto no existe', status=status.HTTP_404_NOT_FOUND)
@@ -634,7 +637,6 @@ def search_producto_codigo_canal_list(request):
             return Response(err, status=status.HTTP_404_NOT_FOUND)
         # tomar el dato
         if request.method == 'POST':
-
 
             serializer = ProductosListSerializer(query)
             serializer2 = ProductosIntegracionesListSerializer(query2, many=True)

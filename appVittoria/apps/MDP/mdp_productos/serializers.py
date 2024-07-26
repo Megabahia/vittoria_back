@@ -23,7 +23,7 @@ class ProductosSerializer(serializers.ModelSerializer):
 class ProductosListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Productos
-        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal', 'stockVirtual', 'descripcion', 'precioVentaA', 'precioVentaB', 'precioOferta', 'imagen_principal', 'prefijo']
+        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal', 'stockVirtual', 'descripcion', 'precioVentaA', 'precioVentaB', 'precioOferta', 'imagen_principal', 'prefijo', 'link_catalogo']
 
     def to_representation(self, instance):
         data = super(ProductosListSerializer, self).to_representation(instance)
@@ -50,7 +50,7 @@ class ProductosIntegracionesListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Productos
-        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal', 'stockVirtual', 'descripcion', 'precioVentaA', 'precioVentaB', 'precioOferta', 'imagen_principal', 'prefijo', 'ciudad', 'sector', 'costo', 'courier', 'tienda']
+        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal', 'stockVirtual', 'descripcion', 'precioVentaA', 'precioVentaB', 'precioOferta', 'imagen_principal', 'prefijo', 'ciudad', 'sector', 'costo', 'courier', 'tienda', 'link_catalogo']
 
     def get_integracion(self, obj):
         # Cachear la integración para evitar múltiples consultas
