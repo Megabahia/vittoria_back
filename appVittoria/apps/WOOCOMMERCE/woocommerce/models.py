@@ -53,6 +53,15 @@ class Pedidos(models.Model):
     tipoEnvio = models.CharField(max_length=255, null=True, blank=True)
     evidenciaPago=models.FileField(blank=True, null=True, upload_to=upload_path)
 
+    formaPago = models.JSONField(null=True)
+    archivoFormaPago = models.FileField(blank=True, null=True, upload_to=upload_path)
+    archivoFormaPagoCredito = models.FileField(blank=True, null=True, upload_to=upload_path)
+    numTransaccionTransferencia = models.CharField(max_length=255, null=True, blank=True)
+    numTransaccionCredito = models.CharField(max_length=255, null=True, blank=True)
+    totalCobroEfectivo = models.FloatField(null=True)
+    montoTransferencia = models.FloatField(null=True)
+    montoCredito = models.FloatField(null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)
