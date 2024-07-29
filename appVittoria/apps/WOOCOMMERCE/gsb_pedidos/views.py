@@ -90,6 +90,7 @@ def gsb_create_order(request):
                 })
 
             serializer = CreateSuperBaratoSerializer(data=request.data)
+
             if serializer.is_valid():
                 serializer.save()
 
@@ -164,9 +165,8 @@ def gsb_create_order(request):
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-            '''if queryProspectos is not None or queryClientes is not None:
-                return Response('Contacto ya existe', status=status.HTTP_400_BAD_REQUEST)'''
+            else:
+                return Response('ERROR AL CREAR', status=status.HTTP_400_BAD_REQUEST)
 
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(status=status.HTTP_200_OK)

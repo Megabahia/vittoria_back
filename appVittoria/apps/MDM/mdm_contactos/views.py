@@ -224,23 +224,25 @@ def contacto_update(request, pk):
                 request.data.pop('created_at')
             if 'nombres' in request.data and request.data['nombres'] != '' and 'apellidos' in request.data and request.data['apellidos'] != '':
                 request.data['nombreCompleto'] = request.data['nombres'] + ' ' + request.data['apellidos']
+
             serializer = ActualizarContactosSerializer(query, data=request.data, partial=True)
+
             if serializer.is_valid():
                 serializer.save()
-                if request.data['confirmacionProspecto'] == 'Confirmado':
-                    articulos = []
-                    for articulo in serializer.data['detalles']:
-                        articulos.append({
-                            "codigo": articulo['codigo'],
-                            "articulo": articulo['articulo'],
-                            "valorUnitario": articulo['valorUnitario'],
-                            "cantidad": articulo['cantidad'],
-                            "precio": articulo['total'],
-                            "caracteristicas": ''
-                        })
-                    data = mapeoProspectoCliente(serializer.data, articulos)
-
-                    Pedidos.objects.create(**data)
+                #if request.data['confirmacionProspecto'] == 'Confirmado':
+                #    articulos = []
+                #    for articulo in serializer.data['detalles']:
+                #        articulos.append({
+                #            "codigo": articulo['codigo'],
+                #            "articulo": articulo['articulo'],
+                #            "valorUnitario": articulo['valorUnitario'],
+                #            "cantidad": articulo['cantidad'],
+                #            "precio": articulo['total'],
+                #            "caracteristicas": ''
+                #        })
+                #    data = mapeoProspectoCliente(serializer.data, articulos)
+#
+                #    Pedidos.objects.create(**data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)
@@ -249,8 +251,6 @@ def contacto_update(request, pk):
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
-
-    # ELIMINAR
 
 
 @api_view(['DELETE'])
