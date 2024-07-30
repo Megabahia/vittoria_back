@@ -56,6 +56,8 @@ class Contactos(models.Model):
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)
 
+    fechaCargaFormaPago = models.CharField(max_length=255, null=True, blank=True)
+
     formaPago=models.JSONField(null=True)
     archivoFormaPago=models.FileField(blank=True, null=True, upload_to=upload_path)
     archivoFormaPagoCredito=models.FileField(blank=True, null=True, upload_to=upload_path)

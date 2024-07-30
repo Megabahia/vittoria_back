@@ -856,28 +856,31 @@ def orders_update_formaPago(request, pk):
             serializer = PedidosSerializer(query, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
+                dataPedidos = {**serializer.data}
 
-                print(serializer.data['archivoFormaPago'])
-                dataPedidos = {**request.data}
+                dataPedidos.pop('archivoFormaPago')
+                dataPedidos.pop('archivoFormaPagoCredito')
+                dataPedidos.pop('fotoCupon')
+
                 query2 = Contactos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
-
-                if serializer.data['archivoFormaPago'] is not None:
-                    dataPedidos = {**request.data, "archivoFormaPago": request.data['archivoFormaPago']}
-
-                if serializer.data['archivoFormaPagoCredito'] is not None:
-                    dataPedidos = {**request.data, "archivoFormaPagoCredito": request.data['archivoFormaPagoCredito']}
-
-                print(request.data)
-
                 serializerContacto = ContactosSerializer(query2, data=dataPedidos, partial=True)
-                print(serializerContacto.is_valid())
 
                 if serializerContacto.is_valid():
-                    serializerContacto.save()
+                    contacto = serializerContacto.save()
+                    if 'archivoFormaPago' in  serializer.data and serializer.data['archivoFormaPago'] is not None:
+                        contacto.archivoFormaPago = obtener_parte_deseada_url(serializer.data['archivoFormaPago'])
+
+                    if 'archivoFormaPagoCredito' in  serializer.data and serializer.data['archivoFormaPagoCredito'] is not None:
+                        contacto.archivoFormaPagoCredito = obtener_parte_deseada_url(serializer.data['archivoFormaPagoCredito'])
+
+                    contacto.estado = 'Por confirmar'
+
+                    contacto.save()
+
                 print(serializerContacto.errors)
 
                 createLog(logModel, serializer.data, logTransaccion)
-                return Response(serializer.data)
+                return Response(serializer.data,  status=status.HTTP_200_OK)
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
@@ -1228,3 +1231,14 @@ def transformar_archivo(url):
     else:
         print("Error al descargar el archivo")
         return None
+
+
+def obtener_parte_deseada_url(url):
+
+    # Parsear la URL
+    parsed_url = urlparse(url)
+
+    # Obtener el path y limpiar la barra inicial si existe
+    clean_path = parsed_url.path.lstrip('/')
+
+    return clean_path
