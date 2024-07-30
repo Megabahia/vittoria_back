@@ -1,5 +1,6 @@
 import json
-
+import requests
+import io
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -15,10 +16,10 @@ from .constantes import mapeoTodoMegaDescuento, mapeoMegaDescuento, mapeoMegaDes
 from .serializers import (
     CreateOrderSerializer, PedidosSerializer, ProductosBodegaListSerializer, CreateOrderSuperBaratoSerializer
 )
-
+from ..gdc_gestor_contactos.models import Contactos
 from ...MDP.mdp_productos.serializers import ProductoCreateSerializer
 from django.db.models import Max
-
+from ..gdc_gestor_contactos.serializers import ContactosSerializer
 from .models import (
     Pedidos, UniqueCode
 )
@@ -808,6 +809,83 @@ def orders_update(request, pk):
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def orders_update_formaPago(request, pk):
+    request.POST._mutable = True
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'update/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'ESCRIBIR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            query = Pedidos.objects.get(pk=pk, state=1)
+        except Pedidos.DoesNotExist:
+            errorNoExiste = {'error': 'No existe'}
+            createLog(logModel, errorNoExiste, logExcepcion)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'POST':
+
+            #Validaciones
+            if 'numeroComprobante' in request.data and request.data['numeroComprobante'] is not None:
+                if Pedidos.objects.filter(numeroComprobante=request.data['numeroComprobante']).exclude(pk=pk).first():
+                    return Response(data='Ya existe el número de comprobante', status=status.HTTP_404_NOT_FOUND)
+
+            if 'numTransaccionTransferencia' in request.data and request.data['numTransaccionTransferencia'] is not None:
+                if Pedidos.objects.filter(numTransaccionTransferencia=request.data['numTransaccionTransferencia']).exclude(pk=pk).first():
+                    return Response(data='Ya existe el número de transacción para transferencia', status=status.HTTP_404_NOT_FOUND)
+
+            if 'numTransaccionCredito' in request.data and request.data['numTransaccionCredito'] is not None:
+                if Pedidos.objects.filter(numTransaccionCredito=request.data['numTransaccionCredito']).exclude(pk=pk).first():
+                    return Response(data='Ya existe el número de transacción para tarjeta de crédito', status=status.HTTP_404_NOT_FOUND)
+
+
+            now = timezone.localtime(timezone.now())
+            # request.data['updated_at'] = str(now)
+            if 'created_at' in request.data:
+                request.data.pop('created_at')
+
+            serializer = PedidosSerializer(query, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+
+                print(serializer.data['archivoFormaPago'])
+                dataPedidos = {**request.data}
+                query2 = Contactos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
+
+                if serializer.data['archivoFormaPago'] is not None:
+                    dataPedidos = {**request.data, "archivoFormaPago": request.data['archivoFormaPago']}
+
+                if serializer.data['archivoFormaPagoCredito'] is not None:
+                    dataPedidos = {**request.data, "archivoFormaPagoCredito": request.data['archivoFormaPagoCredito']}
+
+                print(request.data)
+
+                serializerContacto = ContactosSerializer(query2, data=dataPedidos, partial=True)
+                print(serializerContacto.is_valid())
+
+                if serializerContacto.is_valid():
+                    serializerContacto.save()
+                print(serializerContacto.errors)
+
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
 def generar_numero_guia():
 
     # Obtén el valor máximo de numeroGuia
@@ -1135,3 +1213,18 @@ def orders_verify_code(request):
             err = {"error": 'Un error ha ocurrido: {}'.format(e)}
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+def transformar_archivo(url):
+    # Hacer la petición GET para descargar el archivo
+    respuesta = requests.get(url)
+
+    # Verificar que la petición fue exitosa
+    if respuesta.status_code == 200:
+        # Usar io.BytesIO para manejar el archivo en memoria
+        archivo_en_memoria = io.BytesIO(respuesta.content)
+        archivo_en_memoria.name = url.split('/')[-1]  # Opcional, asignar un nombre al archivo
+        return archivo_en_memoria
+    else:
+        print("Error al descargar el archivo")
+        return None

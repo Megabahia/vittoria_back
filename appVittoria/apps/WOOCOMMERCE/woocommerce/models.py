@@ -53,6 +53,7 @@ class Pedidos(models.Model):
     tipoEnvio = models.CharField(max_length=255, null=True, blank=True)
     evidenciaPago=models.FileField(blank=True, null=True, upload_to=upload_path)
 
+    fechaCargaFormaPago = models.CharField(max_length=255, null=True, blank=True)
     formaPago = models.JSONField(null=True)
     archivoFormaPago = models.FileField(blank=True, null=True, upload_to=upload_path)
     archivoFormaPagoCredito = models.FileField(blank=True, null=True, upload_to=upload_path)
