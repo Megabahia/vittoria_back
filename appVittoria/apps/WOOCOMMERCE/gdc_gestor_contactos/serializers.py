@@ -28,6 +28,7 @@ class CreateContactSerializer(serializers.Serializer):
     estado = serializers.CharField(max_length=255)
     envioTotal = serializers.FloatField()
     total = serializers.FloatField()
+    subtotal = serializers.FloatField()
     facturacion = serializers.JSONField()
     envio = serializers.JSONField()
     metodoPago = serializers.CharField(max_length=255, )
