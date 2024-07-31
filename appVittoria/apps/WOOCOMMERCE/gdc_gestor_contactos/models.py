@@ -72,3 +72,6 @@ class Contactos(models.Model):
 
     archivoFactura = models.FileField(blank=True, null=True, upload_to=upload_path)
     montoSubtotalCliente = models.FloatField(null=True)
+
+    fechaEmisionFactura = models.DateTimeField(null=True)
+    motivoNegacionPedido = models.CharField(max_length=255, null=True, blank=True)

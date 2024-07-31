@@ -876,6 +876,7 @@ def orders_update_formaPago(request, pk):
                     '''
 
                     contacto.estado = 'Por confirmar'
+                    print('CONTACT', contacto)
                     contacto.save()
 
                 createLog(logModel, serializer.data, logTransaccion)
