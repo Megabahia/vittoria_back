@@ -858,8 +858,8 @@ def orders_update_formaPago(request, pk):
                 serializer.save()
                 dataPedidos = {**serializer.data}
 
-                dataPedidos.pop('archivoFormaPago')
-                dataPedidos.pop('archivoFormaPagoCredito')
+                dataPedidos.pop('archivoFactura')
+                #dataPedidos.pop('archivoFormaPagoCredito')
                 dataPedidos.pop('fotoCupon')
 
                 query2 = Contactos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
@@ -867,17 +867,16 @@ def orders_update_formaPago(request, pk):
 
                 if serializerContacto.is_valid():
                     contacto = serializerContacto.save()
-                    if 'archivoFormaPago' in  serializer.data and serializer.data['archivoFormaPago'] is not None:
-                        contacto.archivoFormaPago = obtener_parte_deseada_url(serializer.data['archivoFormaPago'])
+                    if 'archivoFactura' in  serializer.data and serializer.data['archivoFactura'] is not None:
+                        contacto.archivoFactura = obtener_parte_deseada_url(serializer.data['archivoFactura'])
 
+                    '''
                     if 'archivoFormaPagoCredito' in  serializer.data and serializer.data['archivoFormaPagoCredito'] is not None:
                         contacto.archivoFormaPagoCredito = obtener_parte_deseada_url(serializer.data['archivoFormaPagoCredito'])
+                    '''
 
                     contacto.estado = 'Por confirmar'
-
                     contacto.save()
-
-                print(serializerContacto.errors)
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data,  status=status.HTTP_200_OK)

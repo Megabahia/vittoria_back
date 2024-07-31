@@ -69,3 +69,6 @@ class Contactos(models.Model):
 
     montoTransferencia = models.FloatField(null=True)
     montoCredito = models.FloatField(null=True)
+
+    archivoFactura = models.FileField(blank=True, null=True, upload_to=upload_path)
+    montoSubtotalCliente = models.FloatField(null=True)
