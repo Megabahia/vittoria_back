@@ -419,6 +419,7 @@ def contacts_update(request, pk):
                 fotoCupon=serializer.data['fotoCupon'].split(".com/")[1] if serializer.data['fotoCupon'] is not None else None
                 query2 = Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
                 dataPedidos = {**serializer.data, "codigoVendedor": serializer.data['facturacion']['codigoVendedor'], 'fotoCupon':None}
+                dataPedidos.pop('archivoFactura')
                 serializerPedido = PedidosSerializer(query2, data=dataPedidos, partial=True)
                 if serializerPedido.is_valid():
                     serializerPedido.save()

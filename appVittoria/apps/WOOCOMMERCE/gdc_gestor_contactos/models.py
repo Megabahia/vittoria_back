@@ -75,3 +75,4 @@ class Contactos(models.Model):
 
     fechaEmisionFactura = models.DateTimeField(null=True)
     motivoNegacionPedido = models.CharField(max_length=255, null=True, blank=True)
+    montoSubtotalAprobado = models.FloatField(null=True)
