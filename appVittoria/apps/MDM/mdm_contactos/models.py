@@ -47,6 +47,7 @@ class Contactos(models.Model):
     estado = models.CharField(max_length=100, null=True, blank=True)
     usuario = models.CharField(max_length=200, null=True, blank=True)
 
+    tipoContacto = models.CharField(max_length=255, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

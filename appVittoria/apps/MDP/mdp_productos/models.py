@@ -70,7 +70,8 @@ class Productos(models.Model):
 
     prefijo = models.CharField(max_length=100, null=True)
 
-    link_catalogo = models.CharField(max_length=250, null=True, blank=True)
+    link_catalogo = models.CharField(max_length=500, null=True, blank=True)
+    link_tienda = models.CharField(max_length=500, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

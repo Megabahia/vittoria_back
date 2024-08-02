@@ -71,13 +71,13 @@ class ContactosSearchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contactos
         fields = ['id', 'nombres', 'apellidos', 'telefono', 'identificacion', 'whatsapp', 'codigoProducto',
-                  'nombreProducto', 'precio']
+                  'nombreProducto', 'precio', 'tipoContacto']
 
 
 class ContactosListarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contactos
-        fields = ['id', 'nombres', 'apellidos', 'whatsapp', 'created_at', 'canal', 'articulos', 'estado', 'usuario']
+        fields = ['id', 'nombres', 'apellidos', 'whatsapp', 'created_at', 'canal', 'articulos', 'estado', 'usuario', 'tipoContacto']
 
 
 class ContactoImagenSerializer(serializers.HyperlinkedModelSerializer):
