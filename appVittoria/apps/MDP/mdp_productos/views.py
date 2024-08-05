@@ -611,7 +611,10 @@ def search_producto_codigo_canal_list(request):
 
             if 'canal' in request.data and request.data['canal'] != '':
                 filters['canal'] = request.data['canal']
-
+            
+            if 'prefijo' in request.data and request.data['prefijo'] != '':
+                filters['prefijo'] = request.data['prefijo']
+            
             if 'state' in request.data and request.data['state'] != '':
                 filters['state'] = request.data['state']
 
