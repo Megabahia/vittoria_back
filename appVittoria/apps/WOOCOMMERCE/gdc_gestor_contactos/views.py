@@ -34,7 +34,7 @@ from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductos
 from ...MDM.mdm_prospectosClientes.models import ProspectosClientes,ProspectosClientesDetalles
 from ...MDM.mdm_facturas.models import FacturasEncabezados, FacturasDetalles
 from ...MDM.mdm_clientes.models import Clientes
-
+from ...MDM.mdm_clientes.serializers import ClientesSerializer
 # declaracion variables log
 datosAux = datosProductosMDP()
 datosTipoLogAux = datosTipoLog()
@@ -216,6 +216,22 @@ def gdc_create_venta(request):
                 dataPedidos = {**serializer.data, "codigoVendedor": serializer.data['facturacion']['codigoVendedor']}
                 Pedidos.objects.create(**dataPedidos)
 
+                queryCliente = Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion'], state=1).first()
+                if(queryCliente):
+                    queryCliente.nombreCompleto = serializer.data['facturacion']['nombres'] + ' ' + serializer.data['facturacion']['apellidos']
+                    queryCliente.nombres = serializer.data['facturacion']['nombres']
+                    queryCliente.apellidos = serializer.data['facturacion']['apellidos']
+                    queryCliente.telefono = serializer.data['facturacion']['telefono']
+                    queryCliente.cedula = serializer.data['facturacion']['identificacion']
+                    queryCliente.correo = serializer.data['facturacion']['correo']
+                    queryCliente.paisNacimiento = serializer.data['facturacion']['pais']
+                    queryCliente.provinciaNacimiento = serializer.data['facturacion']['provincia']
+                    queryCliente.ciudadNacimiento = serializer.data['facturacion']['ciudad']
+                    queryCliente.tipoIdentificacion = serializer.data['facturacion']['tipoIdentificacion']
+
+                    queryCliente.save()
+
+
                 #for articulo in serializer.data['articulos']:
                 #    producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
                 #    if producto:
@@ -282,8 +298,6 @@ def contacts_list(request):
                 filters['canalEnvio'] = request.data['canalEnvio'].upper()
             if 'canal' in request.data and request.data['canal'] != '':
                 filters['canal'] = request.data['canal'].upper()
-
-
 
             # Serializar los datos
             query = Contactos.objects.filter(**filters).order_by('-created_at')
