@@ -1051,7 +1051,7 @@ def pedidos_exportar(request):
     rol = request.GET.get('rol', None)
 
     if estado is not None:
-        filters['estado__in'] = estado
+        filters['estado__in'] = [estado]
 
     if usuarioVendedor is not None:
         filters['facturacion__contains'] = {"codigoVendedor": usuarioVendedor}
