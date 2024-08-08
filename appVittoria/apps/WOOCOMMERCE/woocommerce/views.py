@@ -889,6 +889,73 @@ def orders_update_formaPago(request, pk):
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def orders_update_queja(request, pk):
+    request.POST._mutable = True
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'update/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'ESCRIBIR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            query = Pedidos.objects.get(pk=pk, state=1)
+        except Pedidos.DoesNotExist:
+            errorNoExiste = {'error': 'No existe'}
+            createLog(logModel, errorNoExiste, logExcepcion)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'POST':
+
+            #Validaciones
+            if 'numeroComprobanteQueja' in request.data and request.data['numeroComprobanteQueja'] is not None:
+                if Pedidos.objects.filter(numeroComprobanteQueja=request.data['numeroComprobanteQueja']).exclude(pk=pk).first():
+                    return Response(data='Ya existe el número de comprobante', status=status.HTTP_404_NOT_FOUND)
+
+            now = timezone.localtime(timezone.now())
+            # request.data['updated_at'] = str(now)
+            if 'created_at' in request.data:
+                request.data.pop('created_at')
+
+            serializer = PedidosSerializer(query, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                dataPedidos = {**serializer.data}
+
+                dataPedidos.pop('archivoFactura')
+                dataPedidos.pop('archivoFacturaQueja')
+
+                #dataPedidos.pop('archivoFormaPagoCredito')
+                dataPedidos.pop('fotoCupon')
+
+                query2 = Contactos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
+                serializerContacto = ContactosSerializer(query2, data=dataPedidos, partial=True)
+                if serializerContacto.is_valid():
+                    contacto = serializerContacto.save()
+                    if 'archivoFacturaQueja' in serializer.data and serializer.data['archivoFacturaQueja'] is not None:
+                        contacto.archivoFacturaQueja = obtener_parte_deseada_url(serializer.data['archivoFacturaQueja'])
+
+                    contacto.estado = 'Queja'
+
+                    contacto.save()
+
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data,  status=status.HTTP_200_OK)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
 def generar_numero_guia():
 
     # Obtén el valor máximo de numeroGuia

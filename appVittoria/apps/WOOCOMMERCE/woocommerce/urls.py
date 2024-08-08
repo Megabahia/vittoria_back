@@ -4,7 +4,7 @@ from .views import (
     orders_create, orders_list, orders_listOne, orders_update,
     orders_devolucion, orders_notificacion, orders_list_bodega,
     orders_listOne_bodega, orders_update_bodega, pedidos_exportar, orders_send_code, orders_verify_code,
-    orders_create_super_barato,orders_update_formaPago
+    orders_create_super_barato,orders_update_formaPago, orders_update_queja
 )
 
 app_name = 'woocommerce'
@@ -18,6 +18,7 @@ urlpatterns = [
     path('orders/update/bodega/<str:pk>', orders_update_bodega, name="orders_update_bodega"),
     path('orders/update/<str:pk>', orders_update, name="orders_update"),
     path('orders/update/formaPago/<str:pk>', orders_update_formaPago, name="orders_update_formaPago"),
+    path('orders/update/queja/<str:pk>', orders_update_queja, name="orders_update_queja"),
     path('orders/devolucion/<str:pk>', orders_devolucion, name="orders_devolucion"),
     path('orders/listOne/<str:pk>', orders_listOne, name="orders_listOne"),
     path('orders/listOne/bodega/<str:pk>', orders_listOne_bodega, name="orders_listOne_bodega"),

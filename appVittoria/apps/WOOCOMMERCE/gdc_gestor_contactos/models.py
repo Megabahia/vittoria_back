@@ -76,3 +76,12 @@ class Contactos(models.Model):
     fechaEmisionFactura = models.DateTimeField(null=True)
     motivoNegacionPedido = models.CharField(max_length=255, null=True, blank=True)
     montoSubtotalAprobado = models.FloatField(null=True)
+
+    fechaCargaFormaPagoQueja = models.CharField(max_length=255, null=True, blank=True)
+    tipoPagoQueja = models.CharField(max_length=255, null=True, blank=True)
+    fechaEmisionFacturaQueja = models.DateTimeField(null=True)
+    archivoFacturaQueja = models.FileField(blank=True, null=True, upload_to=upload_path)
+    montoSubtotalQueja = models.FloatField(null=True)
+    descripcionQueja = models.CharField(max_length=300, null=True, blank=True)
+    numeroComprobanteQueja = models.CharField(max_length=255, null=True, blank=True)
+    montoSubtotalAprobadoQueja = models.FloatField(null=True)

@@ -404,6 +404,10 @@ def contacts_update(request, pk):
                 if Contactos.objects.filter(numeroComprobante=request.data['numeroComprobante']).exclude(pk=pk).first():
                     return Response(data='Ya existe el número de comprobante', status=status.HTTP_404_NOT_FOUND)
 
+            if 'numeroComprobanteQueja' in request.data and request.data['numeroComprobanteQueja'] is not None:
+                if Contactos.objects.filter(numeroComprobanteQueja=request.data['numeroComprobanteQueja']).exclude(pk=pk).first():
+                    return Response(data='Ya existe el número de comprobante', status=status.HTTP_404_NOT_FOUND)
+
             if 'numTransaccionTransferencia' in request.data and request.data['numTransaccionTransferencia'] is not None:
                 if Contactos.objects.filter(numTransaccionTransferencia=request.data['numTransaccionTransferencia']).exclude(pk=pk).first():
                     return Response(data='Ya existe el número de transacción para transferencia', status=status.HTTP_404_NOT_FOUND)
@@ -434,13 +438,14 @@ def contacts_update(request, pk):
                 query2 = Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
                 dataPedidos = {**serializer.data, "codigoVendedor": serializer.data['facturacion']['codigoVendedor'], 'fotoCupon':None}
                 dataPedidos.pop('archivoFactura')
+                dataPedidos.pop('archivoFacturaQueja')
+
                 serializerPedido = PedidosSerializer(query2, data=dataPedidos, partial=True)
+
                 if serializerPedido.is_valid():
                     serializerPedido.save()
                     query2.fotoCupon=fotoCupon
                     query2.save()
-                else:
-                    print(serializerPedido.errors)
 
                 if 'Entregado' in serializer.data['estado']:
                     Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).update(estado='Entregado')
