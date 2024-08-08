@@ -234,7 +234,8 @@ def megabahia_list(request):
             if 'canal' in request.data and request.data['canal'] != '':
                 filters['canal'] = request.data['canal'].upper()
 
-
+            if 'codigoVendedor' in request.data and request.data['codigoVendedor'] != '':
+                filters['facturacion__codigoUsuario'] = request.data['codigoVendedor']
 
             # Serializar los datos
             query = Megabahia.objects.filter(**filters).order_by('-created_at')

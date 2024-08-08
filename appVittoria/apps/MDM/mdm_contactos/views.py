@@ -62,6 +62,10 @@ def contacto_list(request):
                 if request.data['created_at'] != '':
                     s = request.data['created_at']
                     filters['created_at__startswith'] = datetime.strptime(s, "%Y-%m-%d").date()
+
+            if 'nombreUsuario' in request.data and request.data['nombreUsuario'] != '':
+                filters['usuario'] = request.data['nombreUsuario']
+
             # Serializar los datos
             query = Contactos.objects.filter(**filters).order_by('-created_at')
             serializer = ContactosListarSerializer(query[offset:limit], many=True)
