@@ -47,16 +47,22 @@ class ProductosIntegracionesListSerializer(serializers.ModelSerializer):
     courier = serializers.SerializerMethodField()
     costo = serializers.SerializerMethodField()
     tienda = serializers.SerializerMethodField()
+    bodega_central = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Productos
-        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal', 'stockVirtual', 'descripcion', 'precioVentaA', 'precioVentaB', 'precioOferta', 'imagen_principal', 'prefijo', 'ciudad', 'sector', 'costo', 'courier', 'tienda', 'link_catalogo', 'link_tienda']
+        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal', 'stockVirtual', 'descripcion', 'precioVentaA', 'precioVentaB', 'precioOferta', 'imagen_principal', 'prefijo', 'ciudad', 'sector', 'costo', 'courier', 'tienda', 'link_catalogo', 'link_tienda', 'bodega_central']
 
     def get_integracion(self, obj):
         # Cachear la integración para evitar múltiples consultas
         if not hasattr(obj, '_integracion_cache'):
             obj._integracion_cache = Integraciones.objects.filter(valor=obj.canal).first()
         return obj._integracion_cache
+
+    def get_bodega_central(self, obj):
+        integracion = self.get_integracion(obj)
+        return integracion.bodega_central if integracion else None
 
     def get_ciudad(self, obj):
         integracion = self.get_integracion(obj)

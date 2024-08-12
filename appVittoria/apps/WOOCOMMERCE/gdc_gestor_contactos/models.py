@@ -85,3 +85,6 @@ class Contactos(models.Model):
     descripcionQueja = models.CharField(max_length=300, null=True, blank=True)
     numeroComprobanteQueja = models.CharField(max_length=255, null=True, blank=True)
     montoSubtotalAprobadoQueja = models.FloatField(null=True)
+
+    comision = models.FloatField(null=True)
+    comisionFinal = models.FloatField(null=True)

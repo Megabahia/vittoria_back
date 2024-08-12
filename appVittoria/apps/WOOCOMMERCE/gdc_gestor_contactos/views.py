@@ -8,6 +8,7 @@ from django.utils import timezone
 from .serializers import (
     CreateContactSerializer, ContactosSerializer,
 )
+from ...ADM.vittoria_catalogo.serializers import CatalogoSerializer
 from ...MDP.mdp_productos.models import Productos
 from ...WOOCOMMERCE.woocommerce.models import (
     Pedidos
@@ -431,9 +432,26 @@ def contacts_update(request, pk):
 
             serializer = ContactosSerializer(query, data=request.data, partial=True)
 
+            queryComision = Catalogo.objects.filter(nombre = 'Comision', tipo = 'COMISION').first()
+            queryIva = Catalogo.objects.filter(nombre = 'Impuesto de Valor Agregado', tipo = 'IVA').first()
+
+
             if serializer.is_valid():
 
-                serializer.save()
+                contact = serializer.save()
+
+                if serializer.data['estado'] is not None and 'Entregado' in serializer.data['estado']:
+                    contact.comision = calcular_comision(contact.montoSubtotalCliente,
+                                                                    contact.total,
+                                                                    contact.montoSubtotalAprobado,
+                                                                    queryComision.valor, queryIva.valor)
+                    contact.comisionFinal = calcular_comision_final(contact.montoSubtotalQueja,
+                                                                               contact.montoSubtotalAprobadoQueja,
+                                                                               queryComision.valor)
+
+
+                contact.save()
+
                 fotoCupon=serializer.data['fotoCupon'].split(".com/")[1] if serializer.data['fotoCupon'] is not None else None
                 query2 = Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).first()
                 dataPedidos = {**serializer.data, "codigoVendedor": serializer.data['facturacion']['codigoVendedor'], 'fotoCupon':None}
@@ -448,7 +466,7 @@ def contacts_update(request, pk):
                     query2.save()
 
                 if 'Entregado' in serializer.data['estado']:
-                    Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).update(estado='Entregado')
+                    Pedidos.objects.filter(numeroPedido=serializer.data['numeroPedido']).update(estado='Entregado',comision=contact.comision,comisionFinal=contact.comisionFinal)
 
                 #Obtener id cliente
                 datosCliente=Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion']).first()
@@ -534,3 +552,26 @@ def contacts_update(request, pk):
         createLog(logModel, err, logExcepcion)
         print('error', err)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+def calcular_comision(montoSubtotal, total, montoAprobado, comision, iva):
+    result = 0
+
+    if (montoAprobado is not None):
+        result = float(montoAprobado) * float(comision)
+    elif (montoSubtotal is not None):
+        result = float(montoSubtotal) * float(comision)
+    elif (total is not None):
+        result = (float(total) / float(iva)) * float(comision)
+
+    return round(result, 2)
+
+def calcular_comision_final(montoSubtotal, montoAprobado, comision):
+    result = 0
+
+    if montoSubtotal is None and montoAprobado is None:
+        return None
+
+    if (montoAprobado is not None):
+        result = float(montoAprobado) * float(comision)
+
+    return round(result, 2)

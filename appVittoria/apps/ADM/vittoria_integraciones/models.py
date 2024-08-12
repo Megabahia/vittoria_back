@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class Integraciones(models.Model):
+class   Integraciones(models.Model):
     nombre = models.CharField(max_length=250,null=True)
     valor = models.CharField(max_length=250,null=True)
     pedidos_local = models.JSONField(null=True)
@@ -18,6 +18,8 @@ class Integraciones(models.Model):
     longitud = models.CharField(max_length=250,null=True)
 
     prefijo = models.CharField(max_length=100,null=True)
+
+    bodega_central = models.SmallIntegerField(default=0, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

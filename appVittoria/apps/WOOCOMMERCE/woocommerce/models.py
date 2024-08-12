@@ -91,6 +91,9 @@ class Pedidos(models.Model):
     numeroComprobanteQueja = models.CharField(max_length=255, null=True, blank=True)
     montoSubtotalAprobadoQueja = models.FloatField(null=True)
 
+    comision = models.FloatField(null=True)
+    comisionFinal = models.FloatField(null=True)
+
 
 class UniqueCode(models.Model):
     email_cliente = models.CharField(max_length=255, null=True, blank=True)
