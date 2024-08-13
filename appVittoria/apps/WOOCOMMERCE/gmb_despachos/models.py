@@ -55,6 +55,8 @@ class Megabahia(models.Model):
     tipoPago = models.CharField(max_length=255, null=True, blank=True)
     evidenciaPago=models.FileField(blank=True, null=True, upload_to=upload_path)
 
+    montoPrevioPago = models.FloatField(null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)
