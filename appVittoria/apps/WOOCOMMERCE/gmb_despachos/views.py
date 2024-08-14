@@ -1,4 +1,6 @@
 import json
+import requests
+import io
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -8,6 +10,7 @@ from django.utils import timezone
 from .serializers import (
     CreateMegabahiaSerializer, MegabahiaSerializer,
 )
+from ...ADM.vittoria_integraciones.models import Integraciones
 from ...MDP.mdp_productos.models import Productos
 from ...WOOCOMMERCE.woocommerce.models import (
     Pedidos
@@ -69,6 +72,9 @@ def gmb_create_megabahia(request):
             if 'articulos' in request.data and isinstance(request.data['articulos'], str):
                 articulosTemporal = request.data.pop('articulos')[0]
                 request.data['articulos'] = json.loads(articulosTemporal)
+            if 'envio' in request.data and isinstance(request.data['envio'], str):
+                envioTemporal = request.data.pop('envio')[0]
+                request.data['envio'] = json.loads(envioTemporal)
 
             logModel['dataEnviada'] = str(request.data)
             request.data['created_at'] = str(timezone_now)
@@ -103,10 +109,25 @@ def gmb_create_megabahia(request):
                     })
 
                 request.data['facturacion'] = json.dumps(request.data.pop('facturacion')[0])
+                request.data['envio'] = json.dumps(request.data.pop('envio')[0])
                 request.data['articulos'] = json.dumps(request.data.pop('articulos')[0])
                 serializer = CreateMegabahiaSerializer(data=request.data)
                 if serializer.is_valid():
-                    serializer.save()
+                    gmb = serializer.save()
+                    queryIntegraciones = Integraciones.objects.filter(valor=serializer.data['canal']).first()
+                    gestion_pedido = 'omniglobal' if queryIntegraciones.pedidos_omniglobal == 1 else 'local'
+
+                    dataPedidos = {**serializer.data, "estado": 'Pendiente', "numeroPedido": serializer.data['numeroDespacho'], 'gestion_pedido': gestion_pedido, 'archivoMetodoPago': gmb.archivoMetodoPago}
+
+                    dataPedidos.pop('numeroDespacho')
+                    dataPedidos.pop('codigoUsuario')
+                    dataPedidos.pop('vendedor')
+                    dataPedidos.pop('montoPrevioPago')
+                    dataPedidos.pop('archivoComprobanteVenta')
+                    #dataPedidos.pop('archivoMetodoPago')
+                    dataPedidos.pop('id')
+
+                    Pedidos.objects.create(**dataPedidos)
 
                     # serializerProspect = {
                     #     "nombres": serializer.data['facturacion']['nombres'],
@@ -177,6 +198,8 @@ def gmb_create_megabahia(request):
                     #         prospectoClienteEncabezado=prospectoEncabezado, **detalle)
                     # enviarCorreoAdministradorGDC(request.data)
 
+
+
                     createLog(logModel, serializer.data, logTransaccion)
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -235,7 +258,7 @@ def megabahia_list(request):
                 filters['canal'] = request.data['canal'].upper()
 
             if 'codigoVendedor' in request.data and request.data['codigoVendedor'] != '':
-                filters['facturacion__codigoUsuario'] = request.data['codigoVendedor']
+                filters['facturacion__codigoVendedor'] = request.data['codigoVendedor']
 
             # Serializar los datos
             query = Megabahia.objects.filter(**filters).order_by('-created_at')
@@ -466,3 +489,18 @@ def megabahia_update(request, pk):
         createLog(logModel, err, logExcepcion)
         print('error', err)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+def transformar_archivo(url):
+    # Hacer la petición GET para descargar el archivo
+    respuesta = requests.get(url)
+
+    # Verificar que la petición fue exitosa
+    if respuesta.status_code == 200:
+        # Usar io.BytesIO para manejar el archivo en memoria
+        archivo_en_memoria = io.BytesIO(respuesta.content)
+        archivo_en_memoria.name = url.split('/')[-1]  # Opcional, asignar un nombre al archivo
+        return archivo_en_memoria
+    else:
+        print("Error al descargar el archivo")
+        return None

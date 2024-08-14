@@ -13,12 +13,12 @@ class MegabahiaSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super(MegabahiaSerializer, self).to_representation(instance)
-        user = Usuarios.objects.filter(username=data['facturacion']['codigoUsuario']).first()
+        user = Usuarios.objects.filter(username=data['facturacion']['codigoVendedor']).first()
         if user:
-            data['nombreUsuario'] = user.nombres + ' ' + user.apellidos
+            data['nombreVendedor'] = user.nombres + ' ' + user.apellidos
             data['companiaVendedor'] = user.compania
         else:
-            data['nombreUsuario'] = ''
+            data['nombreVendedor'] = ''
             data['companiaVendedor'] = ''
 
         return data
