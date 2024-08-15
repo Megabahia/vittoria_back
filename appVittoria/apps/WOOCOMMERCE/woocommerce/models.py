@@ -94,6 +94,7 @@ class Pedidos(models.Model):
     comision = models.FloatField(null=True)
     comisionFinal = models.FloatField(null=True)
 
+    comprobanteVendedorGmb = models.FileField(blank=True, null=True, upload_to=upload_path)
 
 class UniqueCode(models.Model):
     email_cliente = models.CharField(max_length=255, null=True, blank=True)

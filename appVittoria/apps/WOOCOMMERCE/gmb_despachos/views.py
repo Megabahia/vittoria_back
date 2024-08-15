@@ -81,12 +81,12 @@ def gmb_create_megabahia(request):
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
 
-            if request.data['facturacion']['identificacion'] != '':
-                queryProspectos = ProspectosClientes.objects.filter(
-                    Q(identificacion=request.data['facturacion']['identificacion'])).first()
-                queryClientes = Clientes.objects.filter(
-                    Q(cedula=request.data['facturacion']['identificacion'])).first()
-            elif request.data['facturacion']['correo'] !='':
+
+
+            #if request.data['facturacion']['identificacion'] != '':
+            queryProspectos = ProspectosClientes.objects.filter(identificacion=request.data['facturacion']['identificacion']).first()
+            queryClientes = Clientes.objects.filter(cedula=request.data['facturacion']['identificacion']).first()
+            '''elif request.data['facturacion']['correo'] !='':
                 queryProspectos = ProspectosClientes.objects.filter(
                     Q(correo1=request.data['facturacion']['correo']) |
                     Q(correo2=request.data['facturacion']['correo'])).first()
@@ -94,117 +94,149 @@ def gmb_create_megabahia(request):
                     Q(correo=request.data['facturacion']['correo'])).first()
             else:
                 queryProspectos = ProspectosClientes.objects.filter(Q(whatsapp=request.data['facturacion']['telefono'])).first()
-                queryClientes = Clientes.objects.filter(Q(telefono=request.data['facturacion']['telefono'])).first()
-            if queryProspectos is not None or queryClientes is not None:
-                return Response('Contacto ya existe', status=status.HTTP_400_BAD_REQUEST)
-            else:
-                articulos = []
-
-                for articulo in request.data['articulos']:
-                    articulos.append({
-                        "codigo": articulo['codigo'],
-                        "articulo": articulo['articulo'],
-                        "valorUnitario": articulo['valorUnitario'],
-                        "cantidad": articulo['cantidad'],
-                    })
-
-                request.data['facturacion'] = json.dumps(request.data.pop('facturacion')[0])
-                request.data['envio'] = json.dumps(request.data.pop('envio')[0])
-                request.data['articulos'] = json.dumps(request.data.pop('articulos')[0])
-                serializer = CreateMegabahiaSerializer(data=request.data)
-                if serializer.is_valid():
-                    gmb = serializer.save()
-                    queryIntegraciones = Integraciones.objects.filter(valor=serializer.data['canal']).first()
-                    gestion_pedido = 'omniglobal' if queryIntegraciones.pedidos_omniglobal == 1 else 'local'
-
-                    dataPedidos = {**serializer.data, "estado": 'Pendiente', "numeroPedido": serializer.data['numeroDespacho'], 'gestion_pedido': gestion_pedido, 'archivoMetodoPago': gmb.archivoMetodoPago}
-
-                    dataPedidos.pop('numeroDespacho')
-                    dataPedidos.pop('codigoUsuario')
-                    dataPedidos.pop('vendedor')
-                    dataPedidos.pop('montoPrevioPago')
-                    dataPedidos.pop('archivoComprobanteVenta')
-                    #dataPedidos.pop('archivoMetodoPago')
-                    dataPedidos.pop('id')
-
-                    Pedidos.objects.create(**dataPedidos)
-
-                    # serializerProspect = {
-                    #     "nombres": serializer.data['facturacion']['nombres'],
-                    #     "apellidos": serializer.data['facturacion']['apellidos'],
-                    #     "telefono": serializer.data['facturacion']['telefono'],
-                    #     "tipoCliente": '',
-                    #     "whatsapp": serializer.data['facturacion']['telefono'],
-                    #     "facebook": '',
-                    #     "twitter": '',
-                    #     "instagram": '',
-                    #     "correo1": serializer.data['facturacion']['correo'],
-                    #     "correo2": '',
-                    #     "pais": serializer.data['facturacion']['pais'],
-                    #     "provincia": serializer.data['facturacion']['provincia'],
-                    #     "ciudad": serializer.data['facturacion']['ciudad'],
-                    #     "canal": serializer.data['canal'],
-                    #     "canalOrigen": '',
-                    #     "metodoPago": '',
-                    #     "codigoProducto": '',
-                    #     "nombreProducto": '',
-                    #     "precio": 0,
-                    #     "tipoPrecio": '',
-                    #     "nombreVendedor": serializer.data['facturacion']['nombreVendedor'],
-                    #     "confirmacionProspecto": '',
-                    #     "imagen": '',
-                    #     "tipoIdentificacion": "Cédula",
-                    #     "identificacion": serializer.data['facturacion']['identificacion'],
-                    #     "nombreCompleto": '',
-                    #     "callePrincipal": '',
-                    #     "numeroCasa": '',
-                    #     "calleSecundaria": '',
-                    #     "referencia": '',
-                    #     "comentarios": '',
-                    #     "comentariosVendedor": '',
-                    #     "cantidad": 0,
-                    #     "subTotal": 0,
-                    #     "descuento": 0,
-                    #     "iva": 0,
-                    #     "total": 0,
-                    #     "courier": "",
-                    #     "articulos": '',
-                    #     "facturacion": '',
-                    #     "envio": '',
-                    #     "state": 1
-                    # }
-                    # Pedidos.objects.create(**serializer.data)
-                    #
-                    # prospectoEncabezado = ProspectosClientes.objects.create(**serializerProspect)
-                    # detalleProspecto = []
-                    #
-                    # for articuloP in request.data['articulos']:
-                    #     detalleProspecto.append({
-                    #         'articulo': articuloP['articulo'],
-                    #         'valorUnitario': articuloP['valorUnitario'],
-                    #         'cantidad': articuloP['cantidad'],
-                    #         'precio': articuloP['precio'],
-                    #         'codigo': articuloP['codigo'],
-                    #         'informacionAdicional': '',
-                    #         'descuento': 0,
-                    #         'impuesto': 0,
-                    #         'valorDescuento': 0,
-                    #         'total': 0,
-                    #         'state': 1
-                    #     })
-                    #
-                    # for detalle in detalleProspecto:
-                    #     ProspectosClientesDetalles.objects.create(
-                    #         prospectoClienteEncabezado=prospectoEncabezado, **detalle)
-                    # enviarCorreoAdministradorGDC(request.data)
+                queryClientes = Clientes.objects.filter(Q(telefono=request.data['facturacion']['telefono'])).first()'''
 
 
+            articulos = []
 
-                    createLog(logModel, serializer.data, logTransaccion)
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            for articulo in request.data['articulos']:
+                articulos.append({
+                    "codigo": articulo['codigo'],
+                    "articulo": articulo['articulo'],
+                    "valorUnitario": articulo['valorUnitario'],
+                    "cantidad": articulo['cantidad'],
+                })
 
-                createLog(logModel, serializer.errors, logExcepcion)
-                return Response(serializer.errors, status=status.HTTP_200_OK)
+            request.data['facturacion'] = json.dumps(request.data.pop('facturacion')[0])
+            request.data['envio'] = json.dumps(request.data.pop('envio')[0])
+            request.data['articulos'] = json.dumps(request.data.pop('articulos')[0])
+            serializer = CreateMegabahiaSerializer(data=request.data)
+            if serializer.is_valid():
+                gmb = serializer.save()
+
+                # ACTUALIZAR CLIENTE EN CASO DE QUE EXISTA
+                if queryProspectos is not None:
+                    queryProspectos.nombres = gmb.facturacion.nombres
+                    queryProspectos.apellidos = gmb.facturacion.apellidos
+                    queryProspectos.correo1 = gmb.facturacion.correo
+                    queryProspectos.tipoIdentificacion = gmb.facturacion.tipoIdentificacion
+                    queryProspectos.identificacion = gmb.facturacion.identificacion
+                    queryProspectos.whatsapp = gmb.facturacion.telefono
+                    queryProspectos.pais = gmb.facturacion.pais
+                    queryProspectos.provincia = gmb.facturacion.provincia
+                    queryProspectos.ciudad = gmb.facturacion.ciudad
+                    queryProspectos.callePrincipal = gmb.facturacion.callePrincipal
+                    queryProspectos.numeroCasa = gmb.facturacion.numero
+                    queryProspectos.calleSecundaria = gmb.facturacion.calleSecundaria
+                    queryProspectos.referencia = gmb.facturacion.referencia
+
+                    queryProspectos.save()
+
+                if queryClientes is not None:
+                    queryClientes.nombres = gmb.facturacion.nombres
+                    queryClientes.apellidos = gmb.facturacion.apellidos
+                    queryClientes.correo = gmb.facturacion.correo
+                    queryClientes.tipoIdentificacion = gmb.facturacion.tipoIdentificacion
+                    queryClientes.cedula = gmb.facturacion.identificacion
+                    queryClientes.telefono = gmb.facturacion.telefono
+                    queryClientes.paisNacimiento = gmb.facturacion.pais
+                    queryClientes.provinciaNacimiento = gmb.facturacion.provincia
+                    queryClientes.ciudadNacimiento = gmb.facturacion.ciudad
+
+                    queryClientes.save()
+
+                queryIntegraciones = Integraciones.objects.filter(valor=serializer.data['canal']).first()
+                gestion_pedido = 'omniglobal' if queryIntegraciones.pedidos_omniglobal == 1 else 'local'
+
+                dataPedidos = {**serializer.data, "estado": 'Pendiente',
+                               "numeroPedido": serializer.data['numeroDespacho'], 'gestion_pedido': gestion_pedido,
+                               'comprobanteVendedorGmb': gmb.archivoMetodoPago}
+
+                dataPedidos.pop('numeroDespacho')
+                dataPedidos.pop('codigoUsuario')
+                dataPedidos.pop('vendedor')
+                dataPedidos.pop('montoPrevioPago')
+                dataPedidos.pop('archivoComprobanteVenta')
+                # dataPedidos.pop('archivoMetodoPago')
+                dataPedidos.pop('id')
+
+                Pedidos.objects.create(**dataPedidos)
+
+                # serializerProspect = {
+                #     "nombres": serializer.data['facturacion']['nombres'],
+                #     "apellidos": serializer.data['facturacion']['apellidos'],
+                #     "telefono": serializer.data['facturacion']['telefono'],
+                #     "tipoCliente": '',
+                #     "whatsapp": serializer.data['facturacion']['telefono'],
+                #     "facebook": '',
+                #     "twitter": '',
+                #     "instagram": '',
+                #     "correo1": serializer.data['facturacion']['correo'],
+                #     "correo2": '',
+                #     "pais": serializer.data['facturacion']['pais'],
+                #     "provincia": serializer.data['facturacion']['provincia'],
+                #     "ciudad": serializer.data['facturacion']['ciudad'],
+                #     "canal": serializer.data['canal'],
+                #     "canalOrigen": '',
+                #     "metodoPago": '',
+                #     "codigoProducto": '',
+                #     "nombreProducto": '',
+                #     "precio": 0,
+                #     "tipoPrecio": '',
+                #     "nombreVendedor": serializer.data['facturacion']['nombreVendedor'],
+                #     "confirmacionProspecto": '',
+                #     "imagen": '',
+                #     "tipoIdentificacion": "Cédula",
+                #     "identificacion": serializer.data['facturacion']['identificacion'],
+                #     "nombreCompleto": '',
+                #     "callePrincipal": '',
+                #     "numeroCasa": '',
+                #     "calleSecundaria": '',
+                #     "referencia": '',
+                #     "comentarios": '',
+                #     "comentariosVendedor": '',
+                #     "cantidad": 0,
+                #     "subTotal": 0,
+                #     "descuento": 0,
+                #     "iva": 0,
+                #     "total": 0,
+                #     "courier": "",
+                #     "articulos": '',
+                #     "facturacion": '',
+                #     "envio": '',
+                #     "state": 1
+                # }
+                # Pedidos.objects.create(**serializer.data)
+                #
+                # prospectoEncabezado = ProspectosClientes.objects.create(**serializerProspect)
+                # detalleProspecto = []
+                #
+                # for articuloP in request.data['articulos']:
+                #     detalleProspecto.append({
+                #         'articulo': articuloP['articulo'],
+                #         'valorUnitario': articuloP['valorUnitario'],
+                #         'cantidad': articuloP['cantidad'],
+                #         'precio': articuloP['precio'],
+                #         'codigo': articuloP['codigo'],
+                #         'informacionAdicional': '',
+                #         'descuento': 0,
+                #         'impuesto': 0,
+                #         'valorDescuento': 0,
+                #         'total': 0,
+                #         'state': 1
+                #     })
+                #
+                # for detalle in detalleProspecto:
+                #     ProspectosClientesDetalles.objects.create(
+                #         prospectoClienteEncabezado=prospectoEncabezado, **detalle)
+                # enviarCorreoAdministradorGDC(request.data)
+
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_200_OK)
+
 
         except Exception as e:
             err = {"error": 'Un error ha ocurrido: {}'.format(e)}
