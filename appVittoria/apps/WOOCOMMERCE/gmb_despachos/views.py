@@ -84,8 +84,7 @@ def gmb_create_megabahia(request):
 
 
             #if request.data['facturacion']['identificacion'] != '':
-            queryProspectos = ProspectosClientes.objects.filter(identificacion=request.data['facturacion']['identificacion']).first()
-            queryClientes = Clientes.objects.filter(cedula=request.data['facturacion']['identificacion']).first()
+
             '''elif request.data['facturacion']['correo'] !='':
                 queryProspectos = ProspectosClientes.objects.filter(
                     Q(correo1=request.data['facturacion']['correo']) |
@@ -115,33 +114,34 @@ def gmb_create_megabahia(request):
                 gmb = serializer.save()
 
                 # ACTUALIZAR CLIENTE EN CASO DE QUE EXISTA
+                queryProspectos = ProspectosClientes.objects.filter(identificacion=gmb.facturacion['identificacion']).first()
+                queryClientes = Clientes.objects.filter(cedula=gmb.facturacion['identificacion']).first()
+
                 if queryProspectos is not None:
-                    queryProspectos.nombres = gmb.facturacion.nombres
-                    queryProspectos.apellidos = gmb.facturacion.apellidos
-                    queryProspectos.correo1 = gmb.facturacion.correo
-                    queryProspectos.tipoIdentificacion = gmb.facturacion.tipoIdentificacion
-                    queryProspectos.identificacion = gmb.facturacion.identificacion
-                    queryProspectos.whatsapp = gmb.facturacion.telefono
-                    queryProspectos.pais = gmb.facturacion.pais
-                    queryProspectos.provincia = gmb.facturacion.provincia
-                    queryProspectos.ciudad = gmb.facturacion.ciudad
-                    queryProspectos.callePrincipal = gmb.facturacion.callePrincipal
-                    queryProspectos.numeroCasa = gmb.facturacion.numero
-                    queryProspectos.calleSecundaria = gmb.facturacion.calleSecundaria
-                    queryProspectos.referencia = gmb.facturacion.referencia
+                    queryProspectos.nombres = gmb.facturacion['nombres']
+                    queryProspectos.apellidos = gmb.facturacion['apellidos']
+                    queryProspectos.correo1 = gmb.facturacion['correo']
+                    queryProspectos.nombreCompleto = gmb.facturacion['nombres'] + ' ' +gmb.facturacion['apellidos']
+                    queryProspectos.whatsapp = gmb.facturacion['telefono']
+                    queryProspectos.pais = gmb.facturacion['pais']
+                    queryProspectos.provincia = gmb.facturacion['provincia']
+                    queryProspectos.ciudad = gmb.facturacion['ciudad']
+                    queryProspectos.callePrincipal = gmb.facturacion['callePrincipal']
+                    queryProspectos.numeroCasa = gmb.facturacion['numero']
+                    queryProspectos.calleSecundaria = gmb.facturacion['calleSecundaria']
+                    queryProspectos.referencia = gmb.facturacion['referencia']
 
                     queryProspectos.save()
 
                 if queryClientes is not None:
-                    queryClientes.nombres = gmb.facturacion.nombres
-                    queryClientes.apellidos = gmb.facturacion.apellidos
-                    queryClientes.correo = gmb.facturacion.correo
-                    queryClientes.tipoIdentificacion = gmb.facturacion.tipoIdentificacion
-                    queryClientes.cedula = gmb.facturacion.identificacion
-                    queryClientes.telefono = gmb.facturacion.telefono
-                    queryClientes.paisNacimiento = gmb.facturacion.pais
-                    queryClientes.provinciaNacimiento = gmb.facturacion.provincia
-                    queryClientes.ciudadNacimiento = gmb.facturacion.ciudad
+                    queryClientes.nombres = gmb.facturacion['nombres']
+                    queryClientes.apellidos = gmb.facturacion['apellidos']
+                    queryClientes.nombreCompleto = gmb.facturacion['nombres'] + ' ' +gmb.facturacion['apellidos']
+                    queryClientes.correo = gmb.facturacion['correo']
+                    queryClientes.telefono = gmb.facturacion['telefono']
+                    queryClientes.paisNacimiento = gmb.facturacion['pais']
+                    queryClientes.provinciaNacimiento = gmb.facturacion['provincia']
+                    queryClientes.ciudadNacimiento = gmb.facturacion['ciudad']
 
                     queryClientes.save()
 
