@@ -20,6 +20,7 @@ class Usuarios(AbstractBaseUser):
     pais = models.CharField(max_length=200)
     provincia = models.CharField(max_length=200, blank=True, null=True)
     ciudad = models.CharField(max_length=200, blank=True, null=True)
+    tipoEnvio = models.CharField(max_length=200, blank=True, null=True)
     telefono = models.CharField(max_length=30)
     whatsapp = models.CharField(max_length=30)
     compania = models.CharField(max_length=200)
