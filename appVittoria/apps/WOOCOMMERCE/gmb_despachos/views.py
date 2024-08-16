@@ -157,7 +157,7 @@ def gmb_create_megabahia(request):
                 dataPedidos.pop('vendedor')
                 dataPedidos.pop('montoPrevioPago')
                 dataPedidos.pop('archivoComprobanteVenta')
-                # dataPedidos.pop('archivoMetodoPago')
+                dataPedidos.pop('archivoMetodoPago')
                 dataPedidos.pop('id')
 
                 Pedidos.objects.create(**dataPedidos)
