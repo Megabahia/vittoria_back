@@ -76,6 +76,8 @@ def usuario_list(request):
                 filters['email__icontains'] = str(request.data['email'])
             if 'compania' in request.data and request.data['compania'] != '':
                 filters['compania'] = str(request.data['compania'])
+            if 'tipoEnvio' in request.data and request.data['tipoEnvio'] != '':
+                filters['tipoEnvio'] = str(request.data['tipoEnvio'])
             # toma de datos
             usuario = Usuarios.objects.filter(**filters).order_by('-created_at')
             serializerAllDta = UsuarioRolSerializer(usuario, many=True)
