@@ -63,3 +63,5 @@ class Megabahia(models.Model):
 
     archivoComprobanteVenta=models.FileField(blank=True, null=True, upload_to=upload_path)
 
+    nombreEnvio = models.CharField(max_length=255, null=True, blank=True)
+

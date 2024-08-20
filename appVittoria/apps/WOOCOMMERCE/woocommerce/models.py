@@ -96,6 +96,8 @@ class Pedidos(models.Model):
 
     comprobanteVendedorGmb = models.FileField(blank=True, null=True, upload_to=upload_path)
 
+    nombreEnvio = models.CharField(max_length=255, null=True, blank=True)
+
 class UniqueCode(models.Model):
     email_cliente = models.CharField(max_length=255, null=True, blank=True)
     code = models.CharField(max_length=6, null=True)
