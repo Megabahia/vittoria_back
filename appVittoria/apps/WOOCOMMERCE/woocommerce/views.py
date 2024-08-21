@@ -492,6 +492,9 @@ def orders_list(request):
             if 'canal' in request.data and request.data['canal'] != '':
                 filters['canal__icontains'] = request.data['canal'].upper()
 
+            if 'metodoPago' in request.data and request.data['metodoPago'] != '':
+                filters['metodoPago__icontains'] = request.data['metodoPago'].upper()
+
             if 'rol' in request.data and 1 == request.data['rol']:
                 if 'codigoVendedor' in request.data:
                     filters.pop('codigoVendedor')
@@ -505,6 +508,7 @@ def orders_list(request):
             # Serializar los datos
             query = Pedidos.objects.filter(**filters).order_by('-created_at')
             estados = Pedidos.objects.values_list('estado', flat=True).distinct()
+            metodoPago = Pedidos.objects.values_list('metodoPago', flat=True).distinct()
             if 'estado' in request.data and request.data['estado'] == 'Entregado':
                 suma_total = Pedidos.objects.filter(**filters).aggregate(Sum('subtotal'))
                 if suma_total['subtotal__sum'] is None:
@@ -513,7 +517,7 @@ def orders_list(request):
                 suma_total = Pedidos.objects.filter(estado='Entregado').aggregate(Sum('subtotal'))
 
             serializer = PedidosSerializer(query[offset:limit], many=True)
-            new_serializer_data = {'cont': query.count(), 'info': serializer.data, 'suma_total': suma_total, 'estados': estados, 'usuarios': usuarios}
+            new_serializer_data = {'cont': query.count(), 'info': serializer.data, 'suma_total': suma_total, 'estados': estados, 'usuarios': usuarios, 'metodosEnvios': metodoPago}
             # envio de datos
             return Response(new_serializer_data, status=status.HTTP_200_OK)
         except Exception as e:

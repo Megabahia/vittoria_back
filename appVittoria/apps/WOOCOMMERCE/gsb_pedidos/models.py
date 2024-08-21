@@ -64,3 +64,5 @@ class SuperBarato(models.Model):
     fotoCupon = models.FileField(blank=True, null=True, upload_to=upload_path)
 
     productoExtra = models.JSONField(null=True)
+
+    estadoGestion = models.CharField(max_length=100, null=True, blank=True)

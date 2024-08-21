@@ -45,6 +45,7 @@ class Contactos(models.Model):
     envio = models.JSONField(null=True)
 
     estado = models.CharField(max_length=100, null=True, blank=True)
+    estadoGestion = models.CharField(max_length=100, null=True, blank=True)
     usuario = models.CharField(max_length=200, null=True, blank=True)
 
     tipoContacto = models.CharField(max_length=255, null=True, blank=True)
