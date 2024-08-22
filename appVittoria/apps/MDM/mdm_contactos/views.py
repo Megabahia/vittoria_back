@@ -66,6 +66,9 @@ def contacto_list(request):
             if 'nombreUsuario' in request.data and request.data['nombreUsuario'] != '':
                 filters['usuario'] = request.data['nombreUsuario']
 
+            if 'estadoGestion' in request.data and request.data['estadoGestion'] != '':
+                filters['estadoGestion__isnull'] = request.data['estadoGestion']
+
             # Serializar los datos
             query = Contactos.objects.filter(**filters).order_by('-created_at')
             serializer = ContactosListarSerializer(query[offset:limit], many=True)

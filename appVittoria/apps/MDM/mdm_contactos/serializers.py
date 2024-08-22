@@ -77,7 +77,7 @@ class ContactosSearchSerializer(serializers.ModelSerializer):
 class ContactosListarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contactos
-        fields = ['id', 'nombres', 'apellidos', 'whatsapp', 'created_at', 'canal', 'articulos', 'estado', 'usuario', 'tipoContacto']
+        fields = ['id', 'nombres', 'apellidos', 'whatsapp', 'created_at', 'canal', 'articulos', 'estado', 'usuario', 'tipoContacto', 'estadoGestion']
 
 
 class ContactoImagenSerializer(serializers.HyperlinkedModelSerializer):
