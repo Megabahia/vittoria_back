@@ -137,7 +137,18 @@ def cliente_findOne_cedula(request):
     }
     try:
         try:
-            query = Clientes.objects.filter(cedula=str(request.data['cedula']), state=1).first()
+            filters = {"state": "1"}
+
+            if 'cedula' in request.data and request.data['cedula'] != '':
+                filters['cedula'] = str(request.data['cedula'])
+
+            if 'whatsApp' in request.data and request.data['whatsApp'] != '':
+                filters['telefono'] = str(request.data['whatsApp'])
+
+            if 'correo' in request.data and request.data['correo'] != '':
+                filters['correo'] = str(request.data['correo'])
+
+            query = Clientes.objects.filter(**filters).first()
             if query is None:
                 return Response('No existe el cliente', status=status.HTTP_404_NOT_FOUND)
         except Clientes.DoesNotExist:
