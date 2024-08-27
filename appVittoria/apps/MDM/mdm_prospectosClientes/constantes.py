@@ -50,5 +50,6 @@ def mapeoProspectoCliente(data, articulos):
         "created_at": data['created_at'],
         "fechaHoraConfirmacion": data['updated_at'],
         "codigoVendedor": None,
+        "gestion_pedido": "omniglobal"
     }
 

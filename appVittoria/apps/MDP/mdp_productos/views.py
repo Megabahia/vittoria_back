@@ -457,9 +457,10 @@ def search_producto_codigo_list(request):
     }
     try:
         try:
-            if request.data['canalProducto'] is None or request.data['canalProducto'] == '':
-                createLog(logModel, 'Seleccione un canal', logExcepcion)
-                return Response('Seleccione un canal', status=status.HTTP_404_NOT_FOUND)
+            if 'canalProducto' in request.data:
+                if request.data['canalProducto'] is None or request.data['canalProducto'] == '':
+                    createLog(logModel, 'Seleccione un canal', logExcepcion)
+                    return Response('Seleccione un canal', status=status.HTTP_404_NOT_FOUND)
 
             filters = {
                 'codigoBarras': request.data['codigoBarras'],
