@@ -777,6 +777,24 @@ def orders_update(request, pk):
                     enviarCorreoClienteDespacho(serializer.data)
                     enviarCorreoCourierDespacho(serializer.data)
                     enviarCorreoVendedorDespacho(serializer.data)
+
+                    queryProspectos = ProspectosClientes.objects.filter(identificacion=serializer.data['facturacion']['identificacion']).first()
+                    if queryProspectos is not None:
+                        queryProspectos.nombres = serializer.data['facturacion']['nombres']
+                        queryProspectos.apellidos = serializer.data['facturacion']['apellidos']
+                        queryProspectos.correo1 = serializer.data['facturacion']['correo']
+                        queryProspectos.nombreCompleto = serializer.data['facturacion']['nombres'] + ' ' + serializer.data['facturacion']['apellidos']
+                        queryProspectos.whatsapp = serializer.data['facturacion']['telefono']
+                        queryProspectos.pais = serializer.data['facturacion']['pais']
+                        queryProspectos.provincia = serializer.data['facturacion']['provincia']
+                        queryProspectos.ciudad = serializer.data['facturacion']['ciudad']
+                        queryProspectos.callePrincipal = serializer.data['facturacion']['callePrincipal']
+                        queryProspectos.numeroCasa = serializer.data['facturacion']['numero']
+                        queryProspectos.calleSecundaria = serializer.data['facturacion']['calleSecundaria']
+                        queryProspectos.referencia = serializer.data['facturacion']['referencia']
+
+                        queryProspectos.save()
+
                     # Se crea el usuario cuando el pedido es despachado
                     cliente = {
                         'nombreCompleto': serializer.data['facturacion']['nombres'] + serializer.data['facturacion']['apellidos'],

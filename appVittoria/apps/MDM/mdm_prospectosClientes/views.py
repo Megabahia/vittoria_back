@@ -4,6 +4,8 @@ from .serializers import (
     ProspectosClientesSerializer,   ProspectosClientesListarSerializer, ProspectosClienteImagenSerializer,
     ProspectosClientesSearchSerializer, ProspectosClientesResource, ActualizarProspectosClientesSerializer
 )
+from ...MDP.mdp_productos.models import Productos
+from ...MDP.mdp_productos.serializers import ProductoSearchSerializer
 from .utils import enviarCorreoCliente
 from ..mdm_clientes.serializers import ClientesUpdateSerializer
 from ..mdm_clientes.models import Clientes
@@ -243,16 +245,21 @@ def prospecto_cliente_update(request, pk):
                 if request.data['confirmacionProspecto'] == 'Confirmado':
                     articulos = []
                     for articulo in serializer.data['detalles']:
+                        queryArticulo = Productos.objects.filter(codigoBarras= articulo['codigo'], nombre=articulo['articulo']).first()
+
                         articulos.append({
                             "codigo": articulo['codigo'],
                             "articulo": articulo['articulo'],
                             "valorUnitario": articulo['valorUnitario'],
                             "cantidad": articulo['cantidad'],
                             "precio": articulo['total'],
-                            "caracteristicas": ''
+                            "caracteristicas": '',
+                            "canal":queryArticulo.canal,
+                            "imagen_principal": queryArticulo.imagen_principal.url,
+                            "precios": [{'clave': 'precioLanding', 'valor':articulo['valorUnitario']}]
                         })
-                    data = mapeoProspectoCliente(serializer.data, articulos)
 
+                    data = mapeoProspectoCliente(serializer.data, articulos)
                     Pedidos.objects.create(**data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
