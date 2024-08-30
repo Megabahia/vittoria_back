@@ -3,7 +3,7 @@ def mapeoProspectoCliente(data, articulos):
     total = data['total']
     return {
         "estado": 'Pendiente',
-        "envioTotal": data['total'],
+        "envioTotal": 0,
         "total": data['total'],
         "subtotal": data['total'],
         "facturacion": {
