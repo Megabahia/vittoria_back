@@ -274,11 +274,14 @@ def usuario_create(request):
             if 'updated_at' in request.data:
                 request.data.pop('updated_at')
             logModel['dataEnviada'] = str(request.data)
-            # AGREGA CONTRASEÑA
-            request.data['password'] = get_random_string(length=32)
+
+            if request.data['password'] == '':
+                request.data['password'] = get_random_string(length=32)
+
             if 'username' in request.data and '' != request.data['username']:
-                request.data['username'] = request.data['username'].upper()
+               request.data['username'] = request.data['username'].upper()
             serializer = UsuarioCrearSerializer(data=request.data)
+
             data = {}
             if serializer.is_valid():
                 account = serializer.save()
