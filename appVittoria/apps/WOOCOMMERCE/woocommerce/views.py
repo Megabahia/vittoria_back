@@ -471,7 +471,6 @@ def orders_list(request):
             if 'usuarioVendedor' in request.data and request.data['usuarioVendedor'] != '':
                 filters['facturacion__contains'] = {"codigoVendedor": request.data['usuarioVendedor']}
 
-
             if 'inicio' in request.data and request.data['inicio'] != '':
                 filters['created_at__gte'] = str(request.data['inicio'])
             if 'fin' in request.data and request.data['fin'] != '':
@@ -1138,23 +1137,17 @@ def pedidos_exportar(request):
     canalEnvio = request.GET.get('canalEnvio', None)
     canal = request.GET.get('canal', None)
     rol = request.GET.get('rol', None)
-
     if estado is not None:
         filters['estado__in'] = [estado]
 
     if usuarioVendedor is not None:
         filters['facturacion__contains'] = {"codigoVendedor": usuarioVendedor}
 
-    if inicio is not   None:
-        fecha_inicio = datetime.strptime(inicio, "%Y-%m-%d").date()
-        fecha_inicio_con_zona = timezone.make_aware(datetime.combine(fecha_inicio, datetime.min.time()))
-        filters['created_at__gte'] = fecha_inicio_con_zona
-
+    if inicio is not None:
+        filters['created_at__gte'] = str(inicio)
     if fin is not None:
-        fecha_fin = datetime.strptime(fin, "%Y-%m-%d").date()
-        fecha_fin_con_zona = timezone.make_aware(datetime.combine(fecha_fin, datetime.min.time()),
-                                                 timezone.get_default_timezone())
-        filters['created_at__lte'] = fecha_fin_con_zona
+        filters['created_at__lte'] = datetime.strptime(fin, "%Y-%m-%d").date() + timedelta(
+            days=1)
 
     if codigoVendedor is not None:
         filters['codigoVendedor'] = codigoVendedor.upper()
@@ -1200,16 +1193,10 @@ def pedidos_exportar(request):
         telefono = facturacion.get('telefono', '')
 
         estado = pedidoSerializer.get('estado', '')
+        comision = pedidoSerializer.get('comision', '')
         codigo_vendedor = facturacion.get('codigoVendedor', '')
         nombre_vendedor = facturacion.get('nombreVendedor', '')
         centro_negocio = pedidoSerializer.get('companiaVendedor', '')
-
-        if estado == 'Entregado':
-            total_pedido = float(pedidoSerializer.get('total', 0))
-            comision = (total_pedido / 1.15) * 0.1
-        else:
-            comision = 0
-
 
         # Agregar datos a la hoja de trabajo
         ws.append([fecha_pedido, canal_pedido, numero_pedido, nombres, apellidos, metodo_pago, telefono, estado, comision, codigo_vendedor, nombre_vendedor, centro_negocio])
