@@ -1071,7 +1071,7 @@ def orders_devolucion(request, pk):
             if serializer.is_valid():
                 serializer.save()
                 for articulo in serializer.data['articulos']:
-                    producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
+                    producto = Productos.objects.filter(codigoBarras=articulo['codigo'], canal = articulo['canal'], state=1).first()
                     if producto:
                         producto.stock = producto.stock + int(articulo['cantidad'])
                         producto.save()
