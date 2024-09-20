@@ -10,6 +10,7 @@ from .views import (
     vendedor_list,
     usuarios_list_rol,
     usuarios_exportar,
+    usuario_findOne_courier
 )
 
 app_name = 'usuarios'
@@ -19,6 +20,7 @@ urlpatterns = [
     path('list/export/', usuario_listExport, name="usuario_export"),
     path('create/', usuario_create, name="usuario_create"),
     path('listOne/<int:pk>', usuario_findOne, name="usuario_findOne"),
+    path('listOneCourier/', usuario_findOne_courier, name="usuario_findOne_courier"),
     path('update/<int:pk>', usuario_update, name="usuario_update"),
     path('delete/<int:pk>', usuario_delete, name="usuario_delete"),
     path('update/imagen/<int:pk>', usuarioImagen_update, name="usuarioImagen_update"),

@@ -166,6 +166,42 @@ def usuario_findOne(request, pk):
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def usuario_findOne_courier(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'listOne/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        if request.method == 'POST':
+            logModel['dataEnviada'] = str(request.data)
+            # Filtros
+            filters = {"state": "1"}
+            if 'email' in request.data:
+                if request.data['email'] != '':
+                    filters['email'] = request.data['email']
+            if 'username' in request.data:
+                if request.data['username'] != '':
+                    filters['username'] = request.data['username']
+
+            # toma de datos
+            usuario = Usuarios.objects.filter(**filters)
+            serializer = UsuarioRolSerializer(usuario, many=True)
+            new_serializer_data = {'cont': usuario.count(),
+                                   'info': serializer.data}
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
