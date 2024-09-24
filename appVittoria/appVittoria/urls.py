@@ -37,6 +37,7 @@ urlpatterns = [
     path('mdm/contactos/', include(('apps.MDM.mdm_contactos.urls', 'mdm_contactos'), namespace='mdm_contactos')),
     path('mdm/negocios/', include(('apps.MDM.mdm_negocios.urls', 'negocios'), namespace='negocios')),
     path('mdm/facturas/', include(('apps.MDM.mdm_facturas.urls', 'facturas'), namespace='facturas')),
+    path('mdm/asesores/', include(('apps.MDM.mdm_asesores_comerciales.urls', 'asesores'), namespace='asesores')),
     #Modulo MDP
     path('mdp/param/', include(('apps.MDP.mdp_parametrizaciones.urls', 'parametrizaciones'), namespace='parametrizacionesMDP')),
     path('mdp/categorias/', include(('apps.MDP.mdp_categorias.urls', 'categorias'), namespace='categorias')),

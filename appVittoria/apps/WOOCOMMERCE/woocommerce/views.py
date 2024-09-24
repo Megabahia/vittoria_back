@@ -757,8 +757,6 @@ def orders_update(request, pk):
                             "imagen": articulo['imagen'] if 'imagen' in articulo else None,
                             "estado": 'Autorizado',
                         })
-
-
                 if serializer.data['estado'] == 'Empacado':
                     enviarCorreoCliente(serializer.data)
                     enviarCorreoVendedorEmpacado(serializer.data)

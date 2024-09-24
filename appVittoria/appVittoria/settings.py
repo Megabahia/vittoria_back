@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'apps.MDM.mdm_parametrizaciones',
     'apps.MDM.mdm_prospectosClientes',
     'apps.MDM.mdm_contactos',
+    'apps.MDM.mdm_asesores_comerciales',
     #apps Vittoria MDP
     'apps.MDP.mdp_parametrizaciones',
     'apps.MDP.mdp_categorias',

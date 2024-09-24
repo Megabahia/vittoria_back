@@ -105,6 +105,13 @@ def datosContactos():
         'api':'contactos/'
     }
     return data
+
+def datosAsesores():
+    data={
+        'modulo':'MDM',
+        'api':'asesores/'
+    }
+    return data
 #MODULO MDM-NEGOCIOS
 def datosNegocios():
     data={
