@@ -7,7 +7,7 @@ def upload_path(instance, filname):
 
 
 class AsesoresComerciales(models.Model):
-  usuario = models.ForeignKey(Usuarios, null=True, on_delete=models.CASCADE)
+  usuario = models.IntegerField(blank=True, null=True)
   canal = models.CharField(max_length=250, blank=True, null=True)
   imagen = models.ImageField(blank=True, null=True, upload_to=upload_path)
   nombres = models.CharField(max_length=150, blank=True, null=True)

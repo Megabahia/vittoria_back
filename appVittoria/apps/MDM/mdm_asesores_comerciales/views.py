@@ -109,7 +109,7 @@ def asesor_findOne(request, pk):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def asesor_update(request, pk):
+def asesor_update_state(request, pk):
     timezone_now = timezone.localtime(timezone.now())
     logModel = {
         'endPoint': logApi + 'update/',
@@ -138,16 +138,13 @@ def asesor_update(request, pk):
             serializer = AsesoreSerializer(asesor, data=request.data, partial=True)
             if serializer.is_valid():
                 asesor = serializer.save()
-
                 user = Usuarios.objects.filter(email=asesor.email, state=1).first()
                 if user is not None:
                     data = {'error': 'Usuario ya existe.'}
                     return Response(data, status=status.HTTP_400_BAD_REQUEST)
-                else:
-                    password = generate_pass()
-
-                    rol = Roles.objects.filter(id=63, state=1).first()
-                    serializerUser = {
+                password = generate_pass()
+                rol = Roles.objects.filter(id=63, state=1).first()
+                serializerUser = {
                         'username':format_username(asesor.nombres, asesor.apellidos),
                         'imagen':'',
                         'nombres': asesor.nombres,
@@ -169,13 +166,14 @@ def asesor_update(request, pk):
                         'state':1,
                     }
 
-                    newUser = Usuarios.objects.create(**serializerUser)
-                    newUser.set_password(password)
-                    newUser.save()
-                    enviarCorreoUsuario(newUser, password)
+                newUser = Usuarios.objects.create(**serializerUser)
+                newUser.set_password(password)
+                newUser.save()
 
-                    asesor.usuario = newUser
-                    asesor.save()
+                asesor.usuario = newUser.id
+                asesor.save()
+
+                enviarCorreoUsuario(newUser, password)
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
@@ -186,6 +184,97 @@ def asesor_update(request, pk):
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def asesor_update(request, pk):
+    request.POST._mutable = True
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'update/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'ESCRIBIR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            asesor = AsesoresComerciales.objects.get(pk=pk)
+        except AsesoresComerciales.DoesNotExist:
+            errorNoExiste = {'error': 'No existe'}
+            createLog(logModel, errorNoExiste, logExcepcion)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'POST':
+            now = timezone.localtime(timezone.now())
+            request.data['updated_at'] = str(now)
+            if 'created_at' in request.data:
+                request.data.pop('created_at')
+
+            serializer = AsesoreSerializer(asesor, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def activate_asesor(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'update/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'ESCRIBIR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            asesor = AsesoresComerciales.objects.get(pk=pk)
+        except AsesoresComerciales.DoesNotExist:
+            errorNoExiste = {'error': 'No existe'}
+            createLog(logModel, errorNoExiste, logExcepcion)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'POST':
+            now = timezone.localtime(timezone.now())
+            request.data['updated_at'] = str(now)
+            if 'created_at' in request.data:
+                request.data.pop('created_at')
+
+            serializer = AsesoreSerializer(asesor, data=request.data, partial=True)
+            if serializer.is_valid():
+                asesor = serializer.save()
+                user = Usuarios.objects.filter(email=asesor.email).first()
+                if user is None:
+                    data = {'error': 'Usuario no existe.'}
+                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+                user.estado = asesor.estado
+                user.state = asesor.state
+                user.save()
+
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
