@@ -331,7 +331,7 @@ def asesor_create(request):
 
     try:
         if request.method == 'POST':
-            asesor = AsesoresComerciales.objects.filter(email=request.data['email'], state=1,estado='Activo').first()
+            asesor = AsesoresComerciales.objects.filter(email=request.data['email']).first()
             if asesor is not None:
                 data = {'error': 'Email ya existe.'}
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
