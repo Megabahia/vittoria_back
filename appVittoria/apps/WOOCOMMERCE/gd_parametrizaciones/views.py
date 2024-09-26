@@ -63,7 +63,10 @@ def gd_parametrizaciones_list(request):
             # Serializar los datos
             query = GdParametrizaciones.objects.filter(**filters).order_by('-created_at')
             serializer = GdParametrizacionesListaSerializer(query[offset:limit], many=True)
+            serializerAllData = GdParametrizacionesListaSerializer(query, many=True)
+
             new_serializer_data = {'cont': query.count(),
+                                   'data': serializerAllData.data,
                                    'info': serializer.data}
             # envio de datos
             return Response(new_serializer_data, status=status.HTTP_200_OK)

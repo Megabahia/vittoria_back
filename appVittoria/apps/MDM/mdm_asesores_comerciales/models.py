@@ -25,11 +25,13 @@ class AsesoresComerciales(models.Model):
   state = models.SmallIntegerField(default=1)
 
   saldo_asesor = models.FloatField(null=True)
+  observaciones = models.CharField(max_length=400, blank=True, null=True)
 
   nombre_banco = models.CharField(max_length=100, blank=True, null=True)
   numero_cuenta = models.CharField(max_length=13,blank=True, null=True)
   tipo_cuenta = models.CharField(max_length=100,blank=True, null=True)
   identificacion = models.CharField(max_length=13,null=True)
+  tipoIdentificacion = models.CharField(max_length=255, null=True, blank=True)
   archivoCedula = models.FileField(blank=True, null=True, upload_to=upload_path)
 
   movimientos = models.JSONField(null=True)

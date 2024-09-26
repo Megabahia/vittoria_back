@@ -53,9 +53,12 @@ def asesor_list(request):
             filters = {}
 
             if 'estado' in request.data and request.data['estado'] != '':
-                filters['estado'] = str(request.data['estado'])
+                filters['estado__in'] = request.data['estado']
+
             if 'state' in request.data and request.data['state'] != '':
                 filters['state'] = str(request.data['state'])
+
+            print(filters)
 
             # toma de datos
             asesor = AsesoresComerciales.objects.filter(**filters).order_by('-created_at')
