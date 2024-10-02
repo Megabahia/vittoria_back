@@ -383,30 +383,28 @@ def orders_create_super_barato(request):
                     ProspectosClientesDetalles.objects.create(
                         prospectoClienteEncabezado=prospectoEncabezado, **detalle)
 
-                    # MOVIMIENTOS DE BILLETERA DIGITAL
-                    usuario = Usuarios.objects.filter(username=serializer.data['facturacion']['codigoVendedor']).first()
-                    asesor = AsesoresComerciales.objects.filter(nombres=usuario.nombres, apellidos=usuario.apellidos,
+                # MOVIMIENTOS DE BILLETERA DIGITAL
+                usuario = Usuarios.objects.filter(username=serializer.data['facturacion']['codigoVendedor']).first()
+                asesor = AsesoresComerciales.objects.filter(nombres=usuario.nombres, apellidos=usuario.apellidos,
                                                                 email=usuario.email).first()
-                    if asesor is not None:
-                        movimientos = MovimientosAsesores.objects.filter(asesor=asesor.id).order_by('-id').first()
-                        if 'Contra Entrega' in serializer.data['metodoPago']:
-                            saldoDescuento = serializer.data['envioTotal']
-                        else:
-                            saldoDescuento = serializer.data['total']
+                if asesor is not None:
+                    movimientos = MovimientosAsesores.objects.filter(asesor=asesor.id).order_by('-id').first()
+                    if 'Contra Entrega' in serializer.data['metodoPago']:
+                        saldoDescuento = serializer.data['envioTotal']
+                    else:
+                        saldoDescuento = serializer.data['total']
+                    asesor.numeroPedido = serializer.data['numeroPedido']
+                    asesor.save()
 
-                        asesor.numeroPedido = serializer.data['numeroPedido']
-                        asesor.save()
-
-                        serializerMovimientoAsesor = {
-                            'tipo_movimiento': 'Descuento',
-                            'saldo_ingreso': 0,
-                            'created_at': datetime.now().date(),
-                            'asesor': asesor,
-                            'saldo_egreso': saldoDescuento * -1,
-                            'saldo_total': round(float(movimientos.saldo_total) - float(saldoDescuento), 2)
-                        }
-
-                        MovimientosAsesores.objects.create(**serializerMovimientoAsesor)
+                    serializerMovimientoAsesor = {
+                        'tipo_movimiento': 'Descuento',
+                        'saldo_ingreso': 0,
+                        'created_at': datetime.now().date(),
+                        'asesor': asesor,
+                        'saldo_egreso': saldoDescuento * -1,
+                        'saldo_total': round(float(movimientos.saldo_total) - float(saldoDescuento), 2)
+                    }
+                    MovimientosAsesores.objects.create(**serializerMovimientoAsesor)
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
