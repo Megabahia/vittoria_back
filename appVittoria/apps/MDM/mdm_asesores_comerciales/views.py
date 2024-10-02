@@ -380,8 +380,6 @@ def movimiento_create(request):
 
             asesor = AsesoresComerciales.objects.filter(id = request.data['asesor']).first()
 
-
-
             if asesor is None:
                 errorNoExiste = {'error': 'No existe asesor'}
                 createLog(logModel, errorNoExiste, logExcepcion)
@@ -390,7 +388,7 @@ def movimiento_create(request):
             request.data['asesor'] = asesor.id
             request.data['saldo_ingreso'] = float(request.data['saldo_ingreso'])
 
-            if 'Carga de saldo' in request.data['tipo_movimiento']:
+            if 'Carga de saldo' in request.data['tipo_movimiento'] or 'Saldo incial' in request.data['tipo_movimiento']:
                 movimientoAsesor = MovimientosAsesores.objects.filter(asesor=request.data['asesor']).order_by('-created_at').first()
                 request.data['saldo_total'] = round(float(movimientoAsesor.saldo_total)+float(request.data['saldo_ingreso']),2)
                 request.data['saldo_egreso'] = 0

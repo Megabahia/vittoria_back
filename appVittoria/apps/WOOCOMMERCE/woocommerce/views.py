@@ -389,6 +389,12 @@ def orders_create_super_barato(request):
                                                                 email=usuario.email).first()
                 if asesor is not None:
                     movimientos = MovimientosAsesores.objects.filter(asesor=asesor.id).order_by('-id').first()
+
+                    if movimientos is None:
+                        saldoTotal = 0
+                    else:
+                        saldoTotal = movimientos.saldo_total
+
                     if 'Contra Entrega' in serializer.data['metodoPago']:
                         saldoDescuento = serializer.data['envioTotal']
                     else:
@@ -402,7 +408,7 @@ def orders_create_super_barato(request):
                         'created_at': datetime.now().date(),
                         'asesor': asesor,
                         'saldo_egreso': saldoDescuento * -1,
-                        'saldo_total': round(float(movimientos.saldo_total) - float(saldoDescuento), 2)
+                        'saldo_total': round(float(saldoTotal) - float(saldoDescuento), 2)
                     }
                     MovimientosAsesores.objects.create(**serializerMovimientoAsesor)
 
