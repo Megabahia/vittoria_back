@@ -50,7 +50,9 @@ from django.utils.crypto import get_random_string
 
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
-import re
+from ...MDM.mdm_asesores_comerciales.models import AsesoresComerciales
+from ...MDM.mdm_asesores_comerciales.models import MovimientosAsesores
+from ...ADM.vittoria_usuarios.models import Usuarios
 
 # declaracion variables log
 datosAux = datosProductosMDP()
@@ -238,7 +240,6 @@ def orders_create(request):
                     ProspectosClientesDetalles.objects.create(
                         prospectoClienteEncabezado=prospectoEncabezado, **detalle)
 
-                # if data['facturacion']['codigoVendedor']:
                 enviarCorreoAdminAutorizador(data)
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -314,7 +315,6 @@ def orders_create_super_barato(request):
             serializer = CreateOrderSuperBaratoSerializer(data=request.data)
 
             if serializer.is_valid():
-                print('entro al valid')
                 serializer.save()
 
                 serializerProspect = {
@@ -382,6 +382,31 @@ def orders_create_super_barato(request):
                 for detalle in detalleProspecto:
                     ProspectosClientesDetalles.objects.create(
                         prospectoClienteEncabezado=prospectoEncabezado, **detalle)
+
+                    # MOVIMIENTOS DE BILLETERA DIGITAL
+                    usuario = Usuarios.objects.filter(username=serializer.data['facturacion']['codigoVendedor']).first()
+                    asesor = AsesoresComerciales.objects.filter(nombres=usuario.nombres, apellidos=usuario.apellidos,
+                                                                email=usuario.email).first()
+                    if asesor is not None:
+                        movimientos = MovimientosAsesores.objects.filter(asesor=asesor.id).order_by('-id').first()
+                        if 'Contra Entrega' in serializer.data['metodoPago']:
+                            saldoDescuento = serializer.data['envioTotal']
+                        else:
+                            saldoDescuento = serializer.data['total']
+
+                        asesor.numeroPedido = serializer.data['numeroPedido']
+                        asesor.save()
+
+                        serializerMovimientoAsesor = {
+                            'tipo_movimiento': 'Descuento',
+                            'saldo_ingreso': 0,
+                            'created_at': datetime.now().date(),
+                            'asesor': asesor,
+                            'saldo_egreso': saldoDescuento * -1,
+                            'saldo_total': round(float(movimientos.saldo_total) - float(saldoDescuento), 2)
+                        }
+
+                        MovimientosAsesores.objects.create(**serializerMovimientoAsesor)
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)

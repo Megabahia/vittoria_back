@@ -55,6 +55,10 @@ def catalogo_list(request):
                 if request.data['tipo'] != '':
                     filters['tipo'] = str(request.data['tipo'])
 
+            if 'canal' in request.data:
+                if request.data['canal'] != '':
+                    filters['canal'] = str(request.data['canal'])
+
             # Serializar los datos
             query = Catalogo.objects.filter(**filters).order_by('-created_at')
             serializer = CatalogoListaSerializer(query[offset:limit], many=True)

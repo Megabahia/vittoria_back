@@ -2,7 +2,7 @@ from rest_framework import serializers
 from import_export import resources
 
 from .models import AsesoresComerciales
-
+from .models import MovimientosAsesores
 
 class AsesoreSerializer(serializers.ModelSerializer):
     class Meta:
@@ -59,3 +59,10 @@ class AsesorResource(resources.ModelResource):
     class Meta:
         model = AsesoresComerciales
         exclude = ('id', 'idPadre', 'password', 'last_login', 'imagen', 'idRol', 'created_at', 'updated_at', 'state')
+
+
+#MOVIMIENTOS
+class MovimientosAsesoresSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MovimientosAsesores
+        fields = '__all__'

@@ -1,13 +1,14 @@
 from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import AsesoreSerializer,AsesorCrearSerializer,AsesorFiltroSerializer,AsesorImagenSerializer
+from .serializers import AsesoreSerializer, MovimientosAsesoresSerializer
 from rest_framework.permissions import IsAuthenticated
 from .utils import enviarCorreoUsuario
 from ...ADM.vittoria_usuarios.serializers import UsuarioCrearSerializer
 from django.utils import timezone
 from .models import AsesoresComerciales
 from ...ADM.vittoria_usuarios.models import Usuarios
+from .models import MovimientosAsesores
 from ...ADM.vittoria_roles.models import Roles
 import random
 import string
@@ -354,6 +355,145 @@ def asesor_create(request):
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+
+#MOVIMIENTOS
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def movimiento_create(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'create/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'CREAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        if request.method == 'POST':
+            request.data['created_at'] = str(timezone_now)
+
+            logModel['dataEnviada'] = str(request.data)
+
+            asesor = AsesoresComerciales.objects.filter(id = request.data['asesor']).first()
+
+
+
+            if asesor is None:
+                errorNoExiste = {'error': 'No existe asesor'}
+                createLog(logModel, errorNoExiste, logExcepcion)
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
+            request.data['asesor'] = asesor.id
+            request.data['saldo_ingreso'] = float(request.data['saldo_ingreso'])
+
+            if 'Carga de saldo' in request.data['tipo_movimiento']:
+                movimientoAsesor = MovimientosAsesores.objects.filter(asesor=request.data['asesor']).order_by('-created_at').first()
+                request.data['saldo_total'] = round(float(movimientoAsesor.saldo_total)+float(request.data['saldo_ingreso']),2)
+                request.data['saldo_egreso'] = 0
+
+            serializer = MovimientosAsesoresSerializer(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def movimiento_asesor_list(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'list/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'LEER',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        if request.method == 'POST':
+            logModel['dataEnviada'] = str(request.data)
+
+            # paginacion
+            page_size = int(request.data['page_size'])
+            page = int(request.data['page'])
+            offset = page_size * page
+            limit = offset + page_size
+            # Filtros
+            filters = {"state": "1"}
+
+            if 'asesor' in request.data and request.data['asesor'] != '':
+                filters['asesor'] = request.data['asesor']
+
+            # toma de datos
+            movimientos_asesor = MovimientosAsesores.objects.filter(**filters).order_by('-created_at')
+            serializer = MovimientosAsesoresSerializer(movimientos_asesor[offset:limit], many=True)
+            allSerializer = MovimientosAsesoresSerializer(movimientos_asesor, many=True)
+
+            new_serializer_data = {'cont': movimientos_asesor.count(),
+                                   'allData': allSerializer.data,
+                                   'info': serializer.data,
+                                   }
+            return Response(new_serializer_data, status=status.HTTP_200_OK)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def movimiento_asesor_update(request, pk):
+    request.POST._mutable = True
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'update/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'ESCRIBIR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    try:
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            movimiento_asesor = MovimientosAsesores.objects.get(pk=pk)
+        except AsesoresComerciales.DoesNotExist:
+            errorNoExiste = {'error': 'No existe'}
+            createLog(logModel, errorNoExiste, logExcepcion)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'POST':
+            now = timezone.localtime(timezone.now())
+            if 'created_at' in request.data:
+                request.data.pop('created_at')
+
+            serializer = MovimientosAsesoresSerializer(movimiento_asesor, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data)
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+        createLog(logModel, err, logExcepcion)
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 def generate_pass():

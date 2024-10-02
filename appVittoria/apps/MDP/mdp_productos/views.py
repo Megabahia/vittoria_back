@@ -635,6 +635,12 @@ def search_producto_codigo_canal_list(request):
                 return Response('El producto no existe', status=status.HTTP_404_NOT_FOUND)
             # Verifica si el objeto existe antes de aplicar más filtros
 
+            # Verificar stock
+            if 'cantidad' in request.data:
+                if (request.data['cantidad'] > query.stock):
+                    err = {"error": f"La cantidad registrada en el producto {request.data['codigoBarras']} excede al stock disponible"}
+                    return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
         except Productos.DoesNotExist:
             err = {"error": "No existe"}
             createLog(logModel, err, logExcepcion)

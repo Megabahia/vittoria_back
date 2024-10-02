@@ -3,7 +3,7 @@ from django.db import models
 from ...ADM.vittoria_usuarios.models import Usuarios
 
 def upload_path(instance, filname):
-  return '/'.join(['MDM/archivosAsesor', str(instance.nombres) + "_" + filname])
+  return '/'.join(['MDM/archivosAsesor', str(instance.asesor.nombres) + "_" + filname])
 
 
 class AsesoresComerciales(models.Model):
@@ -26,6 +26,7 @@ class AsesoresComerciales(models.Model):
 
   saldo_asesor = models.FloatField(null=True)
   observaciones = models.CharField(max_length=400, blank=True, null=True)
+  numeroPedido = models.CharField(max_length=255,blank=True, null=False)
 
   nombre_banco = models.CharField(max_length=100, blank=True, null=True)
   numero_cuenta = models.CharField(max_length=13,blank=True, null=True)
@@ -34,5 +35,18 @@ class AsesoresComerciales(models.Model):
   tipoIdentificacion = models.CharField(max_length=255, null=True, blank=True)
   archivoCedula = models.FileField(blank=True, null=True, upload_to=upload_path)
 
-  movimientos = models.JSONField(null=True)
+class MovimientosAsesores(models.Model):
+  asesor = models.ForeignKey(AsesoresComerciales, null=False, on_delete=models.CASCADE)
+  tipo_movimiento = models.CharField(max_length=250, blank=True, null=True)
+  saldo = models.FloatField(blank=True,null=True)
+  saldo_ingreso = models.FloatField(blank=True,null=True)
+  saldo_egreso = models.FloatField(blank=True,null=True)
+  saldo_total = models.FloatField(blank=True,null=True)
+  observaciones = models.CharField(max_length=400, blank=True, null=True)
+  archivo_comprobante = models.FileField(blank=True, null=True, upload_to=upload_path)
+  numero_transaccion = models.CharField(max_length=100, blank=True, null=True)
+
+  created_at = models.DateTimeField(auto_now_add=True)
+  state = models.SmallIntegerField(default=1)
+
 
