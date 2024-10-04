@@ -21,6 +21,11 @@ class   Integraciones(models.Model):
 
     bodega_central = models.SmallIntegerField(default=0, null=True)
 
+    descripcion_direccion = models.CharField(max_length=400, blank=True, null=True)
+    direccion_mapa = models.CharField(max_length=400, blank=True, null=True)
+    hora_atencion = models.CharField(max_length=400, blank=True, null=True)
+    descuento = models.IntegerField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     state = models.SmallIntegerField(default=1)
