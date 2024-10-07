@@ -254,6 +254,8 @@ def gdc_create_venta(request):
                 if canal == "Contacto Local":
                     canal = "megabahia.megadescuento.com"
 
+                imagenCanalBase64 = ''
+
                 integracion = Integraciones.objects.filter(valor=canal).first()
 
                 if integracion:
@@ -265,7 +267,9 @@ def gdc_create_venta(request):
                         response = requests.get(url)
                         b64_encodedCanal = base64.b64encode(response.content)
                         imagenCanalBase64 = b64_encodedCanal.decode('utf-8')
+
                 imagen_canal = f"data:image/png;base64,{imagenCanalBase64}"
+
                 dataVenta = {**serializer.data, "imagen_canal": imagen_canal}
 
                 createLog(logModel, dataVenta, logTransaccion)
