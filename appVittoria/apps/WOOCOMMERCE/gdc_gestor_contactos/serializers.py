@@ -2,9 +2,10 @@ from rest_framework import serializers
 import requests
 import base64
 
+from ...ADM.vittoria_integraciones.models import Integraciones
 from .models import Contactos
 from ...ADM.vittoria_usuarios.models import Usuarios
-
+from ...ADM.vittoria_integraciones.serializers import IntegracionesSerializer
 
 class ContactosSerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,6 +47,7 @@ class CreateContactSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         data = super(CreateContactSerializer, self).to_representation(instance)
+
         articulos = data.pop('articulos')
         articulosModificado = []
         if articulos:
@@ -63,5 +65,7 @@ class CreateContactSerializer(serializers.Serializer):
                     **articulo,
                     "imagen_principal": f"data:image/jpg;base64,{imagen}"
                 })
+
+
         data['articulos'] = articulosModificado
         return data

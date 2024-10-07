@@ -1,5 +1,6 @@
 import json
-
+import requests
+import base64
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -30,12 +31,15 @@ from datetime import timedelta
 
 from ...ADM.vittoria_usuarios.models import Usuarios
 from ...ADM.vittoria_catalogo.models import Catalogo
+from ...ADM.vittoria_integraciones.models import Integraciones
+from ...ADM.vittoria_integraciones.serializers import IntegracionesSerializer
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
 from ...MDM.mdm_prospectosClientes.models import ProspectosClientes,ProspectosClientesDetalles
 from ...MDM.mdm_facturas.models import FacturasEncabezados, FacturasDetalles
 from ...MDM.mdm_clientes.models import Clientes
 from ...MDM.mdm_clientes.serializers import ClientesSerializer
+
 # declaracion variables log
 datosAux = datosProductosMDP()
 datosTipoLogAux = datosTipoLog()
@@ -123,7 +127,7 @@ def gdc_create_contact(request):
                         "nombreVendedor": serializer.data['facturacion']['nombreVendedor'],
                         "confirmacionProspecto": '',
                         "imagen": '',
-                        "tipoIdentificacion": "Cédula",
+                        "tipoIdentificacion": "cedula",
                         "identificacion": serializer.data['facturacion']['identificacion'],
                         "nombreCompleto": '',
                         "callePrincipal": '',
@@ -245,8 +249,27 @@ def gdc_create_venta(request):
                 #                productoPadre.save()
                 enviarCorreoAdministradorGDC(request.data)
 
-                createLog(logModel, serializer.data, logTransaccion)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                canal = serializer.data['canal']
+
+                if canal == "Contacto Local":
+                    canal = "megabahia.megadescuento.com"
+
+                integracion = Integraciones.objects.filter(valor=canal).first()
+
+                if integracion:
+                    serailizer = IntegracionesSerializer(integracion)
+
+                    url = serailizer.data['imagen_principal']
+
+                    if url is not None:
+                        response = requests.get(url)
+                        b64_encodedCanal = base64.b64encode(response.content)
+                        imagenCanalBase64 = b64_encodedCanal.decode('utf-8')
+                imagen_canal = f"data:image/png;base64,{imagenCanalBase64}"
+                dataVenta = {**serializer.data, "imagen_canal": imagen_canal}
+
+                createLog(logModel, dataVenta, logTransaccion)
+                return Response(dataVenta, status=status.HTTP_201_CREATED)
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(status=status.HTTP_200_OK)
 
@@ -511,7 +534,7 @@ def contacts_update(request, pk):
                 #CLIENT
                 serializerClient = {
                     "tipoCliente": "Consumidor final",
-                    "tipoIdentificacion": "Cédula",
+                    "tipoIdentificacion": "cedula",
                     "cedula": serializer.data['facturacion']['identificacion'],
                     "nombreCompleto": serializer.data['facturacion']['nombres'] + ' ' +
                                       serializer.data['facturacion']['apellidos'],

@@ -36,6 +36,12 @@ class Clientes(models.Model):
     estado=models.CharField(max_length=200,default="Inactivo")
     correo= models.EmailField(max_length=150,null=True)
     telefono= models.CharField(max_length=20,null=True)
+
+    callePrincipal = models.CharField(max_length=200, null=True, blank=True)
+    numero = models.CharField(max_length=20, null=True, blank=True)
+    calleSecundaria = models.CharField(max_length=200, null=True, blank=True)
+    referencia = models.CharField(max_length=200, null=True, blank=True)
+    gps = models.CharField(max_length=400, null=True, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

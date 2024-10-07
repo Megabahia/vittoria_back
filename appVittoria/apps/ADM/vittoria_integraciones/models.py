@@ -1,7 +1,12 @@
 from django.db import models
 
+
+def upload_path(instance, filname):
+    return '/'.join(['ADM/imgCanales', str(instance.id) + "_" + filname])
+
+
 # Create your models here.
-class   Integraciones(models.Model):
+class Integraciones(models.Model):
     nombre = models.CharField(max_length=250,null=True)
     valor = models.CharField(max_length=250,null=True)
     pedidos_local = models.JSONField(null=True)
@@ -25,6 +30,7 @@ class   Integraciones(models.Model):
     direccion_mapa = models.CharField(max_length=400, blank=True, null=True)
     hora_atencion = models.CharField(max_length=400, blank=True, null=True)
     descuento = models.IntegerField(null=True, blank=True)
+    imagen_principal = models.FileField(blank=True, null=True, upload_to=upload_path)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)

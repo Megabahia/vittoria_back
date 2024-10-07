@@ -120,7 +120,7 @@ def gsb_create_order(request):
                         "nombreVendedor": serializer.data['facturacion']['nombreVendedor'],
                         "confirmacionProspecto": '',
                         "imagen": '',
-                        "tipoIdentificacion": "Cédula",
+                        "tipoIdentificacion": "cedula",
                         "identificacion": serializer.data['facturacion']['identificacion'],
                         "nombreCompleto": '',
                         "callePrincipal": '',
@@ -422,7 +422,7 @@ def gsb_update_order(request, pk):
                 # CLIENT
                 serializerClient = {
                     "tipoCliente": "Consumidor final",
-                    "tipoIdentificacion": "Cédula",
+                    "tipoIdentificacion": "cedula",
                     "cedula": serializer.data['facturacion']['identificacion'],
                     "nombreCompleto": serializer.data['facturacion']['nombres'] + ' ' +
                                       serializer.data['facturacion']['apellidos'],

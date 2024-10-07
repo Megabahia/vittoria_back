@@ -411,7 +411,7 @@ def megabahia_update(request, pk):
                 #CLIENT
                 serializerClient = {
                     "tipoCliente": "Consumidor final",
-                    "tipoIdentificacion": "Cédula",
+                    "tipoIdentificacion": "cedula",
                     "cedula": serializer.data['facturacion']['identificacion'],
                     "nombreCompleto": serializer.data['facturacion']['nombres'] + ' ' +
                                       serializer.data['facturacion']['apellidos'],

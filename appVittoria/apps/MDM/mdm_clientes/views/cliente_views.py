@@ -148,7 +148,7 @@ def cliente_findOne_cedula(request):
             if 'correo' in request.data and request.data['correo'] != '':
                 filters['correo'] = str(request.data['correo'])
 
-            query = Clientes.objects.filter(**filters).first()
+            query = Clientes.objects.filter(**filters).order_by('-id').first()
             if query is None:
                 return Response('No existe el cliente', status=status.HTTP_404_NOT_FOUND)
         except Clientes.DoesNotExist:
