@@ -45,6 +45,8 @@ class Productos(models.Model):
     canal = models.CharField(max_length=150, null=True, blank=True)
     stockVirtual = models.JSONField(null=True)
 
+    porcentaje_comision = models.IntegerField(null=True, blank=True)
+    valor_comision = models.FloatField(null=True, blank=True)
 
     estado = models.CharField(max_length=150, null=True, default="Inactivo", blank=True)
     variableRefil = models.CharField(max_length=150, null=True, blank=True)
