@@ -539,6 +539,125 @@ def uploadEXCEL_stockProductosMegabahia(request):
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def productos_cargar_stock_canales(request):
+    """
+    El metodo sirve para crear
+    @type request: REcibe los campos de la tabla credito archivo
+    @rtype: DEvuelve el registro creado
+    """
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'create/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'CREAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+            logModel['dataEnviada'] = str(request.data)
+            request.data['created_at'] = str(timezone_now)
+            if 'updated_at' in request.data:
+                request.data.pop('updated_at')
+            serializer = ArchivosFacturasSerializer(data=request.data)
+            result = uploadEXCEL_stockProductosCanales(request)
+            if serializer.is_valid():
+                serializer.save()
+                enviarCorreoInventario(request.user, result)
+                createLog(logModel, result, logTransaccion)
+                return Response(result, status=status.HTTP_201_CREATED)
+            createLog(logModel, result, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+def uploadEXCEL_stockProductosCanales(request):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': 'mdp/gestion-inventario/cargar/stock/megabahia',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'CREAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    contValidos = 0
+    contInvalidos = 0
+    contTotal = 0
+    errores = []
+    try:
+        if request.method == 'POST':
+            first = True  # si tiene encabezado
+            archivo_xls = request.FILES['archivo']
+            archivo_xlsx = 'archivo_convertido.xlsx'
+            # Utiliza pandas para leer el archivo .xls y guardarlo como .xlsx
+            df = pd.read_excel(archivo_xls, dtype=str)
+            df.to_excel(archivo_xlsx, index=False)
+
+            # Carga del archivo .xlsx con openpyxl
+            wb = openpyxl.load_workbook(archivo_xlsx)
+            # Seleccionar una hoja específica del libro, por ejemplo, la primera hoja
+            worksheet = wb.active
+            # Crear una lista para almacenar los datos
+            lines = list()
+        # Iterar sobre las filas y columnas de la hoja
+        for row in worksheet.iter_rows(values_only=True):
+            row_data = list()
+            for cell in row:
+                row_data.append(str(cell))
+            lines.append(row_data)
+
+        for dato in lines:
+            contTotal += 1
+            if first:
+                first = False
+                continue
+            else:
+                if worksheet.iter_cols():
+                    resetearStock = True if 'resetearStock' in request.data and request.data['resetearStock'] == 'true' else False
+                    if 'canal' in request.data and request.data['canal'] is not None:
+                        canal = request.data['canal']
+
+                    logModel['dataEnviada'] = str(dato)
+                    resultadoInsertar = insertarDato_StockProductoCanales(dato, resetearStock, canal)
+                    if resultadoInsertar != 'Dato insertado correctamente':
+                        if resultadoInsertar in 'Codigo producto':
+                            contInvalidos += 1
+                            errores.append(
+                                {"error": "Producto no encontrado " + str(contTotal) + ": " + str(resultadoInsertar)})
+                        else:
+                            contInvalidos += 1
+                            errores.append(
+                                {"error": "Error en la línea " + str(contTotal) + ": " + str(resultadoInsertar)})
+                        createLog(logModel, {"error": "Error en la línea " + str(contTotal) + ": " + str(resultadoInsertar)}, logTransaccion)
+                    else:
+                        createLog(logModel, resultadoInsertar, logTransaccion)
+                        contValidos += 1
+                else:
+                    contInvalidos += 1
+                    errores.append({"error": "Error en la línea " + str(
+                        contTotal) + ": la fila tiene un tamaño incorrecto (" + str(len(dato)) + ")"})
+
+        result = {"mensaje": "La Importación se Realizo Correctamente",
+                  "correctos": contValidos,
+                  "incorrectos": contInvalidos,
+                  "errores": errores
+                  }
+        return result
+
+    except Exception as e:
+        err = {"error": 'Error verifique el archivo, un error ha ocurrido: {}'.format(e)}
+        return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 # INSERTAR DATOS EN LA BASE INDIVIDUAL
@@ -612,6 +731,78 @@ def insertarDato_StockProducto(dato, resetearStock):
         print('error', e)
         return str(e)
 
+def insertarDato_StockProductoCanales(dato, resetearStock, canal):
+    print('dato', dato)
+    try:
+        timezone_now = timezone.localtime(timezone.now())
+        if dato[0] == None and dato[4] == None or dato[0] == 'None' and dato[4] == 'None':
+            return 'Dato insertado correctamente'
+        facturaEncabezadoQuery = ProductosMDP.objects.filter(codigoBarras=str(dato[0]), canal=canal).first()
+        print('encontro', facturaEncabezadoQuery)
+        ##############
+        # Lista de todos los canales disponibles en stockVirtual
+        canales_stock_virtual = [
+            "vittoria-test.netlify.app",
+            "maxidescuento.megadescuento.com",
+            "megabahia.megadescuento.com",
+            "tiendamulticompras.megadescuento.com",
+            "contraentrega.megadescuento.com",
+            "mayorista.megadescuento.com",
+            "megadescuento.com",
+            "todomegacentro.megadescuento.com",
+            "superbarato.megadescuento.com"
+        ]
+
+        # Generar la lista stockVirtual comparando el canal extraído con la lista de canales
+        stock_virtual = [{"canal": sv_canal, "estado": sv_canal == canal} for sv_canal in
+                         canales_stock_virtual]
+        #############
+        if facturaEncabezadoQuery and None is not facturaEncabezadoQuery:
+            print('Entro al if', resetearStock)
+            if resetearStock:
+                facturaEncabezadoQuery.stock = int(dato[3].replace('"', "") if dato[3] != "NULL" else 0)
+            else:
+                facturaEncabezadoQuery.stock = facturaEncabezadoQuery.stock + int(
+                    dato[3].replace('"', "") if dato[3] != "NULL" else 0)
+            facturaEncabezadoQuery.precioVentaA = round(float(
+                dato[5].replace('"', "") if dato[5] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.precioVentaB = round(float(
+                dato[6].replace('"', "") if dato[6] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.precioVentaC = round(float(
+                dato[7].replace('"', "") if dato[7] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.precioVentaD = round(float(
+                dato[8].replace('"', "") if dato[8] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.precioVentaE = round(float(
+                dato[9].replace('"', "") if dato[9] != "NULL" else 0), 2)
+            facturaEncabezadoQuery.updated_at = str(timezone_now)
+            facturaEncabezadoQuery.canal = canal
+            facturaEncabezadoQuery.stockVirtual = stock_virtual
+            facturaEncabezadoQuery.save()
+            return 'Dato insertado correctamente'
+        else:
+            facturaEncabezado = {}
+            facturaEncabezado['stock'] = int(dato[2].replace('"', "") if dato[2] != "NULL" else 0)
+            facturaEncabezado['precioVentaA'] = round(float(dato[5].replace('"', "") if dato[5] != "NULL" else 0), 2)
+            facturaEncabezado['precioVentaB'] = round(float(dato[6].replace('"', "") if dato[6] != "NULL" else 0), 2)
+            facturaEncabezado['precioVentaC'] = round(float(dato[7].replace('"', "") if dato[7] != "NULL" else 0), 2)
+            facturaEncabezado['precioVentaD'] = round(float(dato[8].replace('"', "") if dato[8] != "NULL" else 0), 2)
+            facturaEncabezado['precioVentaE'] = round(float(dato[9].replace('"', "") if dato[9] != "NULL" else 0), 2)
+            facturaEncabezado['codigoBarras'] = dato[0].replace('"', "") if dato[0] != "NULL" else None
+            facturaEncabezado['nombre'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
+            facturaEncabezado['descripcion'] = dato[1].replace('"', "") if dato[1] != "NULL" else None
+            facturaEncabezado['estado'] = 'Activo'
+            facturaEncabezado['created_at'] = str(timezone_now)
+            facturaEncabezado['updated_at'] = str(timezone_now)
+            facturaEncabezado['precioOferta'] = round(float(dato[5].replace('"', "") if dato[5] != "NULL" else 0), 2)
+            facturaEncabezado['fechaElaboracion'] = str(timezone_now)[:10]
+            facturaEncabezado['fechaCaducidad'] = str(timezone_now)[:10]
+            facturaEncabezado['canal'] = canal
+            facturaEncabezado['stockVirtual'] = stock_virtual
+            ProductosMDP.objects.create(**facturaEncabezado)
+            return 'Dato insertado correctamente'
+    except Exception as e:
+        print('error', e)
+        return str(e)
 
 def insertarDato_StockProductoMegabahia(dato, resetearStock):
     print('dato', dato)

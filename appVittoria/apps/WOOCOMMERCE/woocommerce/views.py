@@ -40,7 +40,7 @@ from datetime import timedelta
 from .utils import (
     enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoClienteDespacho, enviarCorreoCourierDespacho,
     enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado,
-    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes,enviarCorreoVendedorEmpacado,enviarCorreoAdminAutorizador, enviarCodigoCorreo
+    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes,enviarCorreoVendedorEmpacado,enviarCorreoAdminAutorizador, enviarCodigoCorreo, enviarCorreoClintePedidoWocommerce
 )
 from ...ADM.vittoria_usuarios.models import Usuarios
 from ...ADM.vittoria_catalogo.models import Catalogo
@@ -317,6 +317,8 @@ def orders_create_super_barato(request):
             if serializer.is_valid():
                 serializer.save()
 
+                enviarCorreoClintePedidoWocommerce(serializer.data)
+                #PROSPECTO CLIENTE
                 serializerProspect = {
                     "nombres": serializer.data['facturacion']['nombres'],
                     "apellidos": serializer.data['facturacion']['apellidos'],
@@ -363,6 +365,33 @@ def orders_create_super_barato(request):
                 }
                 prospectoEncabezado = ProspectosClientes.objects.create(**serializerProspect)
                 detalleProspecto = []
+
+                #CLIENTE
+                cliente = {
+                    'nombreCompleto': serializer.data['facturacion']['nombres'] + serializer.data['facturacion'][
+                        'apellidos'],
+                    'nombres': serializer.data['facturacion']['nombres'],
+                    'apellidos': serializer.data['facturacion']['apellidos'],
+                    'cedula': serializer.data['facturacion']['identificacion'],
+                    'tipoIdentificacion': 'cedula',
+                    'correo': serializer.data['facturacion']['correo'],
+                    'paisNacimiento': serializer.data['facturacion']['pais'],
+                    'provinciaNacimiento': serializer.data['facturacion']['provincia'],
+                    'ciudadNacimiento': serializer.data['facturacion']['ciudad'],
+                    'callePrincipal': serializer.data['facturacion']['callePrincipal'],
+                    'numero': serializer.data['facturacion']['numero'],
+                    'calleSecundaria': serializer.data['facturacion']['calleSecundaria'],
+                    'referencia': serializer.data['facturacion']['referencia'],
+                    'gps': serializer.data['facturacion']['gps'],
+                }
+
+                clienteExiste = Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion']).first()
+                if clienteExiste is None:
+                    Clientes.objects.create(**cliente)
+                else:
+                    clienteSerializer = ClientesUpdateSerializer(clienteExiste, data=cliente, partial=True)
+                    if clienteSerializer.is_valid():
+                        clienteSerializer.save()
 
                 for articuloP in serializer.data['articulos']:
                     detalleProspecto.append({

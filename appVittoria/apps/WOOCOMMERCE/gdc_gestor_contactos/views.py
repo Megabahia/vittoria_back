@@ -38,7 +38,7 @@ from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductos
 from ...MDM.mdm_prospectosClientes.models import ProspectosClientes,ProspectosClientesDetalles
 from ...MDM.mdm_facturas.models import FacturasEncabezados, FacturasDetalles
 from ...MDM.mdm_clientes.models import Clientes
-from ...MDM.mdm_clientes.serializers import ClientesSerializer
+from ...MDM.mdm_clientes.serializers import ClientesSerializer, ClientesUpdateSerializer
 
 # declaracion variables log
 datosAux = datosProductosMDP()
@@ -103,6 +103,35 @@ def gdc_create_contact(request):
                 if serializer.is_valid():
                     serializer.save()
 
+                    #CLIENTE
+                    cliente = {
+                        'nombreCompleto': serializer.data['facturacion']['nombres'] + serializer.data['facturacion'][
+                            'apellidos'],
+                        'nombres': serializer.data['facturacion']['nombres'],
+                        'apellidos': serializer.data['facturacion']['apellidos'],
+                        'cedula': serializer.data['facturacion']['identificacion'],
+                        'tipoIdentificacion': 'cedula',
+                        'correo': serializer.data['facturacion']['correo'],
+                        'paisNacimiento': serializer.data['facturacion']['pais'],
+                        'provinciaNacimiento': serializer.data['facturacion']['provincia'],
+                        'ciudadNacimiento': serializer.data['facturacion']['ciudad'],
+                        'callePrincipal': serializer.data['facturacion']['callePrincipal'],
+                        'numero': serializer.data['facturacion']['numero'],
+                        'calleSecundaria': serializer.data['facturacion']['calleSecundaria'],
+                        'referencia': serializer.data['facturacion']['referencia'],
+                        'gps': serializer.data['facturacion']['gps'],
+                    }
+
+                    clienteExiste = Clientes.objects.filter(
+                        cedula=serializer.data['facturacion']['identificacion']).first()
+                    if clienteExiste is None:
+                        Clientes.objects.create(**cliente)
+                    else:
+                        clienteSerializer = ClientesUpdateSerializer(clienteExiste, data=cliente, partial=True)
+                        if clienteSerializer.is_valid():
+                            clienteSerializer.save()
+
+                    #PROSPECTO
                     serializerProspect = {
                         "nombres": serializer.data['facturacion']['nombres'],
                         "apellidos": serializer.data['facturacion']['apellidos'],
@@ -222,7 +251,7 @@ def gdc_create_venta(request):
                 Pedidos.objects.create(**dataPedidos)
 
                 queryCliente = Clientes.objects.filter(cedula=serializer.data['facturacion']['identificacion'], state=1).first()
-                if(queryCliente):
+                if queryCliente is not None:
                     queryCliente.nombreCompleto = serializer.data['facturacion']['nombres'] + ' ' + serializer.data['facturacion']['apellidos']
                     queryCliente.nombres = serializer.data['facturacion']['nombres']
                     queryCliente.apellidos = serializer.data['facturacion']['apellidos']
