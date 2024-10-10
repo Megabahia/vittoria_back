@@ -14,6 +14,7 @@ from ...MDP.mdp_productos.models import Productos
 from ...WOOCOMMERCE.woocommerce.models import (
     Pedidos
 )
+from .utils import enviarCorreoClinteGenerarPedido
 from .models import (
     Contactos
 )
@@ -265,7 +266,6 @@ def gdc_create_venta(request):
 
                     queryCliente.save()
 
-
                 #for articulo in serializer.data['articulos']:
                 #    producto = Productos.objects.filter(codigoBarras=articulo['codigo'], state=1).first()
                 #    if producto:
@@ -276,8 +276,6 @@ def gdc_create_venta(request):
                 #            if productoPadre:
                 #                productoPadre.stock = productoPadre.stock - int(articulo['cantidad'])
                 #                productoPadre.save()
-                enviarCorreoAdministradorGDC(request.data)
-
                 canal = serializer.data['canal']
 
                 if canal == "Contacto Local":
@@ -296,13 +294,17 @@ def gdc_create_venta(request):
                         response = requests.get(url)
                         b64_encodedCanal = base64.b64encode(response.content)
                         imagenCanalBase64 = b64_encodedCanal.decode('utf-8')
-
                 imagen_canal = f"data:image/png;base64,{imagenCanalBase64}"
-
                 dataVenta = {**serializer.data, "imagen_canal": imagen_canal}
+
+                enviarCorreoAdministradorGDC(request.data)
+                if request.data['facturacion']['correo'] is not None:
+                    enviarCorreoClinteGenerarPedido(request.data)
 
                 createLog(logModel, dataVenta, logTransaccion)
                 return Response(dataVenta, status=status.HTTP_201_CREATED)
+
+            print('ERRORS', serializer.errors)
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(status=status.HTTP_200_OK)
 
