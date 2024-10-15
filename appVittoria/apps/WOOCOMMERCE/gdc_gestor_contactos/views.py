@@ -14,7 +14,7 @@ from ...MDP.mdp_productos.models import Productos
 from ...WOOCOMMERCE.woocommerce.models import (
     Pedidos
 )
-from .utils import enviarCorreoClinteGenerarPedido
+from .utils import enviarCorreoGenerarPedido
 from .models import (
     Contactos
 )
@@ -298,13 +298,15 @@ def gdc_create_venta(request):
                 dataVenta = {**serializer.data, "imagen_canal": imagen_canal}
 
                 enviarCorreoAdministradorGDC(request.data)
-                if request.data['facturacion']['correo'] is not None:
-                    enviarCorreoClinteGenerarPedido(request.data)
+
+                user = Usuarios.objects.filter(username=serializer.data['facturacion']['codigoVendedor']).first()
+
+                if user is not None:
+                    enviarCorreoGenerarPedido(user, request.data)
 
                 createLog(logModel, dataVenta, logTransaccion)
                 return Response(dataVenta, status=status.HTTP_201_CREATED)
 
-            print('ERRORS', serializer.errors)
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(status=status.HTTP_200_OK)
 

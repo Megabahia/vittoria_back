@@ -40,7 +40,7 @@ from datetime import timedelta
 from .utils import (
     enviarCorreoVendedor, enviarCorreoCliente, enviarCorreoClienteDespacho, enviarCorreoCourierDespacho,
     enviarCorreoVendedorDespacho, enviarCorreoClienteRechazado, enviarCorreoVendedorRechazado,
-    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes,enviarCorreoVendedorEmpacado,enviarCorreoAdminAutorizador, enviarCodigoCorreo, enviarCorreoClintePedidoWocommerce
+    enviarCorreoNotificacionProductos,enviarCorreoVendedorVentaConcreta,enviarCorreoVendedorDevolucion,enviarCorreoTodosClientes,enviarCorreoVendedorEmpacado,enviarCorreoAdminAutorizador, enviarCodigoCorreo,enviarCorreoPedidoWocommerce
 )
 from ...ADM.vittoria_usuarios.models import Usuarios
 from ...ADM.vittoria_catalogo.models import Catalogo
@@ -268,12 +268,10 @@ def orders_create_super_barato(request):
     if request.method == 'POST':
 
         try:
-
             if 'created_at' in request.data:
                 request.data.pop('created_at')
             if 'facturacion' in request.data and isinstance(request.data['facturacion'], str):
                 facturacionTemporal = request.data.pop('facturacion')[0]
-                print('entro if', facturacionTemporal)
                 request.data['facturacion'] = json.loads(facturacionTemporal)
             if 'articulos' in request.data and isinstance(request.data['articulos'], str):
                 articulosTemporal = request.data.pop('articulos')[0]
@@ -312,12 +310,15 @@ def orders_create_super_barato(request):
             request.data['facturacion'] = json.dumps(request.data.pop('facturacion')[0])
             request.data['articulos'] = json.dumps(request.data.pop('articulos')[0])
             request.data['gestion_pedido'] = obtener_tipo_pedido(canal)
+
             serializer = CreateOrderSuperBaratoSerializer(data=request.data)
 
             if serializer.is_valid():
                 serializer.save()
 
-                enviarCorreoClintePedidoWocommerce(serializer.data)
+                user = Usuarios.objects.filter(username=serializer.data['facturacion']['codigoVendedor']).first()
+                enviarCorreoPedidoWocommerce(user, serializer.data)
+
                 #PROSPECTO CLIENTE
                 serializerProspect = {
                     "nombres": serializer.data['facturacion']['nombres'],
@@ -443,6 +444,8 @@ def orders_create_super_barato(request):
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            print('ERROR', serializer.errors)
             createLog(logModel, serializer.errors, logExcepcion)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
