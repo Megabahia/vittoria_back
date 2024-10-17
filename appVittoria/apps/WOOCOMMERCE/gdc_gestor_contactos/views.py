@@ -14,7 +14,7 @@ from ...MDP.mdp_productos.models import Productos
 from ...WOOCOMMERCE.woocommerce.models import (
     Pedidos
 )
-from .utils import enviarCorreoGenerarPedido
+from .utils import enviarCorreoGenerarPedido, enviarCorreoVendedorPedidoFacturado, enviarCorreoClientePedidoFacturado
 from .models import (
     Contactos
 )
@@ -357,8 +357,9 @@ def contacts_list(request):
 
             if 'canalEnvio' in request.data and request.data['canalEnvio'] != '':
                 filters['canalEnvio'] = request.data['canalEnvio'].upper()
+
             if 'canal' in request.data and request.data['canal'] != '':
-                filters['canal'] = request.data['canal'].upper()
+                filters['articulos__contains'] = [{'canal': request.data['canal']}]
 
             # Serializar los datos
             query = Contactos.objects.filter(**filters).order_by('-created_at')
@@ -499,6 +500,7 @@ def contacts_update(request, pk):
             if serializer.is_valid():
 
                 contact = serializer.save()
+                user = Usuarios.objects.filter(username=serializer.data['facturacion']['codigoVendedor']).first()
 
                 if serializer.data['estado'] is not None and 'Entregado' in serializer.data['estado']:
                     contact.comision = calcular_comision(contact.montoSubtotalCliente,
@@ -508,6 +510,12 @@ def contacts_update(request, pk):
                     contact.comisionFinal = calcular_comision_final(contact.montoSubtotalQueja,
                                                                                contact.montoSubtotalAprobadoQueja,
                                                                                queryComision.valor)
+
+                    if user is not None:
+                        enviarCorreoVendedorPedidoFacturado(user,serializer.data)
+                    enviarCorreoClientePedidoFacturado(serializer.data)
+
+
 
 
                 contact.save()

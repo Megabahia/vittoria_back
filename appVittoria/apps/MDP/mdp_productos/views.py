@@ -78,7 +78,8 @@ def productos_list(request):
                 filters['nombre__icontains'] = request.data['nombre']
 
             if 'codigoBarras' in request.data and request.data['codigoBarras'] != '':
-                filters['codigoBarras__icontains'] = request.data['codigoBarras']
+                codigo_barras_sin_espacios = request.data['codigoBarras'].strip()
+                filters['codigoBarras__icontains'] = codigo_barras_sin_espacios
 
             if 'canalProducto' in request.data and request.data['canalProducto'] != '':
                 filters['canal'] = request.data['canalProducto']
