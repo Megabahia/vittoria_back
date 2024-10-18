@@ -20,7 +20,7 @@ def cortar_url(canal):
 
 def enviarCorreoGenerarPedido(user, data):
   canalPedido = cortar_url(data['canal'])
-  subject, from_email, to = f"Su pedido {data['numeroPedido']} desde el canal {canalPedido} ha sido generado", "08d77fe1da-d09822@inbox.mailtrap.io", \
+  subject, from_email, to = f"Su venta con número de pedido {data['numeroPedido']} ha sido generada", "08d77fe1da-d09822@inbox.mailtrap.io", \
     user.email
   txt_content = f"""
                 Registro de Pedido
@@ -62,7 +62,7 @@ def enviarCorreoGenerarPedido(user, data):
                         <tr>
                             <td id="m_-2286063398718872391header_wrapper" style="padding:36px 48px;display:block">
                                 <h1 style="font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:30px;font-weight:300;line-height:150%;margin:0px;text-align:left;color:rgb(255,255,255)">
-                                    Se ha generado su pedido desde el canal {canalPedido}.
+                                    Se ha generado su venta desde el canal {canalPedido}.
                                 </h1>
                             </td>
                         </tr>
@@ -82,7 +82,7 @@ def enviarCorreoGenerarPedido(user, data):
                                         <td valign="top" style="padding:48px 48px 32px">
                                             <div id="m_-2286063398718872391body_content_inner" align="left" style="font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:14px;line-height:150%;text-align:left;color:rgb(99,99,99)">
                                                 <p style="margin:0 0 16px">Hola {user.nombres} {user.apellidos},</p>
-                                                <p style="margin:0 0 16px">Se ha generado correctamente tu pedido # {data['numeroPedido']} y lo estamos procesando:</p>
+                                                <p style="margin:0 0 16px">Se ha generado correctamente su venta con número de pedido # {data['numeroPedido']} y lo estamos procesando:</p>
                                                 <p style="margin:0 0 16px">Está en espera hasta que confirmemos que se ha recibido el pago.</p>
                                                 <h2 style="display:block;font-family:&quot;Helvetica Neue&quot;,Helvetica,Roboto,Arial,sans-serif;font-size:18px;font-weight:bold;line-height:130%;margin:0px 0px 18px;text-align:left;color:rgb(35,85,225)">
                                                     [Pedido #{data['numeroPedido']}] ({data['created_at']})</h2>
@@ -124,6 +124,7 @@ def enviarCorreoGenerarPedido(user, data):
                                                         </tfoot>
                                                     </table>
                                                 </div>
+                                                <p style="margin:0 0 16px; color: red">Recuerde hacerle seguimiento a su cliente a través del WhatsApp o llamada, para que se acerque a retirar el pedido en el local. Su comsión se hará efectiva una vez que el cliente retire el pedido.</p>
                                                 <table id="m_-2286063398718872391addresses" cellspacing="0" cellpadding="0" border="0" width="100%" style="width:100%;vertical-align:top;margin-bottom:40px;padding:0">
                                                     <tbody>
                                                     <tr>
@@ -165,7 +166,7 @@ def enviarCorreoGenerarPedido(user, data):
 
 def enviarCorreoVendedorPedidoFacturado(user, data):
   canalPedido = cortar_url(data['canal'])
-  subject, from_email, to = f"Su venta {data['numeroPedido']} desde el canal {canalPedido} ha sido generado", "08d77fe1da-d09822@inbox.mailtrap.io", \
+  subject, from_email, to = f"Su venta con número de pedido {data['numeroPedido']} ha sido completado", "08d77fe1da-d09822@inbox.mailtrap.io", \
     user.email
   txt_content = f"""
                 Registro de Pedido
@@ -191,6 +192,7 @@ def enviarCorreoVendedorPedidoFacturado(user, data):
                 </td>
             </tr>
         """
+
 
   html_content = f"""
     <html>
@@ -289,7 +291,6 @@ def enviarCorreoVendedorPedidoFacturado(user, data):
                                                     </tr>
                                                     </tbody>
                                                 </table>
-                                                <p style="margin:0 0 16px">Esperamos poder cumplir pronto tu pedido.</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -306,12 +307,11 @@ def enviarCorreoVendedorPedidoFacturado(user, data):
         </body>
     </html>
     """
-
   sendEmail(subject, txt_content, from_email, to, html_content)
 
 def enviarCorreoClientePedidoFacturado(data):
   canalPedido = cortar_url(data['canal'])
-  subject, from_email, to = f"Su pedido {data['numeroPedido']} desde el canal {canalPedido} ha sido completado", "08d77fe1da-d09822@inbox.mailtrap.io", \
+  subject, from_email, to = f"Su pedido {data['numeroPedido']} ha sido completado", "08d77fe1da-d09822@inbox.mailtrap.io", \
     data['facturacion']['correo']
   txt_content = f"""
                 Registro de Pedido

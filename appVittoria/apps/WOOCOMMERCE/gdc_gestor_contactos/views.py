@@ -352,14 +352,17 @@ def contacts_list(request):
             if 'nombre' in request.data and request.data['nombre'] != '':
                 filters['facturacion__nombres__icontains'] = str(request.data['nombre'])
 
+            if 'canal' in request.data and request.data['canal'] != '':
+                filters['canal'] = request.data['canal']
+
             if 'apellido' in request.data and request.data['apellido'] != '':
                 filters['facturacion__apellidos__icontains'] = str(request.data['apellido'])
 
             if 'canalEnvio' in request.data and request.data['canalEnvio'] != '':
                 filters['canalEnvio'] = request.data['canalEnvio'].upper()
 
-            if 'canal' in request.data and request.data['canal'] != '':
-                filters['articulos__contains'] = [{'canal': request.data['canal']}]
+            if 'canalProducto' in request.data and request.data['canalProducto'] != '':
+                filters['articulos__contains'] = [{'canal': request.data['canalProducto']}]
 
             # Serializar los datos
             query = Contactos.objects.filter(**filters).order_by('-created_at')
