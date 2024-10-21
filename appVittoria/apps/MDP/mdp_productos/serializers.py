@@ -49,7 +49,6 @@ class ProductosIntegracionesListSerializer(serializers.ModelSerializer):
     tienda = serializers.SerializerMethodField()
     bodega_central = serializers.SerializerMethodField()
 
-
     class Meta:
         model = Productos
         fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal', 'stockVirtual', 'descripcion', 'precioVentaA', 'precioVentaB', 'precioOferta', 'imagen_principal', 'prefijo', 'ciudad', 'sector', 'costo', 'courier', 'tienda', 'link_catalogo', 'link_tienda', 'bodega_central']

@@ -9,7 +9,8 @@ from .views import (
     uploadEXCEL_crearProductos, productoImagen_list, prediccion_crosseling_list,
     producto_refil_list, prediccion_refil_list, prediccion_productosNuevos_list,
     search_producto_codigo_list, producto_images_delete, productos_findOne_free,
-    productos_findOne_codigo_producto, productos_exportar, search_producto_codigo_canal_list
+    productos_findOne_codigo_producto, productos_exportar, search_producto_codigo_canal_list,
+    producto_copy
 )
 
 app_name = 'productos'
@@ -57,4 +58,7 @@ urlpatterns = [
     path('prediccionProductosNuevos/', prediccion_productosNuevos_list, name="prediccion_productosNuevos_list"),
     # EXPORTAR PRODCUTOS
     path('exportar', productos_exportar, name="productos_exportar"),
+    #COPIAR PRODUCTO
+    path('copy/<int:pk>', producto_copy, name="producto_copy"),
+
 ]

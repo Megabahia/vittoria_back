@@ -7,6 +7,7 @@ from .models import (
 
 from ...ADM.vittoria_integraciones.models import Integraciones
 from ...ADM.vittoria_integraciones.serializers import IntegracionesSerializer
+from ...ADM.vittoria_catalogo.serializers import CatalogoListaSerializer
 
 from .serializers import (
     DetallesSerializer, ProductosActualizarSerializer,
@@ -74,18 +75,34 @@ def productos_list(request):
             # Filtros
             filters = {"state": "1"}
 
+            prefijos = Integraciones.objects.values_list('prefijo', flat=True)
+            lista_prefijos = list(prefijos)
+
             if 'nombre' in request.data and request.data['nombre'] != '':
                 filters['nombre__icontains'] = request.data['nombre']
 
             if 'codigoBarras' in request.data and request.data['codigoBarras'] != '':
+                codigo_completo = request.data['codigoBarras'].strip()
+
+                prefijo = next((p for p in lista_prefijos if codigo_completo.startswith(p)), '')
+
+                if prefijo:
+                    codigo_barras = codigo_completo[len(prefijo):]
+                    filters['prefijo__icontains'] = prefijo
+                    filters['codigoBarras__icontains'] = codigo_barras
+                else:
+                    filters['codigoBarras__icontains'] = codigo_completo
+
+            '''if 'codigoBarras' in request.data and request.data['codigoBarras'] != '':
                 codigo_barras_sin_espacios = request.data['codigoBarras'].strip()
-                filters['codigoBarras__icontains'] = codigo_barras_sin_espacios
+                filters['codigoBarras__icontains'] = codigo_barras_sin_espacios'''
 
             if 'canalProducto' in request.data and request.data['canalProducto'] != '':
                 filters['canal'] = request.data['canalProducto']
 
             if 'proveedor' in request.data and request.data['proveedor'] != '':
                 filters['proveedor'] = request.data['proveedor']
+
 
             #Se realiza la exraccion de los canales de los productos por el motivo de
             #que existen productos con el mismo codigo pero con diferente canal y para realziar el filtro
@@ -334,6 +351,12 @@ def productos_update(request, pk):
 
             if serializer.is_valid():
                 serializer.save()
+                imagen_relativa = serializer.data['imagen_principal'].split('https://appvittoria.s3.amazonaws.com/')[-1]
+                productosMismoCodigo = Productos.objects.filter(codigoBarras=serializer.data['codigoBarras'], state=1).exclude(id=serializer.data['id'])
+                for producto in productosMismoCodigo:
+                    producto.imagen_principal = imagen_relativa
+                    producto.save()
+
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
             createLog(logModel, serializer.errors, logExcepcion)
@@ -367,7 +390,6 @@ def productos_delete(request, pk):
             err = {"error": "No existe"}
             createLog(logModel, err, logExcepcion)
             return Response(err, status=status.HTTP_404_NOT_FOUND)
-            return Response(status=status.HTTP_404_NOT_FOUND)
         productosTodos = Productos.objects.filter(idPadre=query.codigoBarras,state=1).exclude(pk=pk).all()
 
         if productosTodos:
@@ -611,6 +633,9 @@ def search_producto_codigo_canal_list(request):
 
             filters = {}
 
+            prefijos = Integraciones.objects.values_list('prefijo', flat=True)
+            lista_prefijos = list(prefijos)
+
             if 'canal' in request.data and request.data['canal'] != '':
                 filters['canal'] = request.data['canal']
             
@@ -624,7 +649,16 @@ def search_producto_codigo_canal_list(request):
                 filters['estado'] = request.data['estado']
 
             if 'codigoBarras' in request.data and request.data['codigoBarras'] != '':
-                filters['codigoBarras'] = request.data['codigoBarras']
+                codigo_completo = request.data['codigoBarras']
+
+                prefijo = next((p for p in lista_prefijos if codigo_completo.startswith(p)), '')
+
+                if prefijo:
+                    codigo_barras = codigo_completo[len(prefijo):]
+                    filters['prefijo__icontains'] = prefijo
+                    filters['codigoBarras__icontains'] = codigo_barras
+                else:
+                    filters['codigoBarras__icontains'] = codigo_completo
 
             if 'nombre' in request.data and request.data['nombre'] != '':
                 filters['nombre__icontains'] = request.data['nombre']
@@ -654,6 +688,22 @@ def search_producto_codigo_canal_list(request):
 
             queryParamsCanal = Integraciones.objects.filter(valor = serializer.data['canal']).first()
             serializer_canal = IntegracionesSerializer(queryParamsCanal)
+
+            # Agregar formas de pago de cada producto
+            for producto in serializer2.data:
+                canal = producto['canal']
+                if canal is not None:
+                    queryFormasPago = Catalogo.objects.filter(tipo='METODO PAGO', canal=canal)
+                    formas_pago_serializer = CatalogoListaSerializer(queryFormasPago, many=True)
+                    producto['formas_pago'] = formas_pago_serializer.data
+
+                    queryIntegracionCanal = Integraciones.objects.filter(valor = canal).first()
+                    integraciones_canal_serializer = IntegracionesSerializer(queryIntegracionCanal)
+                    producto['integracion_canal'] = integraciones_canal_serializer.data
+
+                else:
+                    producto['formas_pago'] = []
+                    producto['integracion_canal'] = ''
 
             new_serializer_data = {'producto': serializer.data,
                                    'productos': serializer2.data,
@@ -1539,3 +1589,47 @@ def productos_restore_woocommerce(request):
         err = {"error": 'Un error ha ocurrido: {}'.format(e)}
         createLog(logModel, err, logExcepcion)
         return Response(err, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def producto_copy(request, pk):
+    timezone_now = timezone.localtime(timezone.now())
+    logModel = {
+        'endPoint': logApi + 'create/',
+        'modulo': logModulo,
+        'tipo': logExcepcion,
+        'accion': 'CREAR',
+        'fechaInicio': str(timezone_now),
+        'dataEnviada': '{}',
+        'fechaFin': str(timezone_now),
+        'dataRecibida': '{}'
+    }
+    if request.method == 'POST':
+        try:
+            query = Productos.objects.filter(id=pk, state=1).first()
+            producto_data = ProductoCreateSerializer(query).data
+
+            # Modifica los campos requeridos
+            producto_data['canal'] = request.data['canal']
+            producto_data['estado'] = "Inactivo"
+            imagen_relativa = producto_data['imagen_principal'].split('https://appvittoria.s3.amazonaws.com/')[-1]
+
+            producto_data.pop('id')
+            producto_data.pop('imagen_principal')
+            producto_data.pop('imagenes')
+
+            serializer = ProductoCreateSerializer(data=producto_data)
+            if serializer.is_valid():
+                copiaProducto = serializer.save()
+
+                copiaProducto.imagen_principal = imagen_relativa
+                copiaProducto.save(update_fields=['imagen_principal'])
+                createLog(logModel, serializer.data, logTransaccion)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            createLog(logModel, serializer.errors, logExcepcion)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            err = {"error": 'Un error ha ocurrido: {}'.format(e)}
+            createLog(logModel, err, logExcepcion)
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
