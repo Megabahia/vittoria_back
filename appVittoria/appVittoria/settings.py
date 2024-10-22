@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'apps.MDP.mdp_productos',
     'apps.MDP.mdp_fichaTecnicaProductos',
     'apps.MDP.mdp_gestionInventario',
+    'apps.MDP.mdrp_productos',
     # apps Vittoria MDO
     'apps.MDO.mdo_parametrizaciones',
     'apps.MDO.mdo_prediccionCrosseling',
