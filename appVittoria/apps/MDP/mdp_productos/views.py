@@ -1609,8 +1609,10 @@ def producto_copy(request, pk):
             query = Productos.objects.filter(id=pk, state=1).first()
             producto_data = ProductoCreateSerializer(query).data
 
+            integraciones = Integraciones.objects.filter(valor = request.data['canal']).first()
             # Modifica los campos requeridos
             producto_data['canal'] = request.data['canal']
+            producto_data['prefijo'] = integraciones.prefijo
             producto_data['estado'] = "Inactivo"
             imagen_relativa = producto_data['imagen_principal'].split('https://appvittoria.s3.amazonaws.com/')[-1]
 

@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 
 from .models import Productos
+from ...MDP.mdp_productos.models import Productos as ProductosPrincipales
 from .serializers import ProductosSerializer
 # logs
 from ...ADM.vittoria_logs.methods import createLog, datosTipoLog, datosProductosMDP
@@ -148,6 +149,43 @@ def mdrp_productos_update(request, pk):
 
             if serializer.is_valid():
                 serializer.save()
+
+                if serializer.data['estado'] == 'Enviado':
+                    imagen_relativa = serializer.data['imagen'].split('https://appvittoria.s3.amazonaws.com/')[-1]
+
+                    serializerProducto = {
+                        "nombre": serializer.data['nombre'],
+                        "descripcion": serializer.data['descripcion'],
+                        "codigoBarras": serializer.data['codigo_barras'],
+                        "stock": serializer.data['stock'],
+                        "costoCompra": serializer.data['costoCompra'],
+                        "precioVentaA": serializer.data['precioVentaA'],
+                        "precioVentaB": serializer.data['precioVentaB'],
+                        "precioVentaC": serializer.data['precioVentaC'],
+                        "precioVentaD": serializer.data['precioVentaD'],
+                        "precioVentaE": serializer.data['precioVentaE'],
+                        "precioVentaF": serializer.data['precioVentaF'],
+                        "porcentaje_comision": serializer.data['porcentaje_comision'],
+                        "valor_comision": serializer.data['valor_comision'],
+                        "estado": 'Inactivo',
+                        "lote": serializer.data['lote'],
+                        "proveedor": serializer.data['proveedor'],
+                        "imagen_principal": imagen_relativa,
+                        "canal": 'megabahia.megadescuento.com',
+                        "prefijo":'MEGA',
+                        "stockVirtual": [
+                            {"canal": "vittoria-test.netlify.app", "estado": False},
+                            {"canal": "maxidescuento.megadescuento.com", "estado": False},
+                            {"canal": "megabahia.megadescuento.com", "estado": True},
+                            {"canal": "tiendamulticompras.megadescuento.com", "estado": False},
+                            {"canal": "contraentrega.megadescuento.com", "estado": False},
+                            {"canal": "mayorista.megadescuento.com", "estado": False},
+                            {"canal": "megadescuento.com", "estado": False},
+                            {"canal": "todomegacentro.megadescuento.com", "estado": False},
+                            {"canal": "superbarato.megadescuento.com", "estado": False}
+                        ]
+                    }
+                    ProductosPrincipales.objects.create(**serializerProducto)
 
                 createLog(logModel, serializer.data, logTransaccion)
                 return Response(serializer.data)
