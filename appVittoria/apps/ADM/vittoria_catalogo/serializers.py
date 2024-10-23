@@ -19,7 +19,7 @@ class CatalogoHijoSerializer(serializers.ModelSerializer):
 class CatalogoListaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Catalogo
-        fields = ['id', 'nombre', 'tipo', 'tipoVariable', 'valor', 'descripcion', 'tiempo_entrega']
+        fields = ['id', 'nombre', 'tipo', 'tipoVariable', 'valor', 'descripcion', 'tiempo_entrega', 'canal']
 
 
 class CatalogoFiltroSerializer(serializers.ModelSerializer):
