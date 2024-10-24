@@ -45,6 +45,7 @@ urlpatterns = [
     path('mdp/productos/', include(('apps.MDP.mdp_productos.urls', 'productos'), namespace='productos')),
     path('mdp/fichaTecnicaProductos/', include(('apps.MDP.mdp_fichaTecnicaProductos.urls', 'fichaTecnicaProductos'), namespace='fichaTecnicaProductos')),
     path('mdp/gestion-inventario/', include(('apps.MDP.mdp_gestionInventario.urls', 'gestion-inventario'), namespace='gestion-inventario')),
+    path('mdp/proveedores/', include(('apps.MDP.mdp_proveedores.urls', 'mdp_proveedores'), namespace='mdp_proveedores')),
     # Modulo MDRP
     path('mdrp/productos/', include(('apps.MDP.mdrp_productos.urls', 'mdrp_productos'), namespace='mdrp_productos')),
     # Modulo MDO

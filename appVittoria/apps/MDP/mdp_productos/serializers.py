@@ -51,7 +51,7 @@ class ProductosIntegracionesListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Productos
-        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal', 'stockVirtual', 'descripcion', 'precioVentaA', 'precioVentaB', 'precioOferta', 'imagen_principal', 'prefijo', 'ciudad', 'sector', 'costo', 'courier', 'tienda', 'link_catalogo', 'link_tienda', 'bodega_central']
+        fields = ['id', 'codigoBarras', 'nombre', 'categoria', 'subCategoria', 'stock', 'estado', 'proveedor', 'idPadre', 'canal', 'stockVirtual', 'descripcion', 'precioVentaA', 'precioVentaB', 'precioOferta', 'imagen_principal', 'valor_comision', 'porcentaje_comision','prefijo', 'ciudad', 'sector', 'costo', 'courier', 'tienda', 'link_catalogo', 'link_tienda', 'bodega_central']
 
     def get_integracion(self, obj):
         # Cachear la integración para evitar múltiples consultas

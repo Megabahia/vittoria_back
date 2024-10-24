@@ -23,6 +23,12 @@ class Productos(models.Model):
   precioVentaD = models.FloatField(null=True, blank=True)
   precioVentaE = models.FloatField(null=True, blank=True)
   precioVentaF = models.FloatField(null=True, blank=True)
+  precioLanding = models.FloatField(null=True, blank=True)
+  precioLandingOferta = models.FloatField(null=True, blank=True)
+  precioVentaBultos = models.FloatField(null=True, blank=True)
+  precioOferta = models.FloatField(null=True, blank=True)
+
+  verificarProducto = models.SmallIntegerField(default=0)
 
   porcentaje_comision = models.IntegerField(null=True, blank=True)
   valor_comision = models.FloatField(null=True, blank=True)
